@@ -1,0 +1,295 @@
+<UserControl x:Class="FreshStart.Modules.Settings.SettingsPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:FreshStart.Modules.Controls"
+             Background="Transparent" Foreground="{DynamicResource PrimaryTextBrush}">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel MaxWidth="1200" HorizontalAlignment="Stretch" Margin="40,30,40,56">
+
+            <TextBlock Text="设置" Style="{StaticResource PageTitle}"/>
+            <TextBlock Text="外观、动效、备份策略与关于信息" Style="{StaticResource PageSubtitle}" Margin="0,6,0,24"/>
+
+            <!-- 外观与动效 -->
+            <Border Style="{StaticResource CardStyle}" Margin="0,0,0,16">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Path Data="{StaticResource SunIcon}" Width="16" Height="16" Stretch="Uniform"
+                              Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.5"
+                              StrokeLineJoin="Round"/>
+                        <TextBlock Text="外观与动效" Style="{StaticResource SectionTitle}" Margin="8,0,0,0"/>
+                    </StackPanel>
+                    <Border Height="1" Background="{DynamicResource DividerBrush}" Margin="0,14,0,16"/>
+
+                    <Grid Margin="0,0,0,18">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="深色模式" FontSize="13" FontWeight="SemiBold"
+                                          />
+                                <Path Data="{StaticResource InfoIcon}" Width="14" Height="14" Stretch="Uniform"
+                                      Stroke="{DynamicResource SecondaryTextBrush}" StrokeThickness="1.5"
+                                      Margin="6,1,0,0" VerticalAlignment="Center"
+                                      ToolTip="只切换 FreshStart 自身的主题，不修改 Windows 系统深色模式。"/>
+                            </StackPanel>
+                            <TextBlock Text="{Binding ThemeSummary}" Style="{StaticResource CaptionText}" Margin="0,4,0,0"/>
+                        </StackPanel>
+                        <controls:ToggleSwitch Grid.Column="1" Style="{StaticResource ToggleSwitchStyle}"
+                                               IsChecked="{Binding IsDarkMode, Mode=TwoWay}"
+                                               AutomationProperties.Name="深色模式"
+                                               VerticalAlignment="Center"/>
+                    </Grid>
+
+                    <Grid Margin="0,16,0,20">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="主题色" FontSize="13" FontWeight="SemiBold" />
+                            <TextBlock Text="影响按钮、链接与选中高亮；随主题一起保存" Style="{StaticResource CaptionText}"
+                                       Margin="0,4,0,0" />
+                        </StackPanel>
+                        <ItemsControl Grid.Column="1" ItemsSource="{Binding AccentOptions}" VerticalAlignment="Center">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Width="26" Height="26" Margin="3,0,0,0"
+                                            Background="{Binding Hex}" ToolTip="{Binding Name}"
+                                            Command="{Binding DataContext.SetAccentCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}"
+                                            AutomationProperties.Name="{Binding Name}">
+                                        <Button.Template>
+                                            <ControlTemplate TargetType="{x:Type Button}">
+                                                <Grid Width="26" Height="26">
+                                                    <Border x:Name="SelectionRing" CornerRadius="13"
+                                                            BorderBrush="Transparent" BorderThickness="1" />
+                                                    <Border Margin="4" CornerRadius="9"
+                                                            Background="{TemplateBinding Background}"
+                                                            BorderBrush="#28000000" BorderThickness="1" />
+                                                    <Path x:Name="Check" Data="{StaticResource CheckIcon}"
+                                                          Width="8" Height="8" Stretch="Uniform"
+                                                          Stroke="White" StrokeThickness="2"
+                                                          StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                                          HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                          Opacity="0" />
+                                                </Grid>
+                                                <ControlTemplate.Triggers>
+                                                    <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                        <Setter TargetName="SelectionRing" Property="BorderBrush"
+                                                                Value="{DynamicResource PrimaryTextBrush}" />
+                                                        <Setter TargetName="Check" Property="Opacity" Value="1" />
+                                                    </DataTrigger>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter TargetName="SelectionRing" Property="BorderBrush"
+                                                                Value="{DynamicResource SecondaryTextBrush}" />
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Button.Template>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Grid>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="界面动效" FontSize="13" FontWeight="SemiBold"
+                                          />
+                                <Path Data="{StaticResource InfoIcon}" Width="14" Height="14" Stretch="Uniform"
+                                      Stroke="{DynamicResource SecondaryTextBrush}" StrokeThickness="1.5"
+                                      Margin="6,1,0,0" VerticalAlignment="Center"
+                                      ToolTip="关闭后页面切换、开关滑块与 Toast 动画立即完成，满足无障碍偏好。"/>
+                            </StackPanel>
+                            <TextBlock Text="关闭后页面切换、开关与 Toast 动画立即完成（无障碍）"
+                                       Style="{StaticResource CaptionText}" Margin="0,4,0,0"/>
+                        </StackPanel>
+                        <controls:ToggleSwitch Grid.Column="1" Style="{StaticResource ToggleSwitchStyle}"
+                                               IsChecked="{Binding AnimationsEnabled, Mode=TwoWay}"
+                                               AutomationProperties.Name="界面动效"
+                                               VerticalAlignment="Center"/>
+                    </Grid>
+
+                    <Border Height="1" Background="{DynamicResource DividerBrush}" Margin="0,16,0,16"/>
+
+                    <StackPanel>
+                        <TextBlock Text="桌面壁纸" FontSize="13" FontWeight="SemiBold"/>
+                        <TextBlock Text="把内置图片设为 Windows 桌面壁纸（不修改 FreshStart 自己的界面）。设置前会自动记住原来的壁纸，随时可恢复。"
+                                   Style="{StaticResource CaptionText}" Margin="0,4,0,0" TextWrapping="Wrap"/>
+                        <ItemsControl ItemsSource="{Binding WallpaperOptions}" Margin="0,12,0,0">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate><StackPanel Orientation="Horizontal"/></ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Margin="0,0,10,0" Padding="0" Cursor="Hand" Background="Transparent"
+                                            Command="{Binding DataContext.ApplyDesktopWallpaperCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}" ToolTip="点击设为桌面壁纸"
+                                            AutomationProperties.Name="{Binding Name}">
+                                        <Button.Template>
+                                            <ControlTemplate TargetType="{x:Type Button}">
+                                                <StackPanel>
+                                                    <Border x:Name="Frame" Width="104" Height="58" CornerRadius="8"
+                                                            ClipToBounds="True" BorderThickness="1"
+                                                            BorderBrush="{DynamicResource DividerBrush}">
+                                                        <Grid>
+                                                            <Border Background="{DynamicResource SkeletonBrush}"/>
+                                                            <Image Source="{Binding PreviewPath}" Stretch="UniformToFill"/>
+                                                            <TextBlock Text="缺图" FontSize="11"
+                                                                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                       Foreground="{DynamicResource SecondaryTextBrush}"
+                                                                       Visibility="{Binding HasPreview, Converter={StaticResource InverseBoolToVisibility}}"/>
+                                                        </Grid>
+                                                    </Border>
+                                                    <TextBlock x:Name="Label" Text="{Binding Name}" FontSize="11"
+                                                               HorizontalAlignment="Center" Margin="0,6,0,0"
+                                                               Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                                </StackPanel>
+                                                <ControlTemplate.Triggers>
+                                                    <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                        <Setter TargetName="Frame" Property="BorderThickness" Value="2"/>
+                                                        <Setter TargetName="Frame" Property="BorderBrush"
+                                                                Value="{DynamicResource AccentBrush}"/>
+                                                        <Setter TargetName="Label" Property="Foreground"
+                                                                Value="{DynamicResource AccentBrush}"/>
+                                                    </DataTrigger>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter TargetName="Frame" Property="BorderBrush"
+                                                                Value="{DynamicResource SecondaryTextBrush}"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Button.Template>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <Grid Margin="0,12,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Button Grid.Column="0" Content="恢复原壁纸" Style="{StaticResource SmallButton}"
+                                    Command="{Binding RestoreWallpaperCommand}"
+                                    IsEnabled="{Binding CanRestoreWallpaper}"
+                                    ToolTip="恢复到应用内置壁纸之前的那张壁纸"/>
+                            <TextBlock Grid.Column="1" Text="{Binding CurrentWallpaperText}" FontSize="10.5"
+                                       VerticalAlignment="Center" Margin="10,0,0,0"
+                                       TextTrimming="CharacterEllipsis"
+                                       ToolTip="{Binding CurrentWallpaperText}"
+                                       Foreground="{DynamicResource SecondaryTextBrush}"/>
+                        </Grid>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- 安全与备份 -->
+            <Border Style="{StaticResource CardStyle}" Margin="0,0,0,16">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Path Data="{StaticResource ShieldIcon}" Width="16" Height="16" Stretch="Uniform"
+                              Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.5"
+                              StrokeLineJoin="Round"/>
+                        <TextBlock Text="安全与备份" Style="{StaticResource SectionTitle}" Margin="8,0,0,0"/>
+                    </StackPanel>
+                    <Border Height="1" Background="{DynamicResource DividerBrush}" Margin="0,14,0,16"/>
+
+                    <Grid Margin="0,0,0,18">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="首次修改前询问系统还原点" FontSize="13" FontWeight="SemiBold"
+                                          />
+                                <Path Data="{StaticResource InfoIcon}" Width="14" Height="14" Stretch="Uniform"
+                                      Stroke="{DynamicResource SecondaryTextBrush}" StrokeThickness="1.5"
+                                      Margin="6,1,0,0" VerticalAlignment="Center"
+                                      ToolTip="每次启动后的第一次写入前询问。选择“开启”后，仅高风险操作会创建系统还原点；所有操作都会生成 JSON 配置快照。"/>
+                            </StackPanel>
+                            <TextBlock Text="关闭后不再弹窗，所有写入仍会保留可回滚的 JSON 快照"
+                                       Style="{StaticResource CaptionText}" Margin="0,4,0,0"/>
+                        </StackPanel>
+                        <controls:ToggleSwitch Grid.Column="1" Style="{StaticResource ToggleSwitchStyle}"
+                                               IsChecked="{Binding AskRestorePoint, Mode=TwoWay}"
+                                               VerticalAlignment="Center"/>
+                    </Grid>
+
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="打开备份目录" Style="{StaticResource SecondaryButton}"
+                                Command="{Binding OpenBackupFolderCommand}"/>
+                        <Button Content="打开日志目录" Style="{StaticResource SecondaryButton}"
+                                Command="{Binding OpenLogFolderCommand}" Margin="8,0,0,0"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- 写入管线自检 -->
+            <Border Style="{StaticResource CardStyle}" Margin="0,0,0,16">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Path Data="{StaticResource CodeIcon}" Width="16" Height="16" Stretch="Uniform"
+                              Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.5"
+                              StrokeLineJoin="Round"/>
+                        <TextBlock Text="备份与回滚自检" Style="{StaticResource SectionTitle}" Margin="8,0,0,0"/>
+                        <Border CornerRadius="6" Padding="7,2" Background="{DynamicResource WarningTintBrush}" Margin="8,1,0,0">
+                            <TextBlock Text="沙箱" FontSize="10" Foreground="{DynamicResource WarningBrush}"/>
+                        </Border>
+                    </StackPanel>
+                    <Border Height="1" Background="{DynamicResource DividerBrush}" Margin="0,14,0,16"/>
+                    <TextBlock Text="在 HKCU 沙箱写入一个时间戳，验证“读取 → 备份 → 写入 → 回滚”链路。不会修改系统设置，也不是一键恢复。"
+                               Style="{StaticResource BodyText}" TextWrapping="Wrap" LineHeight="20"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
+                        <Button Content="运行自检" Style="{StaticResource PrimaryButton}"
+                                Command="{Binding RunSelfTestCommand}" IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}"/>
+                        <Button Content="撤销上一次操作" Style="{StaticResource SecondaryButton}"
+                                Command="{Binding UndoLastCommand}" Margin="8,0,0,0"
+                                IsEnabled="{Binding CanUndo}"/>
+                    </StackPanel>
+                    <TextBlock Text="{Binding LastTestText}" Style="{StaticResource CaptionText}"
+                               TextWrapping="Wrap" Margin="0,14,0,0"/>
+                    <TextBlock Text="{Binding UndoText}" Style="{StaticResource CaptionText}" Margin="0,6,0,0"/>
+                    <TextBlock Text="提示：全局还原（恢复到软件首次运行时的状态）将在后续批次提供；当前只支持撤销最近一次成功操作。"
+                               Style="{StaticResource CaptionText}" TextWrapping="Wrap" Margin="0,10,0,0"/>
+                    <TextBlock Text="{Binding LastBackupDirectory}" Style="{StaticResource CaptionText}"
+                               Margin="0,6,0,0" TextTrimming="CharacterEllipsis"
+                               Visibility="{Binding LastBackupDirectory, Converter={StaticResource NullToVisibilityConverter}}"/>
+                </StackPanel>
+            </Border>
+
+            <!-- 关于 -->
+            <Border Style="{StaticResource CardStyle}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Path Data="{StaticResource InfoIcon}" Width="16" Height="16" Stretch="Uniform"
+                              Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.5"
+                              StrokeLineJoin="Round"/>
+                        <TextBlock Text="关于" Style="{StaticResource SectionTitle}" Margin="8,0,0,0"/>
+                    </StackPanel>
+                    <Border Height="1" Background="{DynamicResource DividerBrush}" Margin="0,14,0,16"/>
+                    <TextBlock Text="{Binding VersionText}" Style="{StaticResource BodyText}"/>
+                    <TextBlock Text="不采集、不上传任何用户数据；不内置广告与捆绑安装。所有修改都保存在本机，并生成可回滚的备份。"
+                               Style="{StaticResource CaptionText}" TextWrapping="Wrap" Margin="0,8,0,0" LineHeight="18"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
+                        <Button Content="打开数据目录" Style="{StaticResource SecondaryButton}"
+                                Command="{Binding OpenDataFolderCommand}"/>
+                    </StackPanel>
+                    <TextBlock Text="{Binding DataDirectory}" Style="{StaticResource CaptionText}"
+                               Margin="0,10,0,0" TextTrimming="CharacterEllipsis"/>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

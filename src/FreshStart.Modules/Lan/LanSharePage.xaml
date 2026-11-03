@@ -1,0 +1,56 @@
+<UserControl x:Class="FreshStart.Modules.Lan.LanSharePage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Foreground="{DynamicResource PrimaryTextBrush}"
+             Background="Transparent">
+    <UserControl.Resources>
+        <Style x:Key="SmallButton" TargetType="{x:Type Button}" BasedOn="{StaticResource SecondaryButton}">
+            <Setter Property="Padding" Value="9,4" />
+            <Setter Property="FontSize" Value="11" />
+        </Style>
+    </UserControl.Resources>
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel MaxWidth="1200" HorizontalAlignment="Stretch" Margin="40,30,40,56">
+            <StackPanel>
+                <TextBlock Text="局域网互传" Style="{StaticResource PageTitle}" />
+                <TextBlock Text="把离线包、安装包或配置共享给同一局域网的设备；只读、带令牌、可随时停止"
+                           Style="{StaticResource PageSubtitle}" Margin="0,6,0,0" />
+            </StackPanel>
+
+            <Border Style="{StaticResource CardStyle}" Margin="0,18,0,14">
+                <StackPanel>
+                    <Grid>
+                        <StackPanel>
+                            <TextBlock Text="共享目录" Style="{StaticResource SectionTitle}" />
+                            <TextBlock Text="{Binding FolderText}" Style="{StaticResource CaptionText}" Margin="0,6,0,0"
+                                       TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+                        <Button Content="选择目录" Style="{StaticResource SecondaryButton}" HorizontalAlignment="Right"
+                                VerticalAlignment="Center" Command="{Binding ChooseFolderCommand}" />
+                    </Grid>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
+                        <Button Content="启动共享" Style="{StaticResource PrimaryButton}" Command="{Binding StartCommand}"
+                                IsEnabled="{Binding IsRunning, Converter={StaticResource InverseBoolConverter}}" />
+                        <Button Content="停止" Style="{StaticResource SecondaryButton}" Margin="8,0,0,0"
+                                Command="{Binding StopCommand}"
+                                IsEnabled="{Binding IsRunning}" />
+                        <Button Content="复制地址" Style="{StaticResource SmallButton}" Margin="8,0,0,0"
+                                Command="{Binding CopyUrlCommand}" />
+                    </StackPanel>
+
+                    <Border Height="1" Background="{DynamicResource DividerBrush}" Margin="0,14,0,10" />
+
+                    <TextBlock Text="{Binding StatusText}" Style="{StaticResource CaptionText}" TextWrapping="Wrap" />
+                    <TextBlock Text="{Binding UrlText}" FontSize="13" FontWeight="SemiBold" Margin="0,8,0,0"
+                               Foreground="{DynamicResource AccentBrush}" TextWrapping="Wrap" />
+                    <TextBlock Text="{Binding CodeText, StringFormat=短码：{0}}" Style="{StaticResource CaptionText}"
+                               Margin="0,4,0,0" />
+                </StackPanel>
+            </Border>
+
+            <TextBlock Text="安全说明：仅监听本机局域网 IPv4；访问路径含随机令牌；不提供上传、删除或执行；停止共享后立即断开。请勿在公共 Wi-Fi 使用。"
+                       Style="{StaticResource CaptionText}" TextWrapping="Wrap" Margin="0,4,0,0" />
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

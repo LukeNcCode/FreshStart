@@ -1,0 +1,146 @@
+<UserControl x:Class="FreshStart.Modules.Uninstall.UninstallPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="Transparent" Foreground="{DynamicResource PrimaryTextBrush}">
+    <UserControl.Resources>
+        <Style x:Key="SmallButton" TargetType="{x:Type Button}" BasedOn="{StaticResource SecondaryButton}">
+            <Setter Property="Padding" Value="8,3" />
+            <Setter Property="FontSize" Value="10.5" />
+        </Style>
+        <Style x:Key="SmallDangerButton" TargetType="{x:Type Button}" BasedOn="{StaticResource DangerButton}">
+            <Setter Property="Padding" Value="8,3" />
+            <Setter Property="FontSize" Value="10.5" />
+        </Style>
+        <Style x:Key="RowItem" TargetType="{x:Type ListBoxItem}">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                        <ContentPresenter />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel MaxWidth="1200" HorizontalAlignment="Stretch" Margin="40,30,40,56">
+
+            <Grid>
+                <StackPanel>
+                    <TextBlock Text="软件卸载" Style="{StaticResource PageTitle}" />
+                    <TextBlock Text="列出注册表中的已安装程序，调用程序自带卸载命令；卸载不可自动回滚"
+                               Style="{StaticResource PageSubtitle}" Margin="0,6,0,0" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <Button Content="扫描上次卸载残留" Style="{StaticResource SecondaryButton}"
+                            Command="{Binding ScanLastResidueCommand}" Margin="0,0,8,0" />
+                    <Button Content="刷新" Style="{StaticResource SecondaryButton}"
+                            Command="{Binding RefreshCommand}" />
+                </StackPanel>
+            </Grid>
+
+            <Grid Margin="0,16,0,10">
+                <TextBlock Text="{Binding StatusText}" Style="{StaticResource CaptionText}" VerticalAlignment="Center" />
+                <TextBlock Text="{Binding CountText}" Style="{StaticResource CaptionText}"
+                           HorizontalAlignment="Right" VerticalAlignment="Center" />
+            </Grid>
+
+            <Grid Margin="0,0,0,10">
+                <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" Width="260"
+                         HorizontalAlignment="Right" ToolTip="按名称或发布者搜索" />
+            </Grid>
+
+            <Border Style="{StaticResource CardStyle}" Padding="16,4">
+                <ListBox ItemsSource="{Binding Programs}" Height="480" BorderThickness="0"
+                         Background="Transparent" ItemContainerStyle="{StaticResource RowItem}"
+                         VirtualizingPanel.IsVirtualizing="True"
+                         VirtualizingPanel.VirtualizationMode="Recycling"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Border BorderBrush="{DynamicResource DividerBrush}" BorderThickness="0,0,0,1" Padding="0,8">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding DisplayName}" FontSize="12.5" FontWeight="SemiBold"
+                                                   TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Text="{Binding Subtitle}" Style="{StaticResource CaptionText}"
+                                                   Margin="0,3,0,0" TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                    <TextBlock Grid.Column="1" Text="{Binding SizeText}" FontSize="11"
+                                               VerticalAlignment="Center" Margin="10,0,10,0"
+                                               Foreground="{DynamicResource SecondaryTextBrush}" />
+                                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Button Content="目录" Style="{StaticResource SmallButton}" Margin="0,0,6,0"
+                                                Command="{Binding DataContext.OpenLocationCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}" />
+                                        <Button Content="卸载" Style="{StaticResource SmallDangerButton}"
+                                                Command="{Binding DataContext.UninstallCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}"
+                                                IsEnabled="{Binding CanUninstall}" />
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Border>
+
+            <Border Style="{StaticResource CardStyle}" Margin="0,16,0,0"
+                    Visibility="{Binding HasResidue, Converter={StaticResource BoolToVisibility}}">
+                <StackPanel>
+                    <Grid>
+                        <StackPanel>
+                            <TextBlock Text="卸载残留" Style="{StaticResource SectionTitle}" />
+                            <TextBlock Text="{Binding ResidueSummary}" Style="{StaticResource CaptionText}"
+                                       Margin="0,4,0,0" />
+                        </StackPanel>
+                        <Button Content="清理选中" Style="{StaticResource PrimaryButton}" HorizontalAlignment="Right"
+                                VerticalAlignment="Center" Command="{Binding CleanResidueCommand}" />
+                    </Grid>
+                    <ItemsControl ItemsSource="{Binding ResidueItems}" Margin="0,10,0,0">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border BorderBrush="{DynamicResource DividerBrush}" BorderThickness="0,0,0,1" Padding="0,8">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                                  IsEnabled="{Binding CanClean}" VerticalAlignment="Center"
+                                                  Margin="2,0,10,0" />
+                                        <StackPanel Grid.Column="1">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding Kind}" FontSize="12.5" FontWeight="SemiBold" />
+                                                <TextBlock Text="{Binding RiskText}" FontSize="9.5" Margin="8,2,0,0"
+                                                           Foreground="{DynamicResource WarningBrush}" />
+                                            </StackPanel>
+                                            <TextBlock Text="{Binding Path}" Style="{StaticResource CaptionText}"
+                                                       Margin="0,3,0,0" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Text="{Binding Evidence}" Style="{StaticResource CaptionText}"
+                                                       Margin="0,2,0,0" />
+                                        </StackPanel>
+                                        <TextBlock Grid.Column="2" Text="{Binding SizeText}" Style="{StaticResource CaptionText}"
+                                                   VerticalAlignment="Center" Margin="10,0,0,0" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+
+            <TextBlock Text="说明：卸载使用程序提供的 QuietUninstallString；MSI 程序自动改为 msiexec /x … /passive。某些卸载程序仍会弹出自己的界面，按提示完成即可。"
+                       Style="{StaticResource CaptionText}" TextWrapping="Wrap" Margin="0,16,0,0" />
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

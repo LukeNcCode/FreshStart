@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <RootNamespace>FreshStart.Launcher</RootNamespace>
+    <AssemblyName>FreshStart</AssemblyName>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <ApplicationIcon>..\FreshStart.App\Assets\app.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile Condition="'$(PublishAot)' != 'true'">true</PublishSingleFile>
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <PublishTrimmed Condition="'$(PublishAot)' != 'true'">true</PublishTrimmed>
+    <EnableCompressionInSingleFile>false</EnableCompressionInSingleFile>
+    <UseAppHost>true</UseAppHost>
+  </PropertyGroup>
+</Project>

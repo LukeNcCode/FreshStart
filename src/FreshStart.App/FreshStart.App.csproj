@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>FreshStart.App</RootNamespace>
+    <AssemblyName>FreshStart.Host</AssemblyName>
+    <ApplicationManifest Condition="'$(DevNoElevation)' == 'true'">app.dev.manifest</ApplicationManifest>
+    <ApplicationManifest Condition="'$(DevNoElevation)' != 'true'">app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\app.ico</ApplicationIcon>
+    <!-- 发布配置：单文件 + R2R + 不裁剪（WPF 不支持裁剪） -->
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <PublishTrimmed>false</PublishTrimmed>
+    <EnableCompressionInSingleFile>false</EnableCompressionInSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <DebugType>embedded</DebugType>
+    <TieredPGO>true</TieredPGO>
+    <InvariantGlobalization>false</InvariantGlobalization>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FreshStart.Core\FreshStart.Core.csproj" />
+    <ProjectReference Include="..\FreshStart.Services\FreshStart.Services.csproj" />
+    <ProjectReference Include="..\FreshStart.Modules\FreshStart.Modules.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\app.ico" />
+    <!-- 内置桌面壁纸：保持为外部文件，便于设置页预览并交给 Windows 直接应用 -->
+    <Content Include="..\..\assets\wallpapers\*.jpg"
+             Link="assets\wallpapers\%(Filename)%(Extension)"
+             CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,72 @@
+<UserControl x:Class="FreshStart.Modules.Cleanup.CleanupPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="Transparent" Foreground="{DynamicResource PrimaryTextBrush}">
+    <UserControl.Resources>
+        <Style x:Key="SmallDangerButton" TargetType="{x:Type Button}" BasedOn="{StaticResource DangerButton}">
+            <Setter Property="Padding" Value="9,4" />
+            <Setter Property="FontSize" Value="11" />
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel MaxWidth="1200" HorizontalAlignment="Stretch" Margin="40,30,40,56">
+
+            <Grid>
+                <StackPanel>
+                    <TextBlock Text="系统清理" Style="{StaticResource PageTitle}" />
+                    <TextBlock Text="扫描并清理临时文件、Windows 临时目录与缩略图缓存；删除不可回滚"
+                               Style="{StaticResource PageSubtitle}" Margin="0,6,0,0" />
+                </StackPanel>
+                <Button Content="重新扫描" Style="{StaticResource SecondaryButton}"
+                        Command="{Binding ScanCommand}" HorizontalAlignment="Right" VerticalAlignment="Center" />
+            </Grid>
+
+            <Border Style="{StaticResource CardStyle}" Margin="0,18,0,14">
+                <Grid>
+                    <StackPanel>
+                        <TextBlock Text="可清理空间" Style="{StaticResource CaptionText}" />
+                        <TextBlock Text="{Binding TotalText}" FontSize="26" FontWeight="SemiBold" Margin="0,2,0,0" />
+                    </StackPanel>
+                    <TextBlock Text="{Binding StatusText}" Style="{StaticResource CaptionText}"
+                               HorizontalAlignment="Right" VerticalAlignment="Center" MaxWidth="420"
+                               TextWrapping="Wrap" TextAlignment="Right" />
+                </Grid>
+            </Border>
+
+            <Border Style="{StaticResource CardStyle}" Padding="16,6">
+                <ItemsControl ItemsSource="{Binding Categories}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border BorderBrush="{DynamicResource DividerBrush}" BorderThickness="0,0,0,1" Padding="0,12">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Title}" FontSize="13" FontWeight="SemiBold" />
+                                        <TextBlock Text="{Binding Description}" Style="{StaticResource CaptionText}"
+                                                   Margin="0,4,0,0" TextWrapping="Wrap" />
+                                        <TextBlock Text="{Binding CountText}" Style="{StaticResource CaptionText}"
+                                                   Margin="0,3,0,0" />
+                                    </StackPanel>
+                                    <TextBlock Grid.Column="1" Text="{Binding SizeText}" FontSize="13" FontWeight="SemiBold"
+                                               VerticalAlignment="Center" Margin="16,0,12,0" />
+                                    <Button Grid.Column="2" Content="清理" Style="{StaticResource SmallDangerButton}"
+                                            VerticalAlignment="Center"
+                                            Command="{Binding DataContext.CleanCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}" />
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Border>
+
+            <TextBlock Text="说明：只清理可再生成的临时文件与缓存，不触碰个人文档、桌面、下载与已安装程序。正在使用的文件会自动跳过；清理前会二次确认。"
+                       Style="{StaticResource CaptionText}" TextWrapping="Wrap" Margin="0,16,0,0" />
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

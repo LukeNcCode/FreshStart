@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 2,
+  "name": "Privacy baseline",
+  "description": "A conservative example that applies the privacy preset and pauses Windows Update.",
+  "steps": [
+    {
+      "kind": "preset",
+      "target": "privacy"
+    },
+    {
+      "kind": "update",
+      "target": "paused"
+    }
+  ]
+}

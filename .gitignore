@@ -1,0 +1,42 @@
+# Build and publish outputs
+**/bin/
+**/obj/
+/artifacts/
+/publish/
+/shots/
+/smoke*.json
+*.zip
+*.sha256
+
+# IDE and local assistant state
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.reasonix/
+
+# Test and profiling output
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+*.log
+
+# OS metadata
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# User-local/generated project files
+*.local.json
+
+# Keep accidentally recreated promo tooling out of the product repository
+/promo/
+
+# Microsoft winget bootstrap payloads exceed GitHub's 100 MB file limit.
+# See assets/winget/README.md before creating a full release bundle.
+assets/winget/*
+!assets/winget/README.md

@@ -1,0 +1,135 @@
+﻿<Application x:Class="FreshStart.App.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:conv="clr-namespace:FreshStart.App.Converters"
+             xmlns:si="clr-namespace:FreshStart.Modules.SystemInfo;assembly=FreshStart.Modules"
+             xmlns:qa="clr-namespace:FreshStart.Modules.QuickActions;assembly=FreshStart.Modules"
+             xmlns:st="clr-namespace:FreshStart.Modules.Settings;assembly=FreshStart.Modules"
+             xmlns:ctx="clr-namespace:FreshStart.Modules.ContextMenu;assembly=FreshStart.Modules"
+             xmlns:startup="clr-namespace:FreshStart.Modules.Startup;assembly=FreshStart.Modules"
+             xmlns:wu="clr-namespace:FreshStart.Modules.WindowsUpdate;assembly=FreshStart.Modules"
+             xmlns:def="clr-namespace:FreshStart.Modules.Defender;assembly=FreshStart.Modules"
+             xmlns:perf="clr-namespace:FreshStart.Modules.Performance;assembly=FreshStart.Modules"
+             xmlns:appx="clr-namespace:FreshStart.Modules.Appx;assembly=FreshStart.Modules"
+             xmlns:soft="clr-namespace:FreshStart.Modules.Software;assembly=FreshStart.Modules"
+             xmlns:preset="clr-namespace:FreshStart.Modules.Presets;assembly=FreshStart.Modules"
+             xmlns:una="clr-namespace:FreshStart.Modules.Unattended;assembly=FreshStart.Modules"
+             xmlns:exec="clr-namespace:FreshStart.Modules.Execution;assembly=FreshStart.Modules"
+             xmlns:feat="clr-namespace:FreshStart.Modules.Features;assembly=FreshStart.Modules"
+             xmlns:priv="clr-namespace:FreshStart.Modules.Privacy;assembly=FreshStart.Modules"
+             xmlns:ui="clr-namespace:FreshStart.Modules.UiTuning;assembly=FreshStart.Modules"
+             xmlns:net="clr-namespace:FreshStart.Modules.Network;assembly=FreshStart.Modules"
+             xmlns:power="clr-namespace:FreshStart.Modules.Power;assembly=FreshStart.Modules"
+             xmlns:svc="clr-namespace:FreshStart.Modules.ServiceTasks;assembly=FreshStart.Modules"
+             xmlns:game="clr-namespace:FreshStart.Modules.GameOptimize;assembly=FreshStart.Modules"
+             xmlns:uninst="clr-namespace:FreshStart.Modules.Uninstall;assembly=FreshStart.Modules"
+             xmlns:res="clr-namespace:FreshStart.Modules.Residue;assembly=FreshStart.Modules"
+             xmlns:drv="clr-namespace:FreshStart.Modules.Driver;assembly=FreshStart.Modules"
+             xmlns:cln="clr-namespace:FreshStart.Modules.Cleanup;assembly=FreshStart.Modules"
+             xmlns:rst="clr-namespace:FreshStart.Modules.Restore;assembly=FreshStart.Modules"
+             xmlns:hst="clr-namespace:FreshStart.Modules.History;assembly=FreshStart.Modules"
+             xmlns:score="clr-namespace:FreshStart.Modules.Score;assembly=FreshStart.Modules"
+             ShutdownMode="OnMainWindowClose">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!-- 索引 0 固定为主题字典，ThemeService 会原地替换 -->
+                <ResourceDictionary Source="Themes/Light.xaml" />
+                <ResourceDictionary Source="Themes/Common.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <conv:BoolToVisibilityConverter x:Key="BoolToVisibility" />
+            <conv:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibility" />
+            <conv:InverseBoolConverter x:Key="InverseBoolConverter" />
+            <conv:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
+            <conv:BoolToCollapsedVisibilityConverter x:Key="BoolToCollapsedVisibility" />
+            <conv:IconKeyToGeometryConverter x:Key="IconKeyToGeometryConverter" />
+            <conv:StartupKindIconConverter x:Key="StartupKindIconConverter" />
+
+            <DataTemplate DataType="{x:Type si:SystemInfoViewModel}">
+                <si:SystemInfoPage />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type qa:QuickActionsViewModel}">
+                <qa:QuickActionsPage />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type st:SettingsViewModel}">
+                <st:SettingsPage />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type ctx:ContextMenuViewModel}">
+                <ctx:ContextMenuPage />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type startup:StartupViewModel}">
+                <startup:StartupPage />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type wu:WindowsUpdateViewModel}">
+                <wu:WindowsUpdatePage />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type def:DefenderViewModel}">
+                <def:DefenderPage />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type perf:PerformanceViewModel}">
+                <perf:PerformancePage />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type appx:AppxViewModel}">
+                <appx:AppxPage />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type soft:SoftwareViewModel}">
+                <soft:SoftwarePage />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type preset:PresetsViewModel}">
+                <preset:PresetsPage />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type una:UnattendedViewModel}">
+                <una:UnattendedPage />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type una:ScriptEditorViewModel}">
+                <una:ScriptEditorPage />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type exec:ExecutionCenterViewModel}">
+                <exec:ExecutionCenterPage />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type feat:FeaturesViewModel}">
+                <feat:FeaturesPage />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type priv:PrivacyViewModel}">
+                <priv:PrivacyPage />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type ui:UiTuningViewModel}">
+                <ui:UiTuningPage />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type net:NetworkViewModel}">
+                <net:NetworkPage />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type power:PowerViewModel}">
+                <power:PowerPage />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type svc:ServiceTasksViewModel}">
+                <svc:ServiceTasksPage />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type game:GameOptimizeViewModel}">
+                <ui:UiTuningPage />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type uninst:UninstallViewModel}">
+                <uninst:UninstallPage />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type res:ResidueViewModel}">
+                <res:ResiduePage />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type drv:DriverViewModel}">
+                <drv:DriverPage />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type cln:CleanupViewModel}">
+                <cln:CleanupPage />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type rst:RestoreViewModel}">
+                <rst:RestorePage />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type hst:HistoryViewModel}">
+                <hst:HistoryPage />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type score:ScoreViewModel}">
+                <score:ScorePage />
+            </DataTemplate>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

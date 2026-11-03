@@ -1,0 +1,131 @@
+<UserControl x:Class="FreshStart.App.Controls.ModalHost"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Visibility="Collapsed"
+             Focusable="True"
+             Background="Transparent">
+    <Grid>
+        <!-- 遮罩：点击不再取消（仅抖动提示），避免误点导致操作“无辜取消” -->
+        <Border x:Name="Scrim" Background="{DynamicResource ScrimBrush}"
+                MouseLeftButtonDown="Scrim_MouseLeftButtonDown" />
+
+        <Border x:Name="Card" Width="540" MaxHeight="560" Padding="24"
+                Background="{DynamicResource CardBrush}" CornerRadius="16"
+                HorizontalAlignment="Center" VerticalAlignment="Center"
+                RenderTransformOrigin="0.5,0.5"
+                MouseLeftButtonDown="Card_MouseLeftButtonDown">
+            <Border.Effect>
+                <DropShadowEffect Color="#000000" Opacity="0.18" BlurRadius="40" ShadowDepth="8" RenderingBias="Performance" />
+            </Border.Effect>
+            <Border.RenderTransform>
+                <ScaleTransform ScaleX="1" ScaleY="1" />
+            </Border.RenderTransform>
+
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <!-- 风险标签 + 标题 -->
+                <StackPanel Grid.Row="0">
+                    <Border CornerRadius="6" Padding="7,2" HorizontalAlignment="Left">
+                        <Border.Style>
+                            <Style TargetType="{x:Type Border}">
+                                <Setter Property="Background" Value="{DynamicResource WarningTintBrush}" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Risk}" Value="High">
+                                        <Setter Property="Background" Value="{DynamicResource DangerTintBrush}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Risk}" Value="Safe">
+                                        <Setter Property="Background" Value="{DynamicResource AccentTintBrush}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                        <TextBlock Text="{Binding RiskText}" FontSize="10.5" FontWeight="SemiBold">
+                            <TextBlock.Style>
+                                <Style TargetType="{x:Type TextBlock}">
+                                    <Setter Property="Foreground" Value="{DynamicResource WarningBrush}" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Risk}" Value="High">
+                                            <Setter Property="Foreground" Value="{DynamicResource DangerBrush}" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Risk}" Value="Safe">
+                                            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Border>
+                    <TextBlock Text="{Binding Title}" FontSize="17" FontWeight="SemiBold"
+                               TextWrapping="Wrap" Margin="0,10,0,0" />
+                    <TextBlock Text="{Binding Message}" FontSize="12.5" LineHeight="20"
+                               Foreground="{DynamicResource SecondaryTextBrush}"
+                               TextWrapping="Wrap" Margin="0,8,0,0" />
+                </StackPanel>
+
+                <!-- 具体变更 -->
+                <ScrollViewer Grid.Row="1" MaxHeight="260" VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled" Margin="0,16,0,0">
+                    <ItemsControl ItemsSource="{Binding Details}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,0,0,10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="18" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Ellipse Width="4" Height="4" Fill="{DynamicResource AccentBrush}"
+                                             VerticalAlignment="Top" Margin="2,7,0,0" />
+                                    <TextBlock Grid.Column="1" Text="{Binding}" FontSize="12"
+                                               LineHeight="19" TextWrapping="Wrap" />
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+
+                <Border Grid.Row="2" Height="1" Background="{DynamicResource DividerBrush}" Margin="0,6,0,16" />
+
+                <TextBlock Grid.Row="3" Text="{Binding Footer}" FontSize="11" LineHeight="18"
+                           Foreground="{DynamicResource SecondaryTextBrush}"
+                           TextWrapping="Wrap" />
+
+                <ItemsControl Grid.Row="4" ItemsSource="{Binding Actions}" Margin="0,20,0,0">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button Content="{Binding Label}" Click="Action_Click" Margin="8,0,0,0">
+                                <Button.Style>
+                                    <Style TargetType="{x:Type Button}" BasedOn="{StaticResource DialogButton}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsPrimary}" Value="True">
+                                                <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+                                                <Setter Property="Foreground" Value="White" />
+                                                <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+                                                <Setter Property="FontWeight" Value="SemiBold" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding IsDestructive}" Value="True">
+                                                <Setter Property="Foreground" Value="{DynamicResource DangerBrush}" />
+                                                <Setter Property="BorderBrush" Value="{DynamicResource DangerBrush}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

@@ -1,0 +1,126 @@
+<UserControl x:Class="FreshStart.Modules.Power.PowerPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:FreshStart.Modules.Controls"
+             Background="Transparent" Foreground="{DynamicResource PrimaryTextBrush}">
+    <UserControl.Resources>
+        <Style x:Key="SmallButton" TargetType="{x:Type Button}" BasedOn="{StaticResource SecondaryButton}">
+            <Setter Property="Padding" Value="9,5" />
+            <Setter Property="FontSize" Value="11" />
+        </Style>
+        <Style x:Key="PillItem" TargetType="{x:Type ListBoxItem}">
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Margin" Value="0,0,6,0" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                        <Border x:Name="Bg" CornerRadius="8" Padding="10,5" Background="Transparent">
+                            <ContentPresenter />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bg" Property="Background" Value="{DynamicResource HoverBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Bg" Property="Background" Value="{DynamicResource AccentBrush}" />
+                                <Setter Property="Foreground" Value="White" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel MaxWidth="1200" HorizontalAlignment="Stretch" Margin="40,30,40,56">
+
+            <Grid>
+                <StackPanel>
+                    <TextBlock Text="电源管理" Style="{StaticResource PageTitle}" />
+                    <TextBlock Text="切换电源计划、控制快速启动；应用前备份，可随时切回"
+                               Style="{StaticResource PageSubtitle}" Margin="0,6,0,0" />
+                </StackPanel>
+                <Button Content="刷新" Style="{StaticResource SecondaryButton}"
+                        Command="{Binding RefreshCommand}" HorizontalAlignment="Right" VerticalAlignment="Center" />
+            </Grid>
+
+            <TextBlock Text="{Binding StatusText}" Style="{StaticResource CaptionText}" Margin="0,14,0,10" />
+
+            <!-- 电源计划 -->
+            <Border Style="{StaticResource CardStyle}" Margin="0,0,0,14">
+                <StackPanel>
+                    <TextBlock Text="电源计划" Style="{StaticResource SectionTitle}" />
+                    <ListBox ItemsSource="{Binding Plans}" SelectedItem="{Binding SelectedPlan, Mode=TwoWay}"
+                             Background="Transparent" BorderThickness="0" ItemContainerStyle="{StaticResource PillItem}"
+                             Margin="0,10,0,0" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding Name}" FontSize="11.5"
+                                               Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" />
+                                    <TextBlock Text="当前" FontSize="9.5" Margin="6,1,0,0" Opacity="0.8"
+                                               Visibility="{Binding IsActive, Converter={StaticResource BoolToVisibility}}"
+                                               Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" />
+                                    <TextBlock Text="内置" FontSize="9.5" Margin="6,1,0,0" Opacity="0.8"
+                                               Visibility="{Binding IsBuiltIn, Converter={StaticResource BoolToVisibility}}"
+                                               Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+
+                    <TextBlock Text="{Binding SelectedPlan.Description}" Style="{StaticResource CaptionText}"
+                               TextWrapping="Wrap" Margin="0,10,0,0" />
+                    <TextBlock Text="带「内置」标记的方案在当前系统未创建，应用时会用 powercfg -duplicatescheme 创建并激活；高性能/卓越性能会增加耗电与发热。"
+                               Style="{StaticResource CaptionText}" TextWrapping="Wrap" Margin="0,6,0,0" />
+
+                    <Border Height="1" Background="{DynamicResource DividerBrush}" Margin="0,12,0,10" />
+
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="应用计划" Style="{StaticResource PrimaryButton}" Command="{Binding ApplyPlanCommand}" />
+                        <Button Content="打开电源选项" Style="{StaticResource SmallButton}" Margin="8,0,0,0"
+                                Command="{Binding OpenPowerOptionsCommand}" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- 快速启动 -->
+            <Border Style="{StaticResource CardStyle}">
+                <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="快速启动" Style="{StaticResource SectionTitle}" />
+                            <TextBlock Text="HiberbootEnabled：关机时把内核会话写入休眠文件，开机更快；双系统或硬件变更时建议关闭"
+                                       Style="{StaticResource CaptionText}" Margin="0,4,0,0" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <controls:ToggleSwitch Grid.Column="1" Style="{StaticResource ToggleSwitchStyle}"
+                                               IsChecked="{Binding FastStartupEnabled, Mode=TwoWay}"
+                                               VerticalAlignment="Center" Margin="16,0,0,0" />
+                    </Grid>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                        <Button Content="应用快速启动设置" Style="{StaticResource SmallButton}"
+                                Command="{Binding ApplyFastStartupCommand}"
+                                IsEnabled="{Binding FastStartupDirty}" />
+                        <TextBlock Text="修改后需要关机再开机生效（重启不生效）" Style="{StaticResource CaptionText}"
+                                   VerticalAlignment="Center" Margin="10,0,0,0" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <TextBlock Text="说明：电源计划切换通过 powercfg /setactive 完成；快速启动写入 HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Power。所有修改都经过 OperationRunner 备份与校验。"
+                       Style="{StaticResource CaptionText}" TextWrapping="Wrap" Margin="0,16,0,0" />
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

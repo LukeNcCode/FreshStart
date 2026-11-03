@@ -1,0 +1,19 @@
+﻿<Project>
+  <PropertyGroup>
+    <LangVersion>12.0</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Deterministic>true</Deterministic>
+    <PlatformTarget>x64</PlatformTarget>
+    <Prefer32Bit>false</Prefer32Bit>
+    <SatelliteResourceLanguages>zh-Hans;en</SatelliteResourceLanguages>
+    <Company>FreshStart</Company>
+    <Product>FreshStart 开荒工具</Product>
+    <Copyright>Copyright © 2026</Copyright>
+    <Version>0.1.0</Version>
+    <FileVersion>0.1.0.0</FileVersion>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <!-- 禁止把 obj/bin 里的生成文件当作源码编译 -->
+    <EnableDefaultCompileItems>true</EnableDefaultCompileItems>
+  </PropertyGroup>
+</Project>

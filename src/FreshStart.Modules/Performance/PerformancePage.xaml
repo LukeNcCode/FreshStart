@@ -1,0 +1,248 @@
+<UserControl x:Class="FreshStart.Modules.Performance.PerformancePage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:FreshStart.Modules.Controls"
+             Background="Transparent" Foreground="{DynamicResource PrimaryTextBrush}">
+    <UserControl.Resources>
+        <Style x:Key="SmallButton" TargetType="{x:Type Button}" BasedOn="{StaticResource SecondaryButton}">
+            <Setter Property="Padding" Value="9,4" />
+            <Setter Property="FontSize" Value="11" />
+        </Style>
+        <Style x:Key="SmallDangerButton" TargetType="{x:Type Button}" BasedOn="{StaticResource DangerButton}">
+            <Setter Property="Padding" Value="9,4" />
+            <Setter Property="FontSize" Value="11" />
+        </Style>
+
+        <Style x:Key="PillItem" TargetType="{x:Type ListBoxItem}">
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Margin" Value="0,0,6,0" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                        <Border x:Name="Bg" CornerRadius="8" Padding="10,5" Background="Transparent">
+                            <ContentPresenter />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bg" Property="Background" Value="{DynamicResource HoverBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Bg" Property="Background" Value="{DynamicResource AccentBrush}" />
+                                <Setter Property="Foreground" Value="White" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ProcessItem" TargetType="{x:Type ListBoxItem}">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                        <ContentPresenter />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel MaxWidth="1200" HorizontalAlignment="Stretch" Margin="40,30,40,56">
+
+            <Grid>
+                <StackPanel>
+                    <TextBlock Text="资源占用" Style="{StaticResource PageTitle}" />
+                    <TextBlock Text="实时 CPU / 内存 / 磁盘 / 网络 / GPU；打开页面立即采样，之后每秒刷新"
+                               Style="{StaticResource PageSubtitle}" Margin="0,6,0,0" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <TextBlock Text="采样" Style="{StaticResource CaptionText}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                    <ListBox ItemsSource="{Binding Intervals}" SelectedItem="{Binding SelectedInterval, Mode=TwoWay}"
+                             Background="Transparent" BorderThickness="0" ItemContainerStyle="{StaticResource PillItem}"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" />
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Title}" FontSize="11"
+                                           Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" />
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </StackPanel>
+            </Grid>
+
+            <!-- 实时指标 -->
+            <Border Style="{StaticResource CardStyle}" Margin="0,18,0,16">
+                <StackPanel>
+                    <Grid>
+                        <TextBlock Text="实时指标" Style="{StaticResource SectionTitle}" />
+                        <TextBlock Text="{Binding StatusText}" Style="{StaticResource CaptionText}"
+                                   HorizontalAlignment="Right" VerticalAlignment="Center" />
+                    </Grid>
+
+                    <Border Height="1" Background="{DynamicResource DividerBrush}" Margin="0,14,0,8" />
+
+                    <Grid Margin="0,2,0,2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="64" />
+                            <ColumnDefinition Width="112" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="CPU" Style="{StaticResource CaptionText}" VerticalAlignment="Center" />
+                        <TextBlock Grid.Column="1" Text="{Binding CpuText}" FontSize="14" FontWeight="SemiBold"
+                                   VerticalAlignment="Center" />
+                        <controls:Sparkline Grid.Column="2" Height="34" Values="{Binding CpuHistory}"
+                                           Stroke="{DynamicResource AccentBrush}"
+                                           Fill="{DynamicResource AccentTintBrush}" Maximum="100" />
+                    </Grid>
+
+                    <Grid Margin="0,2,0,2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="64" />
+                            <ColumnDefinition Width="112" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="内存" Style="{StaticResource CaptionText}" VerticalAlignment="Center" />
+                        <TextBlock Grid.Column="1" Text="{Binding MemoryText}" FontSize="12" FontWeight="SemiBold"
+                                   VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                        <controls:Sparkline Grid.Column="2" Height="34" Values="{Binding MemoryHistory}"
+                                           Stroke="{DynamicResource SuccessBrush}"
+                                           Fill="{DynamicResource SuccessTintBrush}" Maximum="100" />
+                    </Grid>
+
+                    <Grid Margin="0,2,0,2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="64" />
+                            <ColumnDefinition Width="112" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="磁盘" Style="{StaticResource CaptionText}" VerticalAlignment="Center" />
+                        <TextBlock Grid.Column="1" Text="{Binding DiskText}" FontSize="12" FontWeight="SemiBold"
+                                   VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                        <controls:Sparkline Grid.Column="2" Height="34" Values="{Binding DiskHistory}"
+                                           Stroke="{DynamicResource WarningBrush}"
+                                           Fill="{DynamicResource WarningTintBrush}" AutoScale="True" />
+                    </Grid>
+
+                    <Grid Margin="0,2,0,2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="64" />
+                            <ColumnDefinition Width="112" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="网络" Style="{StaticResource CaptionText}" VerticalAlignment="Center" />
+                        <TextBlock Grid.Column="1" Text="{Binding NetworkText}" FontSize="12" FontWeight="SemiBold"
+                                   VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                        <controls:Sparkline Grid.Column="2" Height="34" Values="{Binding NetworkHistory}"
+                                           Stroke="{DynamicResource AccentBrush}"
+                                           Fill="{DynamicResource AccentTintBrush}" AutoScale="True" />
+                    </Grid>
+
+                    <Grid Margin="0,2,0,2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="64" />
+                            <ColumnDefinition Width="112" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="GPU" Style="{StaticResource CaptionText}" VerticalAlignment="Center" />
+                        <TextBlock Grid.Column="1" Text="{Binding GpuText}" FontSize="14" FontWeight="SemiBold"
+                                   VerticalAlignment="Center" />
+                        <controls:Sparkline Grid.Column="2" Height="34" Values="{Binding GpuHistory}"
+                                           Stroke="{DynamicResource DangerBrush}"
+                                           Fill="{DynamicResource DangerTintBrush}" Maximum="100" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- 进程列表 -->
+            <Border Style="{StaticResource CardStyle}" Padding="16,16,16,10">
+                <StackPanel>
+                    <Grid>
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="进程" Style="{StaticResource SectionTitle}" />
+                                <TextBlock Text="{Binding ProcessCountText}" Style="{StaticResource CaptionText}"
+                                           Margin="10,3,0,0" />
+                            </StackPanel>
+                            <TextBlock Text="按占用排序；结束进程不可撤销，请谨慎操作"
+                                       Style="{StaticResource CaptionText}" Margin="0,4,0,0" />
+                        </StackPanel>
+                        <ListBox ItemsSource="{Binding SortOptions}" SelectedItem="{Binding SelectedSort, Mode=TwoWay}"
+                                 HorizontalAlignment="Right" VerticalAlignment="Center"
+                                 Background="Transparent" BorderThickness="0"
+                                 ItemContainerStyle="{StaticResource PillItem}"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                            <ListBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal" />
+                                </ItemsPanelTemplate>
+                            </ListBox.ItemsPanel>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Title}" FontSize="10.5"
+                                               Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" />
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Grid>
+
+                    <Border Height="1" Background="{DynamicResource DividerBrush}" Margin="0,12,0,2" />
+
+                    <ListBox ItemsSource="{Binding ProcessesView}" Height="430" BorderThickness="0"
+                             Background="Transparent" ItemContainerStyle="{StaticResource ProcessItem}"
+                             VirtualizingPanel.IsVirtualizing="True"
+                             VirtualizingPanel.VirtualizationMode="Recycling"
+                             VirtualizingPanel.ScrollUnit="Pixel"
+                             ScrollViewer.CanContentScroll="True"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Border BorderBrush="{DynamicResource DividerBrush}" BorderThickness="0,0,0,1"
+                                        Padding="0,7">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="90" />
+                                            <ColumnDefinition Width="90" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Name}" FontSize="12.5" FontWeight="SemiBold"
+                                                       TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Text="{Binding PidText}" FontSize="10"
+                                                       Foreground="{DynamicResource SecondaryTextBrush}"
+                                                       Margin="0,2,0,0" />
+                                        </StackPanel>
+                                        <TextBlock Grid.Column="1" Text="{Binding CpuText}" FontSize="11"
+                                                   VerticalAlignment="Center"
+                                                   Foreground="{DynamicResource AccentBrush}" />
+                                        <TextBlock Grid.Column="2" Text="{Binding MemoryText}" FontSize="11"
+                                                   VerticalAlignment="Center"
+                                                   Foreground="{DynamicResource SecondaryTextBrush}" />
+                                        <Button Grid.Column="3" Content="结束" Style="{StaticResource SmallDangerButton}"
+                                                Command="{Binding DataContext.KillProcessCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </StackPanel>
+            </Border>
+
+            <TextBlock Text="说明：CPU 为 1 秒窗口平均值；GPU 取最忙引擎类型的利用率（与任务管理器口径接近）；磁盘读取物理磁盘总吞吐。部分虚拟机/驱动没有 GPU Engine 计数器时显示“不可用”。"
+                       Style="{StaticResource CaptionText}" TextWrapping="Wrap" Margin="0,16,0,0" />
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

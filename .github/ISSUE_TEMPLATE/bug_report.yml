@@ -1,0 +1,58 @@
+name: Bug report
+description: Report a reproducible FreshStart problem
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not attach credentials, personal paths, full logs, or other sensitive data.
+        Redact usernames and device identifiers before posting.
+  - type: input
+    id: version
+    attributes:
+      label: FreshStart version
+      placeholder: "0.35.5"
+    validations:
+      required: true
+  - type: input
+    id: windows
+    attributes:
+      label: Windows version and build
+      placeholder: "Windows 11 23H2, 22631.4169"
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction steps
+      description: Provide the smallest reliable sequence.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant redacted logs or screenshots
+      description: Remove usernames, paths, tokens, serial numbers, and personal data.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I am using the latest release.
+          required: true
+        - label: I have removed sensitive data from this report.
+          required: true

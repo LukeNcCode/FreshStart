@@ -1,0 +1,141 @@
+<UserControl x:Class="FreshStart.Modules.ServiceTasks.ServiceTasksPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="Transparent" Foreground="{DynamicResource PrimaryTextBrush}">
+    <UserControl.Resources>
+        <Style x:Key="SmallButton" TargetType="{x:Type Button}" BasedOn="{StaticResource SecondaryButton}">
+            <Setter Property="Padding" Value="8,3" />
+            <Setter Property="FontSize" Value="10.5" />
+        </Style>
+        <Style x:Key="SmallDangerButton" TargetType="{x:Type Button}" BasedOn="{StaticResource DangerButton}">
+            <Setter Property="Padding" Value="8,3" />
+            <Setter Property="FontSize" Value="10.5" />
+        </Style>
+        <Style x:Key="RowItem" TargetType="{x:Type ListBoxItem}">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                        <ContentPresenter />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel MaxWidth="1200" HorizontalAlignment="Stretch" Margin="40,30,40,56">
+
+            <Grid>
+                <StackPanel>
+                    <TextBlock Text="服务与任务" Style="{StaticResource PageTitle}" />
+                    <TextBlock Text="调整 Win32 服务启动类型、启用/禁用登录与开机计划任务；全部先备份再写入"
+                               Style="{StaticResource PageSubtitle}" Margin="0,6,0,0" />
+                </StackPanel>
+                <Button Content="刷新" Style="{StaticResource SecondaryButton}"
+                        Command="{Binding RefreshCommand}" HorizontalAlignment="Right" VerticalAlignment="Center" />
+            </Grid>
+
+            <TextBlock Text="{Binding StatusText}" Style="{StaticResource CaptionText}" Margin="0,14,0,10" />
+
+            <!-- 服务 -->
+            <Border Style="{StaticResource CardStyle}" Margin="0,0,0,14">
+                <StackPanel>
+                    <Grid>
+                        <StackPanel>
+                            <TextBlock Text="系统服务" Style="{StaticResource SectionTitle}" />
+                            <TextBlock Text="{Binding ServiceCountText}" Style="{StaticResource CaptionText}" Margin="0,4,0,0" />
+                        </StackPanel>
+                        <TextBox Text="{Binding ServiceSearch, UpdateSourceTrigger=PropertyChanged}" Width="220"
+                                 HorizontalAlignment="Right" VerticalAlignment="Center"
+                                 ToolTip="按显示名或服务名搜索" />
+                    </Grid>
+
+                    <Border Height="1" Background="{DynamicResource DividerBrush}" Margin="0,12,0,4" />
+
+                    <ListBox ItemsSource="{Binding Services}" Height="340" BorderThickness="0"
+                             Background="Transparent" ItemContainerStyle="{StaticResource RowItem}"
+                             VirtualizingPanel.IsVirtualizing="True"
+                             VirtualizingPanel.VirtualizationMode="Recycling"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Border BorderBrush="{DynamicResource DividerBrush}" BorderThickness="0,0,0,1" Padding="0,8">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding DisplayName}" FontSize="12.5" FontWeight="SemiBold"
+                                                       TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Text="{Binding Subtitle}" Style="{StaticResource CaptionText}"
+                                                       Margin="0,3,0,0" />
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Button Content="自动" Style="{StaticResource SmallButton}" Margin="0,0,4,0"
+                                                    Command="{Binding DataContext.SetAutoCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}" />
+                                            <Button Content="手动" Style="{StaticResource SmallButton}" Margin="0,0,4,0"
+                                                    Command="{Binding DataContext.SetManualCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}" />
+                                            <Button Content="禁用" Style="{StaticResource SmallDangerButton}"
+                                                    Command="{Binding DataContext.SetDisabledCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}" />
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </StackPanel>
+            </Border>
+
+            <!-- 计划任务 -->
+            <Border Style="{StaticResource CardStyle}">
+                <StackPanel>
+                    <TextBlock Text="登录 / 开机计划任务" Style="{StaticResource SectionTitle}" />
+                    <TextBlock Text="{Binding TaskCountText}" Style="{StaticResource CaptionText}" Margin="0,4,0,0" />
+                    <TextBlock Text="只列出非 Microsoft 的登录/开机触发任务；禁用不会删除任务"
+                               Style="{StaticResource CaptionText}" Margin="0,4,0,0" />
+
+                    <Border Height="1" Background="{DynamicResource DividerBrush}" Margin="0,12,0,4" />
+
+                    <ListBox ItemsSource="{Binding Tasks}" Height="200" BorderThickness="0"
+                             Background="Transparent" ItemContainerStyle="{StaticResource RowItem}"
+                             VirtualizingPanel.IsVirtualizing="True"
+                             VirtualizingPanel.VirtualizationMode="Recycling"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Border BorderBrush="{DynamicResource DividerBrush}" BorderThickness="0,0,0,1" Padding="0,8">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Name}" FontSize="12.5" FontWeight="SemiBold"
+                                                       TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Text="{Binding Action}" Style="{StaticResource CaptionText}"
+                                                       Margin="0,3,0,0" TextTrimming="CharacterEllipsis" />
+                                        </StackPanel>
+                                        <Button Grid.Column="1" Content="切换" Style="{StaticResource SmallButton}"
+                                                VerticalAlignment="Center"
+                                                Command="{Binding DataContext.ToggleTaskCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </StackPanel>
+            </Border>
+
+            <TextBlock Text="说明：禁用服务可能导致依赖它的功能不可用（如打印、网络共享、音频）；页面只修改启动类型，不会立即停止正在运行的服务。"
+                       Style="{StaticResource CaptionText}" TextWrapping="Wrap" Margin="0,16,0,0" />
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

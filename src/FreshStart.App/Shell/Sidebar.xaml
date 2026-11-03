@@ -1,0 +1,190 @@
+<UserControl x:Class="FreshStart.App.Shell.Sidebar"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Name="Root"
+             Background="Transparent">
+    <UserControl.Resources>
+        <Style x:Key="NavButtonStyle" TargetType="{x:Type Button}">
+            <Setter Property="Foreground" Value="{DynamicResource SidebarSecondaryTextBrush}" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Grid x:Name="RootGrid" Height="40" Background="Transparent">
+                            <Border x:Name="HoverBg" CornerRadius="9" Background="Transparent" />
+                            <Border x:Name="Indicator" Width="3" Height="16" CornerRadius="1.5"
+                                    HorizontalAlignment="Left" VerticalAlignment="Center"
+                                    Background="{DynamicResource AccentBrush}" Visibility="Collapsed" />
+                            <Grid x:Name="ContentGrid" Margin="13,0,10,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="20" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Path x:Name="Icon" Data="{Binding IconData}" Width="17" Height="17"
+                                      Stretch="Uniform" Stroke="{TemplateBinding Foreground}"
+                                      StrokeThickness="1.5" StrokeLineJoin="Round"
+                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                      VerticalAlignment="Center" />
+                                <TextBlock x:Name="Label" Grid.Column="1" Text="{Binding Title}"
+                                           Margin="12,0,4,0" FontSize="12.5" VerticalAlignment="Center"
+                                           Foreground="{TemplateBinding Foreground}" TextTrimming="CharacterEllipsis" />
+                            </Grid>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="HoverBg" Property="Background" Value="{DynamicResource SidebarHoverBrush}" />
+                                <Setter Property="Foreground" Value="{DynamicResource SidebarPrimaryTextBrush}" />
+                            </Trigger>
+                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                <Setter Property="Foreground" Value="{DynamicResource SidebarSelectedTextBrush}" />
+                                <Setter TargetName="Label" Property="FontWeight" Value="SemiBold" />
+                                <Setter TargetName="Indicator" Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsAvailable}" Value="False">
+                                <Setter Property="Opacity" Value="0.5" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsCollapsed, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                                         Value="True">
+                                <Setter TargetName="Label" Property="Visibility" Value="Collapsed" />
+                                <Setter TargetName="Indicator" Property="Visibility" Value="Collapsed" />
+                                <Setter TargetName="ContentGrid" Property="Margin" Value="0" />
+                                <Setter TargetName="Icon" Property="Grid.ColumnSpan" Value="2" />
+                                <Setter TargetName="Icon" Property="HorizontalAlignment" Value="Center" />
+                                <Setter TargetName="Icon" Property="Margin" Value="0" />
+                            </DataTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="18,16,18,12">
+            <StackPanel Orientation="Horizontal"
+                        Visibility="{Binding IsCollapsed, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}, Converter={StaticResource BoolToCollapsedVisibility}}">
+                <Border Width="38" Height="38" CornerRadius="12"
+                        Background="{DynamicResource AccentGradientBrush}">
+                    <Grid>
+                        <Border Width="18" Height="3" CornerRadius="2" Background="White"
+                                HorizontalAlignment="Left" VerticalAlignment="Top" Margin="9,11,0,0" />
+                        <Border Width="12" Height="3" CornerRadius="2" Background="#C8FFFFFF"
+                                HorizontalAlignment="Left" VerticalAlignment="Top" Margin="9,18,0,0" />
+                        <Ellipse Width="5" Height="5" Fill="White" HorizontalAlignment="Right"
+                                 VerticalAlignment="Bottom" Margin="0,0,8,8" />
+                    </Grid>
+                </Border>
+                <StackPanel Margin="12,0,0,0" VerticalAlignment="Center">
+                    <TextBlock Text="FreshStart" FontFamily="{StaticResource DisplayFont}"
+                               FontSize="16" FontWeight="Bold"
+                               Foreground="{DynamicResource SidebarPrimaryTextBrush}" />
+                    <TextBlock Text="CONTROL DECK · WIN11" FontFamily="{StaticResource DisplayFont}"
+                               FontSize="8.5" FontWeight="SemiBold" Margin="0,2,0,0"
+                               Foreground="{DynamicResource SidebarSecondaryTextBrush}" />
+                </StackPanel>
+            </StackPanel>
+            <Border Width="38" Height="38" CornerRadius="12"
+                    Background="{DynamicResource AccentGradientBrush}"
+                    HorizontalAlignment="Center"
+                    Visibility="{Binding IsCollapsed, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}, Converter={StaticResource BoolToVisibility}}">
+                <Grid>
+                    <Border Width="18" Height="3" CornerRadius="2" Background="White"
+                            HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,12,0,0" />
+                    <Border Width="12" Height="3" CornerRadius="2" Background="#C8FFFFFF"
+                            HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,19,0,0" />
+                    <Ellipse Width="5" Height="5" Fill="White" HorizontalAlignment="Right"
+                             VerticalAlignment="Bottom" Margin="0,0,9,9" />
+                </Grid>
+            </Border>
+        </Grid>
+
+        <StackPanel Grid.Row="1" Margin="12,0,12,8"
+                    Visibility="{Binding IsCollapsed, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}, Converter={StaticResource BoolToCollapsedVisibility}}">
+            <TextBlock Text="快速定位" FontSize="10" FontWeight="SemiBold"
+                       Foreground="{DynamicResource SidebarSecondaryTextBrush}" Margin="6,0,0,5" />
+            <Grid>
+                <TextBox x:Name="NavSearchBox" Height="36"
+                         Text="{Binding NavSearch, UpdateSourceTrigger=PropertyChanged}"
+                         TextChanged="NavSearch_TextChanged"
+                         ToolTip="搜索页面、功能或说明"
+                         AutomationProperties.Name="搜索导航"
+                         FontSize="12" Padding="34,7,11,7"
+                         Background="{DynamicResource SidebarInputBrush}"
+                         Foreground="{DynamicResource SidebarPrimaryTextBrush}"
+                         BorderBrush="{DynamicResource SidebarBorderBrush}"
+                         CaretBrush="{DynamicResource SidebarPrimaryTextBrush}" />
+                <Path Data="{StaticResource SearchIcon}" Width="14" Height="14"
+                      Stretch="Uniform" Stroke="{DynamicResource SidebarSecondaryTextBrush}"
+                      StrokeThickness="1.6" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                      HorizontalAlignment="Left" VerticalAlignment="Center" Margin="12,0,0,0"
+                      IsHitTestVisible="False" />
+                <TextBlock x:Name="NavSearchPlaceholder" Text="搜索页面或功能"
+                           FontSize="11.5" Margin="35,0,12,0"
+                           Foreground="{DynamicResource SidebarSecondaryTextBrush}"
+                           VerticalAlignment="Center" IsHitTestVisible="False" />
+            </Grid>
+        </StackPanel>
+
+        <ScrollViewer x:Name="NavScroll" Grid.Row="2" Margin="0,0,0,4" VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled">
+            <Grid>
+                <!-- 选中背景块：滑动过渡由 code-behind 完成 -->
+                <Canvas x:Name="PillCanvas" ClipToBounds="True" IsHitTestVisible="False">
+                    <Border x:Name="SelectionPill" Width="224" Height="40" CornerRadius="10"
+                            Background="{DynamicResource SidebarSelectedBrush}" Visibility="Collapsed" />
+                </Canvas>
+
+                <ItemsControl x:Name="GroupItems" ItemsSource="{Binding Groups}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Margin="12,0,12,3">
+                                <TextBlock Text="{Binding Title}" FontSize="10" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource SidebarSecondaryTextBrush}"
+                                           Margin="12,12,0,5"
+                                           Visibility="{Binding IsCollapsed, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}, Converter={StaticResource BoolToCollapsedVisibility}}" />
+                                <ItemsControl ItemsSource="{Binding Items}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Button Style="{StaticResource NavButtonStyle}"
+                                                    Click="NavButton_Click"
+                                                    Loaded="NavButton_Loaded"
+                                                    ToolTip="{Binding Hint}"
+                                                    AutomationProperties.Name="{Binding Title}" />
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <TextBlock Text="没有匹配的页面" FontSize="11.5" Margin="20,18,20,0"
+                           Foreground="{DynamicResource SidebarSecondaryTextBrush}"
+                           TextWrapping="Wrap"
+                           Visibility="{Binding HasNoNavResults, Converter={StaticResource BoolToVisibility}}" />
+            </Grid>
+        </ScrollViewer>
+
+        <StackPanel Grid.Row="3" Margin="20,6,20,14"
+                    Visibility="{Binding IsCollapsed, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}, Converter={StaticResource BoolToCollapsedVisibility}}">
+            <Border Height="1" Background="{DynamicResource SidebarBorderBrush}" Margin="0,0,0,12" />
+            <StackPanel Orientation="Horizontal">
+                <Ellipse Width="6" Height="6" Fill="{DynamicResource SidebarSelectedTextBrush}"
+                         VerticalAlignment="Center" Margin="0,0,7,0" />
+                <TextBlock Text="本地运行 · 支持回滚" FontSize="10.5" FontWeight="SemiBold"
+                           Foreground="{DynamicResource SidebarPrimaryTextBrush}" />
+            </StackPanel>
+            <TextBlock x:Name="VersionText" Text="v0.0.0 · 本地开荒工具" FontSize="10" Margin="13,4,0,0"
+                       Foreground="{DynamicResource SidebarSecondaryTextBrush}" />
+        </StackPanel>
+    </Grid>
+</UserControl>
