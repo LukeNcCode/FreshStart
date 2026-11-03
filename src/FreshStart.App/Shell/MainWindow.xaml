@@ -4,6 +4,7 @@
         xmlns:shell="clr-namespace:FreshStart.App.Shell"
         xmlns:controls="clr-namespace:FreshStart.App.Controls"
         Title="FreshStart" Width="1180" Height="760" MinWidth="980" MinHeight="640"
+        Icon="Assets/app.ico"
         WindowStyle="None" ResizeMode="CanResize" Background="{DynamicResource WindowBrush}"
         WindowStartupLocation="CenterScreen"
         FontFamily="{StaticResource AppFont}"

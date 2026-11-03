@@ -72,6 +72,12 @@ src\FreshStart.App\bin\Debug\net8.0-windows\win-x64\FreshStart.Host.exe --page=h
 powershell -ExecutionPolicy Bypass -File build\publish.ps1
 ```
 
+发布脚本会生成：
+
+- `FreshStart-v<version>-win-x64.zip`：轻量主程序包
+- `FreshStart-v<version>-win-x64-offline.zip`：程序本体 + winget 离线组件
+- `FreshStart-v<version>-setup.exe`：包含完整离线内容的 Windows 安装程序
+
 详细构建、调试、视觉回归和打包说明见 [DEVELOPMENT.md](docs/DEVELOPMENT.md)。
 
 ### winget 策略
@@ -83,6 +89,8 @@ FreshStart 不会在启动时强制安装或更新 winget。缺少 winget 或版
 3. 导入提前下载的离线安装包。
 
 完整发布包保持精简，不携带数百 MB 的微软安装包。需要完全离线部署时，可额外下载同一版本的 `winget-offline` 附加包。
+
+如果安装包内存在 winget 离线组件，FreshStart 会在主界面打开后提示是否更新；用户可以选择稍后，升级过程只使用本地文件，不联网下载。
 
 ## 项目结构
 
@@ -102,7 +110,7 @@ assets/wallpapers/       内置桌面壁纸
 
 ## 仓库与发布
 
-源代码仓库只包含软件本体。Microsoft winget 离线组件超过 GitHub 普通文件限制，因此作为独立 Release 附加包发布；完整离线安装说明见 [assets/winget/README.md](assets/winget/README.md)。
+源代码仓库只包含软件本体。Microsoft winget 离线组件超过 GitHub 普通文件限制，因此只进入完整的离线 ZIP 和 `setup.exe` Release 资产；准备说明见 [assets/winget/README.md](assets/winget/README.md)。
 
 GitHub 的 100 MB 限制仅针对 Git 仓库文件。`FreshStart.Host.exe` 和最终 ZIP
 不提交到 Git，而是由 GitHub Actions 构建后上传到 Releases；单个 Release

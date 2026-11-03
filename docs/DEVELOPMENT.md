@@ -6,6 +6,7 @@
 - .NET SDK `8.0.426` (`global.json` uses `latestFeature`)
 - Visual Studio 2022 C++ Build Tools for NativeAOT release builds
 - Windows SDK for WPF, AppX and native tooling
+- Inno Setup 6 for producing `setup.exe`
 
 ## Build
 
@@ -67,16 +68,23 @@ then run:
 powershell -ExecutionPolicy Bypass -File build\publish.ps1
 ```
 
-The script writes the main ZIP and, when assets are present, a separate
-`FreshStart-v<version>-winget-offline-x64.zip` add-on. Each file has a matching
-SHA256 file under `publish/`. Code signing is optional and controlled by
-`-SignCertificateSha1`; unsigned artifacts may show SmartScreen warnings.
+The script writes three artifacts when winget assets are available:
+
+- `FreshStart-v<version>-win-x64.zip` — lightweight application package;
+- `FreshStart-v<version>-win-x64-offline.zip` — application plus winget;
+- `FreshStart-v<version>-setup.exe` — Inno Setup installer with the complete offline package.
+
+Each artifact has a matching SHA256 file under `publish/`. Code signing is
+optional and controlled by `-SignCertificateSha1`; unsigned artifacts may show
+SmartScreen warnings.
 
 Do not commit `publish/` to Git. GitHub source repositories limit individual
 files to 100 MB, but GitHub Releases support assets up to 2 GB. Run the
 `release` workflow manually after pushing the source, or upload the generated
 ZIP through the GitHub Releases page. The workflow creates the main package
-without winget; upload the optional offline add-on separately when needed.
+without winget; upload the complete offline ZIP and `setup.exe` separately
+after building them on a machine that has the optional Microsoft assets and
+Inno Setup installed.
 
 ## Command-line smoke test
 

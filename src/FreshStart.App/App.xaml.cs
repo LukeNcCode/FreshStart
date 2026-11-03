@@ -10,6 +10,7 @@ using FreshStart.Core.Abstractions;
 using FreshStart.Core.Diagnostics;
 using FreshStart.Core.Settings;
 using FreshStart.Core.UI;
+using FreshStart.Services.Software;
 using FreshStart.Services.System;
 
 namespace FreshStart.App;
@@ -121,6 +122,10 @@ public partial class App
         StartupProbe.Mark("window-shown");
         WarnOtherInstances();
         ShowWelcomeIfNeeded(settings);
+        if (!_options.SmokeTest)
+        {
+            _ = PromptForBundledWingetUpdateAsync();
+        }
 
         if (_options.Preset is not null)
         {
@@ -154,6 +159,35 @@ public partial class App
         catch (Exception ex)
         {
             Log.Warn($"显示新手引导失败: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// 主界面显示后提供可选的 winget 离线更新。没有随包离线组件时完全不提示；
+    /// 用户选择“稍后”不会影响任何功能，也不会触发联网下载。
+    /// </summary>
+    private async Task PromptForBundledWingetUpdateAsync()
+    {
+        try
+        {
+            var winget = _composition?.Winget;
+            var bundledVersion = WingetService.ReadBundledBundleVersion();
+            if (winget is null || bundledVersion is null || _mainWindow is null) return;
+
+            var available = await winget.IsAvailableAsync();
+            if (available && WingetService.MeetsRequiredVersion(winget.Version)) return;
+            if (!_mainWindow.IsVisible) return;
+
+            var dialog = new WingetUpdateWindow(
+                winget, available, winget.Version, bundledVersion)
+            {
+                Owner = _mainWindow
+            };
+            dialog.ShowDialog();
+        }
+        catch (Exception ex)
+        {
+            Log.Warn($"无法显示可选 winget 更新提示: {ex.Message}");
         }
     }
 

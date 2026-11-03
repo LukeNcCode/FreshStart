@@ -10,6 +10,7 @@ param(
     [switch]$SkipLauncherAot,
     [switch]$NoZip,
     [switch]$NoWingetOfflineBundle,
+    [switch]$SkipInstaller,
     [string]$SignCertificateSha1 = ""
 )
 
@@ -114,15 +115,17 @@ try {
                 Write-Warning "跳过 winget 离线包：assets\winget 中没有 Microsoft.DesktopAppInstaller*.msixbundle"
             }
             else {
-                $offlineStage = Join-Path $root "publish\winget-offline"
+                $offlineStage = Join-Path $root "publish\offline"
                 if (Test-Path $offlineStage) {
                     Remove-Item $offlineStage -Recurse -Force
                 }
+                New-Item -ItemType Directory -Force -Path $offlineStage | Out-Null
+                Copy-Item (Join-Path $OutputDir "*") $offlineStage -Recurse -Force
                 $offlineAssets = Join-Path $offlineStage "assets\winget"
                 New-Item -ItemType Directory -Force -Path $offlineAssets | Out-Null
                 Copy-Item "assets\winget\*" $offlineAssets -Force
 
-                $offlineZip = Join-Path $root ("publish\FreshStart-v$version-winget-offline-x64.zip")
+                $offlineZip = Join-Path $root ("publish\FreshStart-v$version-win-x64-offline.zip")
                 if (Test-Path $offlineZip) {
                     Remove-Item $offlineZip -Force
                 }
@@ -131,8 +134,45 @@ try {
                 $offlineHash = (Get-FileHash -LiteralPath $offlineZip -Algorithm SHA256).Hash.ToLowerInvariant()
                 $offlineHashLine = "$offlineHash  $([IO.Path]::GetFileName($offlineZip))"
                 Set-Content -LiteralPath "$offlineZip.sha256" -Value $offlineHashLine -Encoding ascii
-                Write-Host "winget 离线包: $offlineZip" -ForegroundColor Green
+                Write-Host "完整离线包: $offlineZip" -ForegroundColor Green
                 Write-Host "SHA256: $offlineHashLine" -ForegroundColor Green
+
+                if (-not $SkipInstaller) {
+                    $isccCandidates = @(
+                        "C:\Users\$env:USERNAME\AppData\Local\Programs\Inno Setup 6\ISCC.exe",
+                        "C:\Program Files (x86)\Inno Setup 6\ISCC.exe",
+                        "C:\Program Files\Inno Setup 6\ISCC.exe"
+                    )
+                    $iscc = $isccCandidates |
+                        Where-Object { Test-Path -LiteralPath $_ } |
+                        Select-Object -First 1
+                    if ($null -eq $iscc) {
+                        throw "未找到 Inno Setup 6 的 ISCC.exe。请安装 Inno Setup，或显式传入 -SkipInstaller。"
+                    }
+
+                    $iconPath = Join-Path $root "src\FreshStart.App\Assets\app.ico"
+                    $publishDir = Join-Path $root "publish"
+                    & $iscc `
+                        "/DMyAppVersion=$version" `
+                        "/DSourceDir=$OutputDir" `
+                        "/DWingetDir=$(Join-Path $root 'assets\winget')" `
+                        "/DOutputDir=$publishDir" `
+                        "/DIconPath=$iconPath" `
+                        (Join-Path $root "build\installer.iss")
+                    if ($LASTEXITCODE -ne 0) {
+                        throw "Inno Setup 构建失败（exit $LASTEXITCODE）"
+                    }
+
+                    $setupPath = Join-Path $publishDir "FreshStart-v$version-setup.exe"
+                    if (-not (Test-Path -LiteralPath $setupPath)) {
+                        throw "安装器未生成：$setupPath"
+                    }
+                    $setupHash = (Get-FileHash -LiteralPath $setupPath -Algorithm SHA256).Hash.ToLowerInvariant()
+                    $setupHashLine = "$setupHash  $([IO.Path]::GetFileName($setupPath))"
+                    Set-Content -LiteralPath "$setupPath.sha256" -Value $setupHashLine -Encoding ascii
+                    Write-Host "安装器: $setupPath" -ForegroundColor Green
+                    Write-Host "SHA256: $setupHashLine" -ForegroundColor Green
+                }
             }
         }
     }
