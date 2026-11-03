@@ -3,7 +3,7 @@
 | Script | Purpose |
 |---|---|
 | `publish.ps1` | Build Host and launcher, assemble the release directory and ZIP |
-| `installer.iss` | Inno Setup definition for the complete offline `setup.exe` |
+| `installer.iss` | Inno Setup definition for lightweight and offline setup packages |
 | `make-icon.ps1` | Generate the multi-resolution application icon |
 | `capture.ps1` | Capture one WPF page with a non-elevated audit build |
 | `test-ui.ps1` | Exercise theme, sidebar and window controls |

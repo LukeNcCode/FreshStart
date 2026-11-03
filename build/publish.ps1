@@ -8,8 +8,7 @@
 param(
     [string]$OutputDir = "",
     [switch]$SkipLauncherAot,
-    [switch]$NoZip,
-    [switch]$NoWingetOfflineBundle,
+    [switch]$SkipOfflineInstaller,
     [switch]$SkipInstaller,
     [string]$SignCertificateSha1 = ""
 )
@@ -22,6 +21,17 @@ if ([string]::IsNullOrWhiteSpace($OutputDir)) {
 
 Write-Host "== FreshStart publish ==" -ForegroundColor Cyan
 Write-Host "输出目录: $OutputDir"
+
+$publishRoot = Join-Path $root "publish"
+Get-ChildItem $publishRoot -File -ErrorAction SilentlyContinue |
+    Where-Object { $_.Name -match '^FreshStart-v.+\.zip(\.sha256)?$' } |
+    Remove-Item -Force
+foreach ($legacyDirectory in @("offline", "winget-offline")) {
+    $legacyPath = Join-Path $publishRoot $legacyDirectory
+    if (Test-Path $legacyPath) {
+        Remove-Item $legacyPath -Recurse -Force
+    }
+}
 
 if (Test-Path $OutputDir) {
     Remove-Item $OutputDir -Recurse -Force
@@ -94,50 +104,18 @@ try {
         Select-Object Name, @{n = "大小(MB)"; e = { [math]::Round($_.Length / 1MB, 2) } } |
         Format-Table -AutoSize
 
-    if (-not $NoZip) {
+    if (-not $SkipInstaller) {
         [xml]$buildProps = Get-Content -Raw -Encoding UTF8 (Join-Path $root "Directory.Build.props")
         $version = ($buildProps.Project.PropertyGroup | Where-Object { $_.Version } | Select-Object -First 1).Version
         if ([string]::IsNullOrWhiteSpace($version)) { $version = "0.0.0" }
-        $zipPath = Join-Path $root ("publish\FreshStart-v$version-win-x64.zip")
-        if (Test-Path $zipPath) { Remove-Item $zipPath -Force }
-        Compress-Archive -Path (Join-Path $OutputDir "*") -DestinationPath $zipPath -CompressionLevel Optimal
-        $zipHash = (Get-FileHash -LiteralPath $zipPath -Algorithm SHA256).Hash.ToLowerInvariant()
-        $hashLine = "$zipHash  $([IO.Path]::GetFileName($zipPath))"
-        Set-Content -LiteralPath "$zipPath.sha256" -Value $hashLine -Encoding ascii
-        Write-Host "ZIP: $zipPath" -ForegroundColor Green
-        Write-Host "SHA256: $hashLine" -ForegroundColor Green
+        $wingetManifest = Get-ChildItem "assets\winget" `
+            -Filter "Microsoft.DesktopAppInstaller*.msixbundle" -File -ErrorAction SilentlyContinue |
+            Select-Object -First 1
+        if ($null -eq $wingetManifest) {
+            $SkipOfflineInstaller = $true
+            Write-Warning "未找到 winget 离线组件；只生成轻量安装器。"
+        }
 
-        if (-not $NoWingetOfflineBundle) {
-            $wingetManifest = Get-ChildItem "assets\winget" `
-                -Filter "Microsoft.DesktopAppInstaller*.msixbundle" -File -ErrorAction SilentlyContinue |
-                Select-Object -First 1
-            if ($null -eq $wingetManifest) {
-                Write-Warning "跳过 winget 离线包：assets\winget 中没有 Microsoft.DesktopAppInstaller*.msixbundle"
-            }
-            else {
-                $offlineStage = Join-Path $root "publish\offline"
-                if (Test-Path $offlineStage) {
-                    Remove-Item $offlineStage -Recurse -Force
-                }
-                New-Item -ItemType Directory -Force -Path $offlineStage | Out-Null
-                Copy-Item (Join-Path $OutputDir "*") $offlineStage -Recurse -Force
-                $offlineAssets = Join-Path $offlineStage "assets\winget"
-                New-Item -ItemType Directory -Force -Path $offlineAssets | Out-Null
-                Copy-Item "assets\winget\*" $offlineAssets -Force
-
-                $offlineZip = Join-Path $root ("publish\FreshStart-v$version-win-x64-offline.zip")
-                if (Test-Path $offlineZip) {
-                    Remove-Item $offlineZip -Force
-                }
-                Compress-Archive -Path (Join-Path $offlineStage "*") `
-                    -DestinationPath $offlineZip -CompressionLevel Optimal
-                $offlineHash = (Get-FileHash -LiteralPath $offlineZip -Algorithm SHA256).Hash.ToLowerInvariant()
-                $offlineHashLine = "$offlineHash  $([IO.Path]::GetFileName($offlineZip))"
-                Set-Content -LiteralPath "$offlineZip.sha256" -Value $offlineHashLine -Encoding ascii
-                Write-Host "完整离线包: $offlineZip" -ForegroundColor Green
-                Write-Host "SHA256: $offlineHashLine" -ForegroundColor Green
-
-                if (-not $SkipInstaller) {
                     $isccCandidates = @(
                         "C:\Users\$env:USERNAME\AppData\Local\Programs\Inno Setup 6\ISCC.exe",
                         "C:\Program Files (x86)\Inno Setup 6\ISCC.exe",
@@ -181,9 +159,8 @@ try {
                     }
 
                     New-FreshStartSetup $false "FreshStart-v$version-setup"
-                    New-FreshStartSetup $true "FreshStart-v$version-offline-setup"
-                }
-            }
+        if (-not $SkipOfflineInstaller) {
+            New-FreshStartSetup $true "FreshStart-v$version-offline-setup"
         }
     }
 }

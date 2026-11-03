@@ -31,6 +31,8 @@ Desktop.ini
 .DS_Store
 
 # User-local/generated project files
+*优化方案.json
+*定制方案.json
 *.local.json
 
 # Keep accidentally recreated promo tooling out of the product repository

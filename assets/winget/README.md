@@ -1,7 +1,7 @@
 # winget bootstrap assets
 
-This directory is only needed to build the complete offline ZIP and setup
-installer for clean or network-restricted Windows 11 installations. FreshStart starts without winget,
+This directory is only needed to build the complete offline setup installer
+for clean or network-restricted Windows 11 installations. FreshStart starts without winget,
 and the software page can install or update App Installer online on demand.
 
 These files are intentionally excluded from Git because several exceed GitHub's
@@ -24,14 +24,13 @@ https://aka.ms/windowsappsdk/1.8/latest/windowsappruntimeinstall-x64.exe
 
 Place the files in this directory before running `build/publish.ps1`. The script
 keeps them out of the lightweight main package and includes them in
-`FreshStart-v<version>-win-x64-offline.zip` and
 `FreshStart-v<version>-offline-setup.exe`.
 
-To use the complete offline ZIP:
+To use the complete offline installer:
 
-1. Extract the complete archive.
-2. Run `FreshStart.exe`.
-3. Accept or postpone the optional local winget update prompt.
+1. Run `FreshStart-v<version>-offline-setup.exe`.
+2. Complete the installer.
+3. Launch FreshStart and accept or postpone the optional local winget update prompt.
 
 Verify the publisher and Authenticode signature before packaging any Microsoft
 binary. Do not commit these files to Git or Git LFS.

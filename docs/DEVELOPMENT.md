@@ -68,24 +68,21 @@ then run:
 powershell -ExecutionPolicy Bypass -File build\publish.ps1
 ```
 
-The script writes four artifacts when winget assets are available:
+The script writes two installers when winget assets are available:
 
-- `FreshStart-v<version>-win-x64.zip` — lightweight application package;
-- `FreshStart-v<version>-win-x64-offline.zip` — application plus winget;
 - `FreshStart-v<version>-setup.exe` — lightweight application installer;
 - `FreshStart-v<version>-offline-setup.exe` — installer with application and offline winget.
 
-Each artifact has a matching SHA256 file under `publish/`. Code signing is
+Each installer has a matching SHA256 file under `publish/`. Code signing is
 optional and controlled by `-SignCertificateSha1`; unsigned artifacts may show
 SmartScreen warnings.
 
 Do not commit `publish/` to Git. GitHub source repositories limit individual
 files to 100 MB, but GitHub Releases support assets up to 2 GB. Run the
 `release` workflow manually after pushing the source, or upload the generated
-ZIP through the GitHub Releases page. The workflow creates the main package
-without winget; upload the complete offline ZIP and both installers separately
-after building them on a machine that has the optional Microsoft assets and
-Inno Setup installed.
+installers through the GitHub Releases page. The workflow creates the lightweight
+installer; upload `offline-setup.exe` separately after building it on a machine
+that has the optional Microsoft assets and Inno Setup installed.
 
 ## Command-line smoke test
 
