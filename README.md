@@ -76,7 +76,8 @@ powershell -ExecutionPolicy Bypass -File build\publish.ps1
 
 - `FreshStart-v<version>-win-x64.zip`：轻量主程序包
 - `FreshStart-v<version>-win-x64-offline.zip`：程序本体 + winget 离线组件
-- `FreshStart-v<version>-setup.exe`：包含完整离线内容的 Windows 安装程序
+- `FreshStart-v<version>-setup.exe`：轻量本体安装器
+- `FreshStart-v<version>-offline-setup.exe`：本体 + winget 离线组件安装器
 
 详细构建、调试、视觉回归和打包说明见 [DEVELOPMENT.md](docs/DEVELOPMENT.md)。
 

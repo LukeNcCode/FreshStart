@@ -175,9 +175,12 @@ public partial class App
             if (winget is null || bundledVersion is null || _mainWindow is null) return;
 
             var available = await winget.IsAvailableAsync();
+            Log.Info($"可选 winget 更新检查：本机={(available ? winget.Version?.ToString() ?? "未知" : "未安装")}，" +
+                     $"离线包=v{bundledVersion}");
             if (available && WingetService.MeetsRequiredVersion(winget.Version)) return;
             if (!_mainWindow.IsVisible) return;
 
+            Log.Info("显示可选 winget 离线更新提示");
             var dialog = new WingetUpdateWindow(
                 winget, available, winget.Version, bundledVersion)
             {

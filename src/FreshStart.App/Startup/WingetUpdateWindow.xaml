@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="可选 winget 更新"
         Width="560" Height="390"
-        Icon="Assets/app.ico"
+        Icon="pack://application:,,,/FreshStart.Host;component/Assets/app.ico"
         WindowStyle="None" ResizeMode="NoResize"
         WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False"

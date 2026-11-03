@@ -152,26 +152,36 @@ try {
 
                     $iconPath = Join-Path $root "src\FreshStart.App\Assets\app.ico"
                     $publishDir = Join-Path $root "publish"
-                    & $iscc `
-                        "/DMyAppVersion=$version" `
-                        "/DSourceDir=$OutputDir" `
-                        "/DWingetDir=$(Join-Path $root 'assets\winget')" `
-                        "/DOutputDir=$publishDir" `
-                        "/DIconPath=$iconPath" `
-                        (Join-Path $root "build\installer.iss")
-                    if ($LASTEXITCODE -ne 0) {
-                        throw "Inno Setup 构建失败（exit $LASTEXITCODE）"
+                    $installerScript = Join-Path $root "build\installer.iss"
+                    $wingetDir = Join-Path $root "assets\winget"
+
+                    function New-FreshStartSetup([bool]$includeWinget, [string]$outputBaseName) {
+                        & $iscc `
+                            "/DMyAppVersion=$version" `
+                            "/DSourceDir=$OutputDir" `
+                            "/DWingetDir=$wingetDir" `
+                            "/DOutputDir=$publishDir" `
+                            "/DIconPath=$iconPath" `
+                            "/DOutputBaseName=$outputBaseName" `
+                            "/DIncludeWinget=$([int]$includeWinget)" `
+                            $installerScript
+                        if ($LASTEXITCODE -ne 0) {
+                            throw "Inno Setup 构建失败：$outputBaseName（exit $LASTEXITCODE）"
+                        }
+
+                        $setupPath = Join-Path $publishDir "$outputBaseName.exe"
+                        if (-not (Test-Path -LiteralPath $setupPath)) {
+                            throw "安装器未生成：$setupPath"
+                        }
+                        $setupHash = (Get-FileHash -LiteralPath $setupPath -Algorithm SHA256).Hash.ToLowerInvariant()
+                        $setupHashLine = "$setupHash  $([IO.Path]::GetFileName($setupPath))"
+                        Set-Content -LiteralPath "$setupPath.sha256" -Value $setupHashLine -Encoding ascii
+                        Write-Host "安装器: $setupPath" -ForegroundColor Green
+                        Write-Host "SHA256: $setupHashLine" -ForegroundColor Green
                     }
 
-                    $setupPath = Join-Path $publishDir "FreshStart-v$version-setup.exe"
-                    if (-not (Test-Path -LiteralPath $setupPath)) {
-                        throw "安装器未生成：$setupPath"
-                    }
-                    $setupHash = (Get-FileHash -LiteralPath $setupPath -Algorithm SHA256).Hash.ToLowerInvariant()
-                    $setupHashLine = "$setupHash  $([IO.Path]::GetFileName($setupPath))"
-                    Set-Content -LiteralPath "$setupPath.sha256" -Value $setupHashLine -Encoding ascii
-                    Write-Host "安装器: $setupPath" -ForegroundColor Green
-                    Write-Host "SHA256: $setupHashLine" -ForegroundColor Green
+                    New-FreshStartSetup $false "FreshStart-v$version-setup"
+                    New-FreshStartSetup $true "FreshStart-v$version-offline-setup"
                 }
             }
         }

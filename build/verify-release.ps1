@@ -104,20 +104,26 @@ else {
     Write-Warning "Complete offline archive not present; skipping optional bundle verification."
 }
 
-$setupPath = Join-Path $root "publish\FreshStart-v$Version-setup.exe"
-if (Test-Path -LiteralPath $setupPath) {
-    $setupHashPath = "$setupPath.sha256"
-    if (-not (Test-Path -LiteralPath $setupHashPath)) {
-        throw "Missing setup checksum file: $setupHashPath"
+$setupNames = @(
+    "FreshStart-v$Version-setup.exe",
+    "FreshStart-v$Version-offline-setup.exe"
+)
+foreach ($setupName in $setupNames) {
+    $setupPath = Join-Path $root "publish\$setupName"
+    if (Test-Path -LiteralPath $setupPath) {
+        $setupHashPath = "$setupPath.sha256"
+        if (-not (Test-Path -LiteralPath $setupHashPath)) {
+            throw "Missing setup checksum file: $setupHashPath"
+        }
+        $setupExpected = ((Get-Content -Raw -LiteralPath $setupHashPath).Trim() -split '\s+')[0].ToLowerInvariant()
+        $setupActual = (Get-FileHash -LiteralPath $setupPath -Algorithm SHA256).Hash.ToLowerInvariant()
+        if ($setupActual -ne $setupExpected) {
+            throw "Setup SHA256 mismatch: expected $setupExpected, got $setupActual"
+        }
+        Write-Host "Verified setup installer: $setupName" -ForegroundColor Green
+        Write-Host "SHA256: $setupActual" -ForegroundColor Green
     }
-    $setupExpected = ((Get-Content -Raw -LiteralPath $setupHashPath).Trim() -split '\s+')[0].ToLowerInvariant()
-    $setupActual = (Get-FileHash -LiteralPath $setupPath -Algorithm SHA256).Hash.ToLowerInvariant()
-    if ($setupActual -ne $setupExpected) {
-        throw "Setup SHA256 mismatch: expected $setupExpected, got $setupActual"
+    else {
+        Write-Warning "Setup installer not present: $setupName"
     }
-    Write-Host "Verified setup installer" -ForegroundColor Green
-    Write-Host "SHA256: $setupActual" -ForegroundColor Green
-}
-else {
-    Write-Warning "Setup installer not present; skipping installer verification."
 }

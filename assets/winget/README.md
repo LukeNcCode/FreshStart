@@ -25,7 +25,7 @@ https://aka.ms/windowsappsdk/1.8/latest/windowsappruntimeinstall-x64.exe
 Place the files in this directory before running `build/publish.ps1`. The script
 keeps them out of the lightweight main package and includes them in
 `FreshStart-v<version>-win-x64-offline.zip` and
-`FreshStart-v<version>-setup.exe`.
+`FreshStart-v<version>-offline-setup.exe`.
 
 To use the complete offline ZIP:
 

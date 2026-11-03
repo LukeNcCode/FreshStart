@@ -13,6 +13,12 @@
 #ifndef IconPath
   #define IconPath "..\src\FreshStart.App\Assets\app.ico"
 #endif
+#ifndef OutputBaseName
+  #define OutputBaseName "FreshStart-v" + MyAppVersion + "-setup"
+#endif
+#ifndef IncludeWinget
+  #define IncludeWinget "0"
+#endif
 
 #define MyAppName "FreshStart"
 #define MyAppPublisher "LukeNcCode"
@@ -29,7 +35,7 @@ DefaultDirName={autopf}\FreshStart
 DefaultGroupName=FreshStart
 DisableProgramGroupPage=yes
 OutputDir={#OutputDir}
-OutputBaseFilename=FreshStart-v{#MyAppVersion}-setup
+OutputBaseFilename={#OutputBaseName}
 SetupIconFile={#IconPath}
 UninstallDisplayIcon={app}\{#MyAppExeName}
 Compression=lzma2/ultra64
@@ -49,7 +55,14 @@ Name: "desktopicon"; Description: "Create a desktop shortcut"; GroupDescription:
 
 [Files]
 Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+#if IncludeWinget == "1"
 Source: "{#WingetDir}\*"; DestDir: "{app}\assets\winget"; Flags: ignoreversion recursesubdirs createallsubdirs
+#endif
+
+[InstallDelete]
+#if IncludeWinget == "0"
+Type: filesandordirs; Name: "{app}\assets\winget"
+#endif
 
 [Icons]
 Name: "{autoprograms}\FreshStart"; Filename: "{app}\{#MyAppExeName}"
