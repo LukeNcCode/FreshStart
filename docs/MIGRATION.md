@@ -8,7 +8,7 @@ Windows 11 设备上离线恢复。
 | 项目 | 迁移内容 |
 |---|---|
 | 微信 | 默认 `Documents\WeChat Files` 或 `Documents\xwechat_files`；可添加自定义数据目录 |
-| QQ | 默认 `Documents\Tencent Files`；可添加自定义数据目录 |
+| QQ | 优先读取 `%APPDATA%\QQ\auth` 中的实际数据路径；配置不可用时回退扫描固定盘中的 `Tencent Files` / `nt_qq` 数据根目录 |
 | 飞书 | 默认 `Documents\Feishu`、`Documents\Lark`；可添加自定义下载目录 |
 | Git | Git 安装目录、PATH 中相关条目和安全的 Git 环境变量 |
 | Python | Python 安装目录、PATH 中相关条目和安全的 Python 环境变量 |

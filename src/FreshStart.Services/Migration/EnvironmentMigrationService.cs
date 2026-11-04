@@ -125,7 +125,9 @@ public sealed class EnvironmentMigrationService
 
     public async Task<IReadOnlyList<MigrationCandidate>> ScanAsync(CancellationToken ct = default)
     {
-        var installed = _programs.List();
+        var installed = await Task.Run(_programs.List, ct).ConfigureAwait(false);
+        var wechatConfiguredRoots = FindWeChatConfiguredRoots();
+        var qqConfiguredRoots = FindQQConfiguredRoots();
         var candidates = new List<MigrationCandidate>
         {
             CreateSocialCandidate(
@@ -136,16 +138,24 @@ public sealed class EnvironmentMigrationService
                     "%USERPROFILE%\\Documents\\xwechat_files",
                     "%APPDATA%\\Tencent\\xwechat\\config"
                 },
-                new[] { "微信", "WeChat" }),
+                new[] { "微信", "WeChat" },
+                wechatConfiguredRoots),
             CreateSocialCandidate(
                 "qq", "QQ", "Tencent.QQ.NT", installed,
                 new[] { "%USERPROFILE%\\Documents\\Tencent Files" },
-                new[] { "QQNT", "QQ" }),
+                new[] { "QQNT", "QQ" },
+                qqConfiguredRoots),
             CreateSocialCandidate(
                 "feishu", "飞书", "ByteDance.Feishu", installed,
                 new[] { "%USERPROFILE%\\Documents\\Feishu", "%USERPROFILE%\\Documents\\Lark" },
                 new[] { "飞书", "Feishu", "Lark" })
         };
+        var discoveredRoots = wechatConfiguredRoots.Count > 0 && qqConfiguredRoots.Count > 0
+            ? EmptyDiscoveredRoots()
+            : await Task.Run(() => FindKnownDataRoots(ct), ct).ConfigureAwait(false);
+        AddDiscoveredRoots(candidates[0], discoveredRoots.GetValueOrDefault("wechat"));
+        AddDiscoveredRoots(candidates[1], discoveredRoots.GetValueOrDefault("qq"));
+        AddDiscoveredRoots(candidates[2], discoveredRoots.GetValueOrDefault("feishu"));
 
         candidates.Add(await CreateDevelopmentCandidateAsync(
             "git", "Git", "Git.Git", "git.exe", new[] { "--version" }, ct));
@@ -178,6 +188,30 @@ public sealed class EnvironmentMigrationService
         }
         candidates.Add(node);
         return candidates;
+    }
+
+    private static IReadOnlyDictionary<string, List<string>> EmptyDiscoveredRoots()
+        => new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["wechat"] = new(),
+            ["qq"] = new(),
+            ["feishu"] = new()
+        };
+
+    private static void AddDiscoveredRoots(
+        MigrationCandidate candidate,
+        IReadOnlyList<string>? discovered)
+    {
+        if (discovered is null || discovered.Count == 0) return;
+        var roots = candidate.DataRoots.ToList();
+        foreach (var path in discovered)
+        {
+            if (!roots.Contains(path, StringComparer.OrdinalIgnoreCase))
+            {
+                roots.Add(path);
+            }
+        }
+        candidate.DataRoots = roots;
     }
 
     public async Task<string> ExportAsync(
@@ -491,7 +525,8 @@ public sealed class EnvironmentMigrationService
         string wingetId,
         IReadOnlyList<InstalledProgram> programs,
         IReadOnlyList<string> dataCandidates,
-        IReadOnlyList<string> nameHints)
+        IReadOnlyList<string> nameHints,
+        IReadOnlyList<string>? configuredRoots = null)
     {
         var installed = programs.FirstOrDefault(program =>
             nameHints.Any(hint => program.DisplayName.Contains(hint, StringComparison.OrdinalIgnoreCase))
@@ -501,14 +536,11 @@ public sealed class EnvironmentMigrationService
             .Where(Directory.Exists)
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
-        if (id == "wechat")
+        foreach (var configured in configuredRoots ?? Array.Empty<string>())
         {
-            foreach (var configured in FindWeChatConfiguredRoots())
+            if (!roots.Contains(configured, StringComparer.OrdinalIgnoreCase))
             {
-                if (!roots.Contains(configured, StringComparer.OrdinalIgnoreCase))
-                {
-                    roots.Add(configured);
-                }
+                roots.Add(configured);
             }
         }
 
@@ -1005,6 +1037,136 @@ public sealed class EnvironmentMigrationService
         }
     }
 
+    private static IReadOnlyDictionary<string, List<string>> FindKnownDataRoots(
+        CancellationToken ct)
+    {
+        var found = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["wechat"] = new(),
+            ["qq"] = new(),
+            ["feishu"] = new()
+        };
+        var visited = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var queue = new Queue<(string Path, int Depth)>();
+        foreach (var drive in DriveInfo.GetDrives())
+        {
+            try
+            {
+                if (drive.DriveType == DriveType.Fixed && drive.IsReady)
+                {
+                    queue.Enqueue((drive.RootDirectory.FullName, 0));
+                }
+            }
+            catch { /* ignore unavailable drives */ }
+        }
+
+        var skipped = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "$Recycle.Bin", "System Volume Information", "Windows", "ProgramData",
+            "node_modules", ".git", "AppData", "nt_qq", "nt_db", "nt_data"
+        };
+        while (queue.Count > 0)
+        {
+            ct.ThrowIfCancellationRequested();
+            var (path, depth) = queue.Dequeue();
+            if (!visited.Add(path) || depth > 5) continue;
+
+            string[] children;
+            try
+            {
+                // Materialize here so access errors during enumeration are handled here,
+                // rather than escaping later from the foreach on the UI thread.
+                children = Directory.GetDirectories(path);
+            }
+            catch
+            {
+                continue;
+            }
+
+            if (IsQQDataRoot(path) || children.Any(IsQQAccountDirectory))
+            {
+                AddRoot(found["qq"], path);
+                continue;
+            }
+
+            foreach (var child in children)
+            {
+                ct.ThrowIfCancellationRequested();
+                string name;
+                try
+                {
+                    var attributes = File.GetAttributes(child);
+                    if ((attributes & FileAttributes.ReparsePoint) != 0) continue;
+                    name = Path.GetFileName(child);
+                }
+                catch
+                {
+                    continue;
+                }
+
+                if (name.Equals("Tencent Files", StringComparison.OrdinalIgnoreCase))
+                {
+                    AddRoot(found["qq"], child);
+                    continue;
+                }
+                if (IsQQDataRoot(child))
+                {
+                    AddRoot(found["qq"], child);
+                    continue;
+                }
+                if (name.Equals("xwechat_files", StringComparison.OrdinalIgnoreCase)
+                    || name.Equals("WeChat Files", StringComparison.OrdinalIgnoreCase))
+                {
+                    var parent = Path.GetDirectoryName(child);
+                    if (!string.IsNullOrWhiteSpace(parent)) AddRoot(found["wechat"], parent);
+                    continue;
+                }
+                if (depth < 5 && !skipped.Contains(name))
+                {
+                    queue.Enqueue((child, depth + 1));
+                }
+            }
+        }
+
+        return found;
+    }
+
+    private static bool IsQQDataRoot(string path)
+    {
+        try
+        {
+            return Directory.Exists(Path.Combine(path, "nt_qq", "global"));
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static bool IsQQAccountDirectory(string path)
+    {
+        try
+        {
+            var name = Path.GetFileName(path.TrimEnd(Path.DirectorySeparatorChar));
+            return name.Length > 0
+                   && name.All(char.IsAsciiDigit)
+                   && Directory.Exists(Path.Combine(path, "nt_qq"));
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static void AddRoot(List<string> roots, string path)
+    {
+        var full = Path.GetFullPath(path);
+        if (!roots.Contains(full, StringComparer.OrdinalIgnoreCase))
+        {
+            roots.Add(full);
+        }
+    }
+
     private static string ResolveAvailableDataTarget(
         string itemId,
         string originalTarget,
@@ -1124,6 +1286,112 @@ public sealed class EnvironmentMigrationService
         }
 
         return roots.ToList();
+    }
+
+    private static IReadOnlyList<string> FindQQConfiguredRoots()
+    {
+        var roots = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        try
+        {
+            var authRoot = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                "QQ", "auth");
+            if (!Directory.Exists(authRoot)) return Array.Empty<string>();
+
+            foreach (var file in Directory.GetFiles(authRoot))
+            {
+                try
+                {
+                    // QQ may hold this file open while running. Only path-bearing
+                    // JSON values are inspected; account/profile fields are ignored.
+                    using var stream = new FileStream(
+                        file, FileMode.Open, FileAccess.Read,
+                        FileShare.ReadWrite | FileShare.Delete);
+                    using var document = JsonDocument.Parse(stream);
+                    CollectQQConfiguredRoots(document.RootElement, roots, 0);
+                }
+                catch
+                {
+                    // Older or encrypted QQ builds are handled by the disk fallback.
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Warn($"读取 QQ 数据目录配置失败: {ex.Message}");
+        }
+
+        return roots.ToList();
+    }
+
+    private static void CollectQQConfiguredRoots(
+        JsonElement element,
+        HashSet<string> roots,
+        int depth)
+    {
+        if (depth > 12) return;
+        if (element.ValueKind == JsonValueKind.Object)
+        {
+            foreach (var property in element.EnumerateObject())
+            {
+                CollectQQConfiguredRoots(property.Value, roots, depth + 1);
+            }
+            return;
+        }
+        if (element.ValueKind == JsonValueKind.Array)
+        {
+            foreach (var item in element.EnumerateArray())
+            {
+                CollectQQConfiguredRoots(item, roots, depth + 1);
+            }
+            return;
+        }
+        if (element.ValueKind != JsonValueKind.String) return;
+
+        var value = element.GetString();
+        if (string.IsNullOrWhiteSpace(value)
+            || !value.StartsWith("appimg://", StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        try
+        {
+            var path = Uri.UnescapeDataString(value["appimg://".Length..])
+                .Replace('/', Path.DirectorySeparatorChar);
+            var current = Path.IsPathRooted(path) ? path : Path.GetDirectoryName(path);
+            for (var level = 0; level < 12 && !string.IsNullOrWhiteSpace(current); level++)
+            {
+                var name = Path.GetFileName(current.TrimEnd(Path.DirectorySeparatorChar));
+                if (name.Equals("Tencent Files", StringComparison.OrdinalIgnoreCase)
+                    || IsQQDataRoot(current))
+                {
+                    if (!IsProtectedTarget(current) && Directory.Exists(current))
+                    {
+                        roots.Add(Path.GetFullPath(current));
+                    }
+                    return;
+                }
+                if (name.Length > 0
+                    && name.All(char.IsAsciiDigit)
+                    && Directory.Exists(Path.Combine(current, "nt_qq")))
+                {
+                    var dataRoot = Path.GetDirectoryName(current);
+                    if (!string.IsNullOrWhiteSpace(dataRoot)
+                        && !IsProtectedTarget(dataRoot)
+                        && Directory.Exists(dataRoot))
+                    {
+                        roots.Add(Path.GetFullPath(dataRoot));
+                    }
+                    return;
+                }
+                current = Path.GetDirectoryName(current);
+            }
+        }
+        catch
+        {
+            // Ignore malformed or stale path values.
+        }
     }
 
     private static string SafeName(string value)
