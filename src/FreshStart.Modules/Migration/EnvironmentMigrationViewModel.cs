@@ -258,12 +258,38 @@ public sealed partial class EnvironmentMigrationViewModel : ObservableObject
             return;
         }
 
+        var relocationRoots = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         var details = new List<string>();
         details.AddRange(preview.Items.Take(6));
         if (preview.Targets.Count > 0)
         {
             details.Add("恢复目标：");
-            details.AddRange(preview.Targets.Take(8));
+            var targetLines = new List<string>();
+            foreach (var target in preview.Targets)
+            {
+                if (!target.RequiresRelocation)
+                {
+                    targetLines.Add(target.OriginalPath);
+                    continue;
+                }
+
+                var folderDialog = new OpenFolderDialog
+                {
+                    Title = $"{target.ItemName} 的数据盘不可用，请选择替代部署位置",
+                    Multiselect = false,
+                    InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
+                };
+                if (folderDialog.ShowDialog() != true)
+                {
+                    StatusText = "已取消选择迁移数据位置";
+                    return;
+                }
+                relocationRoots[target.OriginalPath] = folderDialog.FolderName;
+                var resolved = EnvironmentMigrationService.BuildRelocationTarget(
+                    target.ItemId, target.OriginalPath, folderDialog.FolderName);
+                targetLines.Add($"{target.OriginalPath} → {resolved}");
+            }
+            details.AddRange(targetLines.Take(12));
         }
         details.Add("聊天软件需要关闭后再恢复数据");
         details.Add("已有的同名数据目录会先移动到同级的 freshstart-backup 目录");
@@ -292,7 +318,8 @@ public sealed partial class EnvironmentMigrationViewModel : ObservableObject
                 ProgressText = value.Message;
                 ProgressPercent = value.Percent;
             });
-            var result = await _service.RestoreAsync(dialog.FileName, progress, _cts.Token);
+            var result = await _service.RestoreAsync(
+                dialog.FileName, relocationRoots, progress, _cts.Token);
             StatusText = $"恢复完成：软件 {result.InstalledApplications} 个，" +
                          $"数据目录 {result.RestoredDataSets} 个，" +
                          $"开发环境 {result.RestoredEnvironments} 个";

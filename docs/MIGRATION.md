@@ -48,8 +48,8 @@ data/<item>/<n>/*
 
 - 恢复前校验全部文件。
 - 已存在的聊天数据目录会移动到同级 `.freshstart-backup-*` 目录。
-- 原数据盘不存在时，数据会映射到 `%LocalAppData%\FreshStart\MigrationData`，
-  微信配置中的自定义数据路径会同步改写。
+- 原数据盘不存在时，恢复前会要求用户选择替代部署目录；默认建议使用
+  `%LocalAppData%\FreshStart\MigrationData`，微信配置中的自定义数据路径会同步改写。
 - 已存在的开发工具目录不会覆盖，而是恢复到 FreshStart 独立目录并改写用户 PATH。
 - 安装器失败不会删除已经恢复的数据。
 - 恢复完成后需要用户自行登录聊天软件。

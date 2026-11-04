@@ -96,7 +96,16 @@ public sealed class MigrationRestoreResult
 public sealed class MigrationPackagePreview
 {
     public IReadOnlyList<string> Items { get; init; } = Array.Empty<string>();
-    public IReadOnlyList<string> Targets { get; init; } = Array.Empty<string>();
+    public IReadOnlyList<MigrationTargetPreview> Targets { get; init; } = Array.Empty<MigrationTargetPreview>();
+}
+
+public sealed class MigrationTargetPreview
+{
+    public string ItemId { get; init; } = string.Empty;
+    public string ItemName { get; init; } = string.Empty;
+    public string OriginalPath { get; init; } = string.Empty;
+    public string SuggestedPath { get; init; } = string.Empty;
+    public bool RequiresRelocation { get; init; }
 }
 
 public sealed class EnvironmentMigrationService
@@ -310,6 +319,7 @@ public sealed class EnvironmentMigrationService
 
     public async Task<MigrationRestoreResult> RestoreAsync(
         string packagePath,
+        IReadOnlyDictionary<string, string>? relocationRoots = null,
         IProgress<MigrationProgress>? progress = null,
         CancellationToken ct = default)
     {
@@ -392,7 +402,9 @@ public sealed class EnvironmentMigrationService
                         result.Warnings.Add($"{item.Name} 的数据目标位于受保护位置，已跳过：{originalTarget}");
                         continue;
                     }
-                    var target = ResolveAvailableDataTarget(item.Id, originalTarget);
+                    string? relocationRoot = null;
+                    relocationRoots?.TryGetValue(originalTarget, out relocationRoot);
+                    var target = ResolveAvailableDataTarget(item.Id, originalTarget, relocationRoot);
                     if (!string.Equals(target, originalTarget, StringComparison.OrdinalIgnoreCase))
                     {
                         result.Warnings.Add(
@@ -453,11 +465,16 @@ public sealed class EnvironmentMigrationService
                 {
                     var original = Environment.ExpandEnvironmentVariables(data.TargetPath);
                     var resolved = ResolveAvailableDataTarget(item.Id, original);
-                    return string.Equals(original, resolved, StringComparison.OrdinalIgnoreCase)
-                        ? original
-                        : $"{original}  →  {resolved}";
+                    return new MigrationTargetPreview
+                    {
+                        ItemId = item.Id,
+                        ItemName = item.Name,
+                        OriginalPath = original,
+                        SuggestedPath = resolved,
+                        RequiresRelocation = !string.Equals(
+                            original, resolved, StringComparison.OrdinalIgnoreCase)
+                    };
                 }))
-                .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToList()
         });
     }
@@ -953,21 +970,40 @@ public sealed class EnvironmentMigrationService
         return full.StartsWith(windows, StringComparison.OrdinalIgnoreCase);
     }
 
-    private static string ResolveAvailableDataTarget(string itemId, string originalTarget)
+    private static string ResolveAvailableDataTarget(
+        string itemId,
+        string originalTarget,
+        string? relocationRoot = null)
     {
+        if (!string.IsNullOrWhiteSpace(relocationRoot))
+        {
+            return BuildRelocationTarget(itemId, originalTarget, relocationRoot);
+        }
+
         var driveRoot = Path.GetPathRoot(originalTarget);
         if (!string.IsNullOrWhiteSpace(driveRoot) && Directory.Exists(driveRoot))
         {
             return Path.GetFullPath(originalTarget);
         }
 
-        var trimmedRoot = driveRoot?.TrimEnd(Path.DirectorySeparatorChar) ?? string.Empty;
-        var relative = originalTarget.StartsWith(trimmedRoot, StringComparison.OrdinalIgnoreCase)
-            ? originalTarget[trimmedRoot.Length..].TrimStart(Path.DirectorySeparatorChar)
-            : Path.GetFileName(originalTarget);
-        return Path.Combine(
+        var defaultRoot = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "FreshStart", "MigrationData", SafeName(itemId), relative);
+            "FreshStart", "MigrationData");
+        return BuildRelocationTarget(itemId, originalTarget, defaultRoot);
+    }
+
+    public static string BuildRelocationTarget(
+        string itemId,
+        string originalTarget,
+        string selectedRoot)
+    {
+        var driveRoot = Path.GetPathRoot(originalTarget)?.TrimEnd(Path.DirectorySeparatorChar)
+                        ?? string.Empty;
+        var relative = originalTarget.StartsWith(driveRoot, StringComparison.OrdinalIgnoreCase)
+            ? originalTarget[driveRoot.Length..].TrimStart(Path.DirectorySeparatorChar)
+            : Path.GetFileName(originalTarget.TrimEnd(Path.DirectorySeparatorChar));
+        if (string.IsNullOrWhiteSpace(relative)) relative = "data";
+        return Path.Combine(selectedRoot, SafeName(itemId), relative);
     }
 
     private static void RewriteWeChatDataPaths(
