@@ -120,7 +120,7 @@ public sealed class EnvironmentMigrationService
         var candidates = new List<MigrationCandidate>
         {
             CreateSocialCandidate(
-                "wechat", "微信", "Tencent.WeChat", installed,
+                "wechat", "微信", "Tencent.WeChat.Universal", installed,
                 new[]
                 {
                     "%USERPROFILE%\\Documents\\WeChat Files",
@@ -383,13 +383,20 @@ public sealed class EnvironmentMigrationService
                     result.RestoredEnvironments++;
                 }
 
+                var restoredDataTargets = new List<(string Original, string Actual)>();
                 foreach (var data in item.DataRoots)
                 {
-                    var target = Environment.ExpandEnvironmentVariables(data.TargetPath);
-                    if (IsProtectedTarget(target))
+                    var originalTarget = Environment.ExpandEnvironmentVariables(data.TargetPath);
+                    if (IsProtectedTarget(originalTarget))
                     {
-                        result.Warnings.Add($"{item.Name} 的数据目标位于受保护位置，已跳过：{target}");
+                        result.Warnings.Add($"{item.Name} 的数据目标位于受保护位置，已跳过：{originalTarget}");
                         continue;
+                    }
+                    var target = ResolveAvailableDataTarget(item.Id, originalTarget);
+                    if (!string.Equals(target, originalTarget, StringComparison.OrdinalIgnoreCase))
+                    {
+                        result.Warnings.Add(
+                            $"{item.Name} 的目标盘不存在，已改写到：{target}");
                     }
                     var source = ResolveInside(stage, data.ArchivePath);
                     if (!Directory.Exists(source)) continue;
@@ -401,7 +408,12 @@ public sealed class EnvironmentMigrationService
                         result.Warnings.Add($"{item.Name} 原数据已备份到 {backup}");
                     }
                     await CopyFilesAsync(source, target, null, null, ct).ConfigureAwait(false);
+                    restoredDataTargets.Add((originalTarget, target));
                     result.RestoredDataSets++;
+                }
+                if (item.Id == "wechat" && restoredDataTargets.Count > 0)
+                {
+                    RewriteWeChatDataPaths(restoredDataTargets, result.Warnings);
                 }
                 processed++;
             }
@@ -438,7 +450,13 @@ public sealed class EnvironmentMigrationService
                 $"{item.Name}：安装器 {item.Installers.Count} 个，数据目录 {item.DataRoots.Count} 个").ToList(),
             Targets = manifest.Items
                 .SelectMany(item => item.DataRoots.Select(data =>
-                    Environment.ExpandEnvironmentVariables(data.TargetPath)))
+                {
+                    var original = Environment.ExpandEnvironmentVariables(data.TargetPath);
+                    var resolved = ResolveAvailableDataTarget(item.Id, original);
+                    return string.Equals(original, resolved, StringComparison.OrdinalIgnoreCase)
+                        ? original
+                        : $"{original}  →  {resolved}";
+                }))
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToList()
         });
@@ -880,7 +898,7 @@ public sealed class EnvironmentMigrationService
         {
             "git.git" => "/VERYSILENT /NORESTART /NOCANCEL /SP-",
             "python.python.3.14" => "/quiet InstallAllUsers=1 PrependPath=1 Include_test=0",
-            "tencent.wechat" => "/S",
+            "tencent.wechat" or "tencent.wechat.universal" => "/S",
             "tencent.qq.nt" => "/S",
             "bytedance.feishu" => "/S",
             _ => "/S"
@@ -933,6 +951,62 @@ public sealed class EnvironmentMigrationService
         var windows = Environment.GetFolderPath(Environment.SpecialFolder.Windows)
             .TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
         return full.StartsWith(windows, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string ResolveAvailableDataTarget(string itemId, string originalTarget)
+    {
+        var driveRoot = Path.GetPathRoot(originalTarget);
+        if (!string.IsNullOrWhiteSpace(driveRoot) && Directory.Exists(driveRoot))
+        {
+            return Path.GetFullPath(originalTarget);
+        }
+
+        var trimmedRoot = driveRoot?.TrimEnd(Path.DirectorySeparatorChar) ?? string.Empty;
+        var relative = originalTarget.StartsWith(trimmedRoot, StringComparison.OrdinalIgnoreCase)
+            ? originalTarget[trimmedRoot.Length..].TrimStart(Path.DirectorySeparatorChar)
+            : Path.GetFileName(originalTarget);
+        return Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "FreshStart", "MigrationData", SafeName(itemId), relative);
+    }
+
+    private static void RewriteWeChatDataPaths(
+        IReadOnlyList<(string Original, string Actual)> restoredTargets,
+        List<string> warnings)
+    {
+        try
+        {
+            var configMapping = restoredTargets.FirstOrDefault(pair =>
+                pair.Original.TrimEnd('\\').EndsWith(
+                    @"\Tencent\xwechat\config", StringComparison.OrdinalIgnoreCase));
+            if (configMapping.Original is null) return;
+
+            var dataMappings = restoredTargets
+                .Where(pair => !ReferenceEquals(pair.Original, configMapping.Original)
+                               && !string.Equals(pair.Original, configMapping.Original,
+                                   StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            if (dataMappings.Count == 0) return;
+
+            foreach (var file in Directory.GetFiles(configMapping.Actual, "*.ini"))
+            {
+                var text = File.ReadAllText(file).Trim().Trim('"');
+                var mapping = dataMappings.FirstOrDefault(pair =>
+                    string.Equals(text, pair.Original.TrimEnd('\\'), StringComparison.OrdinalIgnoreCase)
+                    || text.StartsWith(pair.Original.TrimEnd('\\') + "\\",
+                        StringComparison.OrdinalIgnoreCase));
+                if (mapping.Original is null) continue;
+                File.WriteAllText(
+                    file,
+                    text.Replace(mapping.Original.TrimEnd('\\'), mapping.Actual.TrimEnd('\\'),
+                        StringComparison.OrdinalIgnoreCase),
+                    new UTF8Encoding(false));
+            }
+        }
+        catch (Exception ex)
+        {
+            warnings.Add($"微信数据路径改写失败：{ex.Message}");
+        }
     }
 
     private static IReadOnlyList<string> FindWeChatConfiguredRoots()
