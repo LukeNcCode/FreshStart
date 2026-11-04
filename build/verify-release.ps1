@@ -1,5 +1,6 @@
 param(
     [string]$Version = "",
+    [string]$OutputDir = "",
     [switch]$SkipOfflineInstaller
 )
 
@@ -10,14 +11,17 @@ if ([string]::IsNullOrWhiteSpace($Version)) {
     [xml]$props = Get-Content -Raw -Encoding UTF8 (Join-Path $root "Directory.Build.props")
     $Version = ($props.Project.PropertyGroup | Where-Object { $_.Version } | Select-Object -First 1).Version
 }
+if ([string]::IsNullOrWhiteSpace($OutputDir)) {
+    $OutputDir = Join-Path $root "publish\FreshStart"
+}
 [xml]$buildProps = Get-Content -Raw -Encoding UTF8 (Join-Path $root "Directory.Build.props")
 $expectedFileVersion = ($buildProps.Project.PropertyGroup | Where-Object { $_.FileVersion } | Select-Object -First 1).FileVersion
 if ([string]::IsNullOrWhiteSpace($expectedFileVersion)) {
     $expectedFileVersion = ($Version -split '-')[0] + ".0"
 }
 
-$hostExe = Join-Path $root "publish\FreshStart\FreshStart.Host.exe"
-$launcherExe = Join-Path $root "publish\FreshStart\FreshStart.exe"
+$hostExe = Join-Path $OutputDir "FreshStart.Host.exe"
+$launcherExe = Join-Path $OutputDir "FreshStart.exe"
 if (-not (Test-Path -LiteralPath $launcherExe) -or -not (Test-Path -LiteralPath $hostExe)) {
     throw "The unpacked publish directory is incomplete."
 }
