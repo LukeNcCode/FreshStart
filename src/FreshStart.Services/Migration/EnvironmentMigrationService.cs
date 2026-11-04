@@ -464,15 +464,21 @@ public sealed class EnvironmentMigrationService
                 .SelectMany(item => item.DataRoots.Select(data =>
                 {
                     var original = Environment.ExpandEnvironmentVariables(data.TargetPath);
-                    var resolved = ResolveAvailableDataTarget(item.Id, original);
+                    var requiresRelocation = TargetRequiresRelocation(original);
+                    var resolved = requiresRelocation
+                        ? BuildRelocationTarget(
+                            item.Id, original,
+                            Path.Combine(
+                                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                                "FreshStart", "MigrationData"))
+                        : Path.GetFullPath(original);
                     return new MigrationTargetPreview
                     {
                         ItemId = item.Id,
                         ItemName = item.Name,
                         OriginalPath = original,
                         SuggestedPath = resolved,
-                        RequiresRelocation = !string.Equals(
-                            original, resolved, StringComparison.OrdinalIgnoreCase)
+                        RequiresRelocation = requiresRelocation
                     };
                 }))
                 .ToList()
@@ -970,6 +976,35 @@ public sealed class EnvironmentMigrationService
         return full.StartsWith(windows, StringComparison.OrdinalIgnoreCase);
     }
 
+    private static bool TargetRequiresRelocation(string path)
+    {
+        if (IsProtectedTarget(path)) return true;
+        try
+        {
+            var full = Path.GetFullPath(path);
+            var drive = Path.GetPathRoot(full);
+            if (string.IsNullOrWhiteSpace(drive) || !Directory.Exists(drive)) return true;
+
+            var probeRoot = Directory.Exists(full) ? full : Path.GetDirectoryName(full);
+            while (!string.IsNullOrWhiteSpace(probeRoot) && !Directory.Exists(probeRoot))
+            {
+                probeRoot = Path.GetDirectoryName(probeRoot);
+            }
+            if (string.IsNullOrWhiteSpace(probeRoot)) return true;
+
+            var probe = Path.Combine(
+                probeRoot, $".freshstart-write-{Guid.NewGuid():N}.tmp");
+            using var stream = new FileStream(
+                probe, FileMode.CreateNew, FileAccess.Write, FileShare.None,
+                bufferSize: 1, FileOptions.DeleteOnClose);
+            return false;
+        }
+        catch
+        {
+            return true;
+        }
+    }
+
     private static string ResolveAvailableDataTarget(
         string itemId,
         string originalTarget,
@@ -980,16 +1015,13 @@ public sealed class EnvironmentMigrationService
             return BuildRelocationTarget(itemId, originalTarget, relocationRoot);
         }
 
-        var driveRoot = Path.GetPathRoot(originalTarget);
-        if (!string.IsNullOrWhiteSpace(driveRoot) && Directory.Exists(driveRoot))
+        if (!TargetRequiresRelocation(originalTarget))
         {
             return Path.GetFullPath(originalTarget);
         }
 
-        var defaultRoot = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "FreshStart", "MigrationData");
-        return BuildRelocationTarget(itemId, originalTarget, defaultRoot);
+        throw new InvalidOperationException(
+            $"目标目录不可写，必须选择替代位置：{originalTarget}");
     }
 
     public static string BuildRelocationTarget(
