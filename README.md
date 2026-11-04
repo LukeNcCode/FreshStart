@@ -4,7 +4,7 @@
 
 FreshStart 是一个本地优先的 Windows 11 桌面工具，集中处理系统信息、常用设置、隐私、软件、服务、备份与自动化工作流。除明确标注为不可回滚的项目外，写操作遵循“读取当前值 → 备份 → 写入 → 校验 → 失败回滚”的流程。
 
-**当前版本：0.1.0** · Windows 11 · .NET 8 · WPF
+**当前版本：0.2.0-alpha.1** · Windows 11 · .NET 8 · WPF
 
 ![FreshStart 首页浅色主题](docs/images/home-light.png)
 
@@ -17,6 +17,7 @@ FreshStart 是一个本地优先的 Windows 11 桌面工具，集中处理系统
 | 优化与隐私 | Windows 更新、隐私策略、界面调优、Defender、防火墙、可选功能、游戏优化 |
 | 软件管理 | winget 安装与升级、官方直链兜底、软件卸载、原生应用管理、残留清理 |
 | 系统维护 | 启动项、服务与计划任务、驱动备份、系统清理、全局还原 |
+| 环境克隆 | 离线打包社交软件数据、安装器和 Git/Python/Node 开发环境 |
 | 执行中心 | 可视化工作流、依赖排序、风险预检、批量执行、取消与 HTML/JSON 报告 |
 | 命令执行 | `--execute` 无界面执行方案，支持退出码与兼容旧方案格式 |
 
@@ -34,6 +35,13 @@ FreshStart 使用 **Control Deck** 视觉语言：深墨色导航、纸白工作
 |---|---|
 | ![执行中心](docs/images/execution-dark.png) | ![设置](docs/images/settings-light.png) |
 
+## 环境克隆（实验）
+
+![环境克隆](docs/images/environment-migration.png)
+
+把微信、QQ、飞书的数据目录与 Git、Python、Node.js 开发环境封装为本地 `.fclone`
+包，在新系统中离线恢复。登录状态、凭据、驱动和机器绑定许可证不会迁移。
+
 ## 安全模型
 
 - 注册表写入必须通过路径白名单。
@@ -44,6 +52,7 @@ FreshStart 使用 **Control Deck** 视觉语言：深墨色导航、纸白工作
 - 执行中心只调用软件内置的系统操作，不执行任意脚本或外部命令。
 
 安全边界和已知限制见 [PROJECT-NOTES.md](docs/PROJECT-NOTES.md) 与 [SECURITY.md](SECURITY.md)。
+环境迁移的支持范围和包格式见 [MIGRATION.md](docs/MIGRATION.md)。
 
 ## 环境要求
 

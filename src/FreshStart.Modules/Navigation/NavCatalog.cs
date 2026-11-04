@@ -49,6 +49,7 @@ public static class NavCatalog
         new("driver", "驱动与备份", "工具", "chip", true, 4, "驱动安装、删除与导出备份"),
         new("restore", "全局还原", "工具", "sync", true, 4, "恢复到首次基准"),
         new("history", "操作历史", "工具", "activity", true, 4, "查看并回滚任意历史操作"),
+        new("migration", "环境克隆", "工具", "sync", true, 10, "离线迁移软件、聊天数据与开发环境"),
 
         new("settings", "设置", "其他", "settings", true, 1, "外观、动效、备份与关于")
     };

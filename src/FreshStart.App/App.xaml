@@ -29,6 +29,7 @@
              xmlns:rst="clr-namespace:FreshStart.Modules.Restore;assembly=FreshStart.Modules"
              xmlns:hst="clr-namespace:FreshStart.Modules.History;assembly=FreshStart.Modules"
              xmlns:score="clr-namespace:FreshStart.Modules.Score;assembly=FreshStart.Modules"
+             xmlns:mig="clr-namespace:FreshStart.Modules.Migration;assembly=FreshStart.Modules"
              ShutdownMode="OnMainWindowClose">
     <Application.Resources>
         <ResourceDictionary>
@@ -126,6 +127,9 @@
             </DataTemplate>
             <DataTemplate DataType="{x:Type hst:HistoryViewModel}">
                 <hst:HistoryPage />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type mig:EnvironmentMigrationViewModel}">
+                <mig:EnvironmentMigrationPage />
             </DataTemplate>
             <DataTemplate DataType="{x:Type score:ScoreViewModel}">
                 <score:ScorePage />

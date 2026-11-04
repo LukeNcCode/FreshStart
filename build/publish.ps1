@@ -107,7 +107,9 @@ try {
     if (-not $SkipInstaller) {
         [xml]$buildProps = Get-Content -Raw -Encoding UTF8 (Join-Path $root "Directory.Build.props")
         $version = ($buildProps.Project.PropertyGroup | Where-Object { $_.Version } | Select-Object -First 1).Version
+        $fileVersion = ($buildProps.Project.PropertyGroup | Where-Object { $_.FileVersion } | Select-Object -First 1).FileVersion
         if ([string]::IsNullOrWhiteSpace($version)) { $version = "0.0.0" }
+        if ([string]::IsNullOrWhiteSpace($fileVersion)) { $fileVersion = "$version.0" }
         $wingetManifest = Get-ChildItem "assets\winget" `
             -Filter "Microsoft.DesktopAppInstaller*.msixbundle" -File -ErrorAction SilentlyContinue |
             Select-Object -First 1
@@ -136,6 +138,7 @@ try {
                     function New-FreshStartSetup([bool]$includeWinget, [string]$outputBaseName) {
                         & $iscc `
                             "/DMyAppVersion=$version" `
+                            "/DMyFileVersion=$fileVersion" `
                             "/DSourceDir=$OutputDir" `
                             "/DWingetDir=$wingetDir" `
                             "/DOutputDir=$publishDir" `

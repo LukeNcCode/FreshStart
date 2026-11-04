@@ -1,0 +1,50 @@
+# Environment migration
+
+环境克隆是实验功能，用于把选定软件与开发环境封装为本地 `.fclone` 包，并在另一台
+Windows 11 设备上离线恢复。
+
+## Supported items
+
+| 项目 | 迁移内容 |
+|---|---|
+| 微信 | 默认 `Documents\WeChat Files` 或 `Documents\xwechat_files`；可添加自定义数据目录 |
+| QQ | 默认 `Documents\Tencent Files`；可添加自定义数据目录 |
+| 飞书 | 默认 `Documents\Feishu`、`Documents\Lark`；可添加自定义下载目录 |
+| Git | Git 安装目录、PATH 中相关条目和安全的 Git 环境变量 |
+| Python | Python 安装目录、PATH 中相关条目和安全的 Python 环境变量 |
+| Node.js | Node.js 安装目录、npm 全局目录、PATH 中相关条目和安全的环境变量 |
+
+社交软件安装器优先从源机器下载并写入克隆包；也可以手动指定本地安装器目录。目标机器
+恢复时不访问软件官网。
+
+## Explicit exclusions
+
+- 聊天软件登录状态、Cookie 和认证令牌
+- 浏览器密码、Token 和凭据
+- 驱动、内核组件与机器绑定许可证
+- 数据库实例、Docker 虚拟磁盘和其他大型机器状态
+- 未提供离线安装介质的商店应用
+
+社交软件记录能否直接打开还取决于软件版本、账号加密和厂商兼容策略。登录状态不会迁移。
+克隆包本身不加密，可能包含私人聊天记录与下载文件，请存放在受保护的磁盘或加密容器中。
+
+## Package layout
+
+```text
+manifest.json
+checksums.json
+software/<item>/installers/*
+development/<item>/root/*
+data/<item>/<n>/*
+```
+
+`manifest.json` 记录版本、安装参数、原始数据路径、PATH 条目和安全环境变量。
+`checksums.json` 为恢复前完整性校验提供 SHA256。
+
+## Restore safety
+
+- 恢复前校验全部文件。
+- 已存在的聊天数据目录会移动到同级 `.freshstart-backup-*` 目录。
+- 已存在的开发工具目录不会覆盖，而是恢复到 FreshStart 独立目录并改写用户 PATH。
+- 安装器失败不会删除已经恢复的数据。
+- 恢复完成后需要用户自行登录聊天软件。

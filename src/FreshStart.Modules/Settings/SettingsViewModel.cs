@@ -184,8 +184,13 @@ public sealed partial class SettingsViewModel : ObservableObject
             RefreshAccentState();
         };
 
-        var version = Assembly.GetEntryAssembly()?.GetName().Version ?? new Version(0, 1, 0, 0);
-        VersionText = $"FreshStart {version.Major}.{version.Minor}.{version.Build}";
+        var entryAssembly = Assembly.GetEntryAssembly();
+        var informational = entryAssembly?
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
+            .InformationalVersion
+            .Split('+', 2)[0];
+        var version = entryAssembly?.GetName().Version ?? new Version(0, 1, 0, 0);
+        VersionText = $"FreshStart {informational ?? $"{version.Major}.{version.Minor}.{version.Build}"}";
         LastTestText = "尚未运行。自检只会在 HKCU\\Software\\FreshStart\\SelfTest 下写入一个字符串值，不会修改系统设置。";
         UpdateUndoState();
         _runner.HistoryChanged += (_, _) =>

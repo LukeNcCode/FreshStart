@@ -29,8 +29,15 @@ public partial class Sidebar
 
     private static string GetVersionText()
     {
-        var version = Assembly.GetEntryAssembly()?.GetName().Version;
-        var text = version is null ? "dev" : $"{version.Major}.{version.Minor}.{version.Build}";
+        var assembly = Assembly.GetEntryAssembly();
+        var informational = assembly?
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
+            .InformationalVersion
+            .Split('+', 2)[0];
+        var version = assembly?.GetName().Version;
+        var text = !string.IsNullOrWhiteSpace(informational)
+            ? informational
+            : version is null ? "dev" : $"{version.Major}.{version.Minor}.{version.Build}";
         return $"v{text} · 本地开荒工具";
     }
 

@@ -10,6 +10,11 @@ if ([string]::IsNullOrWhiteSpace($Version)) {
     [xml]$props = Get-Content -Raw -Encoding UTF8 (Join-Path $root "Directory.Build.props")
     $Version = ($props.Project.PropertyGroup | Where-Object { $_.Version } | Select-Object -First 1).Version
 }
+[xml]$buildProps = Get-Content -Raw -Encoding UTF8 (Join-Path $root "Directory.Build.props")
+$expectedFileVersion = ($buildProps.Project.PropertyGroup | Where-Object { $_.FileVersion } | Select-Object -First 1).FileVersion
+if ([string]::IsNullOrWhiteSpace($expectedFileVersion)) {
+    $expectedFileVersion = ($Version -split '-')[0] + ".0"
+}
 
 $hostExe = Join-Path $root "publish\FreshStart\FreshStart.Host.exe"
 $launcherExe = Join-Path $root "publish\FreshStart\FreshStart.exe"
@@ -18,7 +23,7 @@ if (-not (Test-Path -LiteralPath $launcherExe) -or -not (Test-Path -LiteralPath 
 }
 foreach ($path in @($launcherExe, $hostExe)) {
     $fileVersion = (Get-Item -LiteralPath $path).VersionInfo.FileVersion
-    if (-not $fileVersion.StartsWith("$Version.", [StringComparison]::OrdinalIgnoreCase)) {
+    if (-not [string]::Equals($fileVersion, $expectedFileVersion, [StringComparison]::OrdinalIgnoreCase)) {
         throw "Version mismatch: $path (file version $fileVersion)"
     }
 }

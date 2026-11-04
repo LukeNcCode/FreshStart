@@ -15,6 +15,7 @@ using FreshStart.Modules.Features;
 using FreshStart.Modules.Firewall;
 using FreshStart.Modules.GameOptimize;
 using FreshStart.Modules.Lan;
+using FreshStart.Modules.Migration;
 using FreshStart.Modules.History;
 using FreshStart.Modules.Network;
 using FreshStart.Modules.Performance;
@@ -43,6 +44,7 @@ using FreshStart.Services.Features;
 using FreshStart.Services.Firewall;
 using FreshStart.Services.History;
 using FreshStart.Services.Lan;
+using FreshStart.Services.Migration;
 using FreshStart.Services.Network;
 using FreshStart.Services.Power;
 using FreshStart.Services.Registry;
@@ -132,6 +134,7 @@ public sealed class CompositionRoot
         Unattended = unattended;
         var residue = new ResidueService(uninstall, Registry, writeLock);
         var score = new ScoreService(serviceControl, scheduledTasks, tuning, uninstall);
+        var environmentMigration = new EnvironmentMigrationService(winget);
 
         MainViewModel = new MainViewModel(settings, Theme);
 
@@ -169,6 +172,7 @@ public sealed class CompositionRoot
             ["cleanup"] = () => new CleanupViewModel(cleanup, Dialogs, Toast),
             ["restore"] = () => new RestoreViewModel(restore, Runner, Toast, Dialogs),
             ["history"] = () => new HistoryViewModel(historyRestore, Dialogs, Toast),
+            ["migration"] = () => new EnvironmentMigrationViewModel(environmentMigration, Toast, Dialogs),
             ["score"] = () => new ScoreViewModel(score, Toast),
             ["settings"] = () => new SettingsViewModel(
                 settings, Theme, Motion, Toast, Dialogs, Runner, Registry,

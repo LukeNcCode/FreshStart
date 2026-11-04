@@ -1,6 +1,9 @@
 #ifndef MyAppVersion
   #define MyAppVersion "0.1.0"
 #endif
+#ifndef MyFileVersion
+  #define MyFileVersion "0.1.0.0"
+#endif
 #ifndef SourceDir
   #define SourceDir "..\publish\FreshStart"
 #endif
@@ -30,7 +33,7 @@ AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppVerName={#MyAppName} {#MyAppVersion}
 AppPublisher={#MyAppPublisher}
-VersionInfoVersion={#MyAppVersion}.0
+VersionInfoVersion={#MyFileVersion}
 DefaultDirName={autopf}\FreshStart
 DefaultGroupName=FreshStart
 DisableProgramGroupPage=yes
