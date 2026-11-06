@@ -159,7 +159,7 @@
                                         <Button Content="{Binding UpdateText}" Style="{StaticResource SmallButton}" Margin="0,0,6,0"
                                                 Command="{Binding DataContext.UpgradeSingleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                 CommandParameter="{Binding}"
-                                                ToolTip="保留配置就地升级；Clash Verge 会自动退出并重启由你决定"
+                                                ToolTip="保留现有配置就地升级；升级前建议先退出正在运行的软件"
                                                 Visibility="{Binding HasUpdate, Converter={StaticResource BoolToVisibility}}" />
                                         <Button Content="安装" Style="{StaticResource SmallButton}"
                                                 Command="{Binding DataContext.InstallSingleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"

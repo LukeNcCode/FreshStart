@@ -1,7 +1,5 @@
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.IO;
-using System.Windows.Data;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FreshStart.Core;
@@ -26,26 +24,22 @@ public sealed partial class MigrationItemViewModel : ObservableObject
     public bool IsSoftware => Candidate.Kind == MigrationItemKind.Software;
     public bool IsInstalled => Candidate.IsInstalled;
     public bool HasPayload => Candidate.HasPayload;
-    public string InstallState => Candidate.IsInstalled ? "已安装" : Candidate.HasPayload ? "发现数据" : "未检测";
+    public bool CanSelect => HasPayload;
+    public string InstallState => !HasPayload
+        ? "不可选"
+        : Candidate.IsInstalled ? "已安装" : "发现数据";
     public string SelectionState => Candidate.Kind == MigrationItemKind.Software
         ? Candidate.DataRoots.Count == 0
             ? "尚未添加数据目录"
             : string.Join(Environment.NewLine, Candidate.DataRoots)
         : Candidate.ToolRoot;
-    public string CloneRouteText => !HasPayload
-        ? "缺少可迁移内容"
+    public string ClonePlanHint => !HasPayload
+        ? "未检测到可迁移内容；添加有效数据目录后才可选择"
         : InstallerDirectory.Length > 0
-            ? "本地原厂安装器链路"
+            ? "使用已选择的本机安装器，目标机离线原生安装"
             : !string.IsNullOrWhiteSpace(Candidate.WingetId)
-                ? "Winget 原厂链路"
-                : "待选择安装器";
-    public string CloneRouteHint => CloneRouteText switch
-    {
-        "Winget 原厂链路" => "源机器下载精确版本安装器，目标机离线原生安装",
-        "本地原厂安装器链路" => "使用已选择的本机安装器，不联网下载",
-        "待选择安装器" => "必须选择本地安装器后才能进行原生部署",
-        _ => "未检测到安装内容或可迁移数据"
-    };
+                ? "自动提取匹配版本的原厂安装器；导出时联网，目标机恢复不联网"
+                : "选择本地原厂安装器后才能进行原生部署";
 
     [ObservableProperty]
     private bool _isSelected;
@@ -55,11 +49,18 @@ public sealed partial class MigrationItemViewModel : ObservableObject
 
     public bool HasManualInstaller => InstallerDirectory.Length > 0;
 
+    partial void OnIsSelectedChanged(bool value)
+    {
+        if (value && !CanSelect)
+        {
+            IsSelected = false;
+        }
+    }
+
     partial void OnInstallerDirectoryChanged(string value)
     {
         OnPropertyChanged(nameof(HasManualInstaller));
-        OnPropertyChanged(nameof(CloneRouteText));
-        OnPropertyChanged(nameof(CloneRouteHint));
+        OnPropertyChanged(nameof(ClonePlanHint));
     }
 
     public void NotifyDataRootsChanged()
@@ -67,9 +68,9 @@ public sealed partial class MigrationItemViewModel : ObservableObject
         OnPropertyChanged(nameof(SelectionState));
         OnPropertyChanged(nameof(Description));
         OnPropertyChanged(nameof(HasPayload));
+        OnPropertyChanged(nameof(CanSelect));
         OnPropertyChanged(nameof(InstallState));
-        OnPropertyChanged(nameof(CloneRouteText));
-        OnPropertyChanged(nameof(CloneRouteHint));
+        OnPropertyChanged(nameof(ClonePlanHint));
     }
 }
 
@@ -92,12 +93,6 @@ public sealed partial class EnvironmentMigrationViewModel : ObservableObject
         _service = service;
         _toast = toast;
         _prompts = prompts;
-        var view = (ListCollectionView)CollectionViewSource.GetDefaultView(Items);
-        view.GroupDescriptions.Add(new PropertyGroupDescription(
-            nameof(MigrationItemViewModel.CloneRouteText)));
-        view.SortDescriptions.Add(new SortDescription(
-            nameof(MigrationItemViewModel.CloneRouteText),
-            ListSortDirection.Ascending));
     }
 
     public ObservableCollection<MigrationItemViewModel> Items { get; } = new();
@@ -161,7 +156,9 @@ public sealed partial class EnvironmentMigrationViewModel : ObservableObject
             }
             var candidates = await _service.ScanAsync();
             Items.Clear();
-            foreach (var candidate in candidates)
+            foreach (var candidate in candidates
+                         .OrderByDescending(candidate => candidate.HasPayload)
+                         .ThenBy(candidate => candidate.Name, StringComparer.CurrentCulture))
             {
                 if (_manualDataRoots.TryGetValue(candidate.Id, out var manualRoots))
                 {
@@ -192,7 +189,8 @@ public sealed partial class EnvironmentMigrationViewModel : ObservableObject
             }
             UpdateSelectedText();
             StatusText = $"扫描完成：{Items.Count(item => item.IsInstalled)} 项已安装，" +
-                         $"{Items.Count(item => item.HasPayload)} 项包含可迁移数据";
+                         $"{Items.Count(item => item.CanSelect)} 项可选择，" +
+                         $"{Items.Count(item => !item.CanSelect)} 项因缺少可迁移内容不可选";
         }
         catch (Exception ex)
         {
@@ -277,28 +275,14 @@ public sealed partial class EnvironmentMigrationViewModel : ObservableObject
         var ready = selected.Where(IsReadyToClone).ToList();
         var blocked = selected.Except(ready).ToList();
         var details = new List<string>();
-        foreach (var group in selected
-                     .GroupBy(item => item.CloneRouteText)
-                     .OrderBy(group => CloneRouteOrder(group.Key)))
+        foreach (var item in selected)
         {
-            details.Add($"{group.Key} · {group.Count()} 项");
-            foreach (var item in group)
+            var version = string.IsNullOrWhiteSpace(item.Version) ? "版本未知" : item.Version;
+            details.Add($"{item.Name} · {version}");
+            details.Add($"  {item.ClonePlanHint}");
+            if (!IsReadyToClone(item))
             {
-                var version = string.IsNullOrWhiteSpace(item.Version) ? "版本未知" : item.Version;
-                details.Add($"  {item.Name} · {version}");
-                details.Add($"  {item.CloneRouteHint}");
-                if (group.Key == "Winget 原厂链路")
-                {
-                    details.Add("  导出阶段需要联网调用 winget download；目标机恢复不联网");
-                }
-                else if (group.Key == "本地原厂安装器链路")
-                {
-                    details.Add("  使用用户选择的本地安装器，导出阶段不联网");
-                }
-                else if (!IsReadyToClone(item))
-                {
-                    details.Add("  当前未准备完整，不会写入克隆包");
-                }
+                details.Add("  当前未准备完整，不会写入克隆包");
             }
         }
         details.Add("迁移不包含登录令牌、密码、Cookie 或机器绑定许可证");
@@ -326,7 +310,7 @@ public sealed partial class EnvironmentMigrationViewModel : ObservableObject
         var confirmed = await _prompts.ConfirmAsync(new UserPrompt
         {
             Title = "确认克隆方案？",
-            Message = $"扫描完成，将打包 {ready.Count} 项。请先确认各软件的克隆链路和限制。",
+            Message = $"扫描完成，将打包 {ready.Count} 项。请先确认各软件的克隆方式和限制。",
             Details = details,
             ConfirmText = $"继续生成 {ready.Count} 项",
             CancelText = "返回修改"
@@ -531,14 +515,6 @@ public sealed partial class EnvironmentMigrationViewModel : ObservableObject
             return false;
         }
     }
-
-    private static int CloneRouteOrder(string route) => route switch
-    {
-        "Winget 原厂链路" => 0,
-        "本地原厂安装器链路" => 1,
-        "待选择安装器" => 2,
-        _ => 3
-    };
 
     public void UpdateSelectedText()
     {

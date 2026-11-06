@@ -77,30 +77,8 @@
             </Border>
 
             <ItemsControl ItemsSource="{Binding Items}">
-                <ItemsControl.GroupStyle>
-                    <GroupStyle>
-                        <GroupStyle.HeaderTemplate>
-                            <DataTemplate>
-                                <Grid Margin="4,18,4,10">
-                                    <StackPanel>
-                                        <TextBlock Text="{Binding Name}" FontSize="14"
-                                                   FontWeight="SemiBold"
-                                                   Foreground="{DynamicResource PrimaryTextBrush}"/>
-                                        <TextBlock Text="{Binding ItemCount, StringFormat={}{0} 项}"
-                                                   Style="{StaticResource CaptionText}" Margin="0,3,0,0"/>
-                                    </StackPanel>
-                                </Grid>
-                            </DataTemplate>
-                        </GroupStyle.HeaderTemplate>
-                        <GroupStyle.Panel>
-                            <ItemsPanelTemplate>
-                                <UniformGrid Columns="2"/>
-                            </ItemsPanelTemplate>
-                        </GroupStyle.Panel>
-                    </GroupStyle>
-                </ItemsControl.GroupStyle>
                 <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate><StackPanel /></ItemsPanelTemplate>
+                    <ItemsPanelTemplate><UniformGrid Columns="2" /></ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
@@ -113,6 +91,7 @@
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
                                     <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                              IsEnabled="{Binding CanSelect}"
                                               AutomationProperties.Name="{Binding Name}"
                                               VerticalAlignment="Center" Margin="0,0,10,0" />
                                     <StackPanel Grid.Column="1">
@@ -132,9 +111,19 @@
                                 </Grid>
                                 <TextBlock Text="{Binding Description}" Style="{StaticResource CaptionText}"
                                            TextWrapping="Wrap" Margin="28,10,0,0" />
-                                <TextBlock Text="{Binding CloneRouteHint}" FontSize="10.5"
-                                           Foreground="{DynamicResource AccentBrush}"
-                                           TextWrapping="Wrap" Margin="28,6,0,0" />
+                                <TextBlock Text="{Binding ClonePlanHint}" FontSize="10.5"
+                                           TextWrapping="Wrap" Margin="28,6,0,0">
+                                    <TextBlock.Style>
+                                        <Style TargetType="{x:Type TextBlock}">
+                                            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding CanSelect}" Value="False">
+                                                    <Setter Property="Foreground" Value="{DynamicResource WarningBrush}" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
                                 <TextBlock Text="{Binding SelectionState}" FontSize="10.5"
                                            Foreground="{DynamicResource SecondaryTextBrush}"
                                            TextWrapping="Wrap" MaxHeight="48" Margin="28,8,0,0" />

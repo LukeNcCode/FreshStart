@@ -372,8 +372,7 @@ public sealed partial class SoftwareViewModel : ObservableObject
     }
 
     /// <summary>
-    /// 独立更新单个软件。Clash Verge 这类用户态程序会先退出再升级（安装器要覆盖 exe），
-    /// 升级期间代理会短暂中断；失败时提示用它自带的更新器重试。
+    /// 独立更新单个软件。用户态程序直接在 winget 中就地升级，保留现有配置。
     /// </summary>
     [RelayCommand]
     private async Task UpgradeSingleAsync(SoftwareItem? item)
@@ -387,19 +386,6 @@ public sealed partial class SoftwareViewModel : ObservableObject
         var ct = _cts.Token;
         try
         {
-            var isClashVerge = string.Equals(item.Id, ClashVergeProcess.PackageId, StringComparison.OrdinalIgnoreCase);
-            if (isClashVerge && ClashVergeProcess.IsRunning)
-            {
-                StatusText = "正在退出 Clash Verge…（升级期间会短暂断网）";
-                ProgressText = StatusText;
-                if (!await ClashVergeProcess.StopAsync(TimeSpan.FromSeconds(6), ct))
-                {
-                    StatusText = "Clash Verge 仍在运行";
-                    _toast.Show("Clash Verge 未能自动退出，请从托盘手动退出后再试", ToastKind.Warning);
-                    return;
-                }
-            }
-
             ProgressText = $"正在更新 {item.Name}…";
             var result = await _winget.UpgradeAsync(item.Id, line => ProgressText = line, ct);
 
@@ -423,9 +409,7 @@ public sealed partial class SoftwareViewModel : ObservableObject
 
             StatusText = $"更新 {item.Name} 失败";
             _toast.Show(
-                isClashVerge
-                    ? "更新失败：可在 Clash Verge 内「设置 → 检查更新」重试（它会自动切换下载镜像）"
-                    : $"更新失败：{FirstLine(result.Output)}",
+                $"更新失败：{FirstLine(result.Output)}",
                 ToastKind.Error);
         }
         catch (OperationCanceledException)
