@@ -1,0 +1,36 @@
+<UserControl x:Class="FreshStart.App.Startup.StartupIntroView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="Black"
+             Focusable="True"
+             UseLayoutRounding="True"
+             SnapsToDevicePixels="True">
+    <Grid x:Name="LayoutRoot" Background="Black" RenderTransformOrigin="0.5,0.5">
+        <Grid.RenderTransform>
+            <ScaleTransform x:Name="FrameScale" ScaleX="1" ScaleY="1" />
+        </Grid.RenderTransform>
+
+        <Viewbox HorizontalAlignment="Center" VerticalAlignment="Center"
+                 Stretch="Uniform" MaxWidth="1120" MaxHeight="310">
+            <Grid Margin="76,42">
+                <!-- 完整描边先出现 -->
+                <Path x:Name="OutlineWord"
+                      Stroke="#F2FFFFFF" StrokeThickness="1.15"
+                      Fill="Transparent"
+                      StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                      StrokeLineJoin="Round"
+                      Opacity="0" />
+
+                <!-- 实心白色从左侧扫入，形成加载进度 -->
+                <Path x:Name="FillWord" Fill="#FFFFFFFF">
+                    <Path.Clip>
+                        <RectangleGeometry x:Name="FillClip" Rect="0,0,0,0" />
+                    </Path.Clip>
+                    <Path.Effect>
+                        <BlurEffect x:Name="FillBlur" Radius="0.9" />
+                    </Path.Effect>
+                </Path>
+            </Grid>
+        </Viewbox>
+    </Grid>
+</UserControl>

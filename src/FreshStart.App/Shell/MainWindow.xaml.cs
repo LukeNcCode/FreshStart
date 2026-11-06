@@ -97,23 +97,20 @@ public partial class MainWindow
         WindowActivation.SetForegroundWindow(hwnd);
     }
 
-    public async Task ShowWelcomeAsync(
-        bool isAdministrator,
-        string wingetVersion,
-        string backupDirectory)
+    public async Task ShowStartupIntroAsync()
     {
         var completion = new TaskCompletionSource<object?>(
             TaskCreationOptions.RunContinuationsAsynchronously);
-        var welcome = new WelcomeView(isAdministrator, wingetVersion, backupDirectory);
-        welcome.Completed += (_, _) => completion.TrySetResult(null);
+        var intro = new StartupIntroView();
+        intro.Completed += (_, _) => completion.TrySetResult(null);
 
-        WelcomeHost.Children.Clear();
-        WelcomeHost.Children.Add(welcome);
-        WelcomeHost.Visibility = Visibility.Visible;
+        StartupIntroHost.Children.Clear();
+        StartupIntroHost.Children.Add(intro);
+        StartupIntroHost.Visibility = Visibility.Visible;
 
         await completion.Task.ConfigureAwait(true);
-        WelcomeHost.Children.Clear();
-        WelcomeHost.Visibility = Visibility.Collapsed;
+        StartupIntroHost.Children.Clear();
+        StartupIntroHost.Visibility = Visibility.Collapsed;
         PageHostControl.Focus();
     }
 

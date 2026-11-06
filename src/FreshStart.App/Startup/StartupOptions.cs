@@ -3,7 +3,7 @@ namespace FreshStart.App.Startup;
 /// <summary>
 /// 启动参数。与 Launcher 共用同一套语法：
 ///   FreshStart.exe --page=system-info
-///   FreshStart.exe --welcome
+///   FreshStart.exe --intro
 ///   FreshStart.exe --apply-preset=gaming --silent
 ///   FreshStart.exe --smoke-test --smoke-out=D:\temp\smoke.json
 /// </summary>
@@ -16,7 +16,7 @@ public sealed class StartupOptions
     public string? Theme { get; private set; }
     public string? Preset { get; private set; }
     public bool Silent { get; private set; }
-    public bool ShowWelcome { get; private set; }
+    public bool ShowIntro { get; private set; }
 
     /// <summary>--execute / --unattended：启动后直接执行方案并退出。</summary>
     public string? UnattendedPath { get; private set; }
@@ -36,7 +36,7 @@ public sealed class StartupOptions
 
             if (arg.Equals("--smoke-test", StringComparison.OrdinalIgnoreCase)) options.SmokeTest = true;
             else if (arg.Equals("--silent", StringComparison.OrdinalIgnoreCase)) options.Silent = true;
-            else if (arg.Equals("--welcome", StringComparison.OrdinalIgnoreCase)) options.ShowWelcome = true;
+            else if (arg.Equals("--intro", StringComparison.OrdinalIgnoreCase)) options.ShowIntro = true;
             else if (arg.Equals("--yes", StringComparison.OrdinalIgnoreCase)
                      || arg.Equals("-y", StringComparison.OrdinalIgnoreCase)) options.Yes = true;
             else if (TryValue(arg, "--page", args, ref i, out var page)) options.Page = page;

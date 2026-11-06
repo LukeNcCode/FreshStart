@@ -4,7 +4,7 @@ param(
     [string]$Out = "",
     [int]$Wait = 2500,
     [string]$Exe = "",
-    [switch]$Welcome
+    [switch]$Intro
 )
 
 $root = Split-Path $PSScriptRoot -Parent
@@ -34,7 +34,7 @@ Get-Process FreshStart.Host -ErrorAction SilentlyContinue | Stop-Process -Force
 Start-Sleep -Milliseconds 200
 
 $arguments = @("--page=$Page", "--theme=$Theme")
-if ($Welcome) { $arguments += "--welcome" }
+if ($Intro) { $arguments += "--intro" }
 $p = Start-Process -FilePath $exePath -ArgumentList $arguments -PassThru
 Start-Sleep -Milliseconds $Wait
 $p.Refresh()

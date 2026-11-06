@@ -17,7 +17,7 @@ namespace FreshStart.App;
 
 public partial class App
 {
-    private const int CurrentWelcomeRevision = 1;
+    private const int CurrentIntroRevision = 1;
     private SingleInstanceHost? _singleInstance;
     private CompositionRoot? _composition;
     private StartupOptions _options = new();
@@ -111,14 +111,14 @@ public partial class App
 
         ShutdownMode = ShutdownMode.OnExplicitShutdown;
 
-        var initialPage = _options.Page ?? settings.Current.LastPage;
+        var initialPage = _options.Page ?? "home";
         _mainWindow = _composition.CreateMainWindow(initialPage);
         MainWindow = _mainWindow;
         StartupProbe.Mark("shell-built");
 
-        var welcomeTask = _options.SmokeTest
+        var introTask = _options.SmokeTest
             ? null
-            : PrepareWelcomeIfNeeded(settings, _options.ShowWelcome);
+            : PrepareStartupIntroIfNeeded(settings, _options.ShowIntro);
         _mainWindow.Show();
         _composition.ActivityConsoleHost.ApplyInitial(settings.Current.TaskConsoleEnabled);
         // ThemeService 已按命令行主题初始化；恢复持久化值，避免一次预览覆盖用户偏好。
@@ -126,9 +126,9 @@ public partial class App
         ShutdownMode = ShutdownMode.OnMainWindowClose;
         StartupProbe.Mark("window-shown");
         WarnOtherInstances();
-        if (welcomeTask is not null)
+        if (introTask is not null)
         {
-            await welcomeTask;
+            await introTask;
         }
         if (!_options.SmokeTest)
         {
@@ -147,41 +147,35 @@ public partial class App
         }
     }
 
-    /// <summary>首次启动展示新手引导（讲清用法、风险与环境状态）；看过后写回设置。</summary>
-    private Task? PrepareWelcomeIfNeeded(SettingsService settings, bool force = false)
+    private Task? PrepareStartupIntroIfNeeded(SettingsService settings, bool force = false)
     {
         if (!force
-            && settings.Current.HasSeenWelcome
-            && settings.Current.WelcomeRevision >= CurrentWelcomeRevision)
+            && settings.Current.HasSeenIntro
+            && settings.Current.IntroRevision >= CurrentIntroRevision)
         {
             return null;
         }
 
-        if (_mainWindow is null) return null;
-        return CompleteWelcomeAsync(settings);
+        return _mainWindow is null ? null : CompleteStartupIntroAsync(settings);
     }
 
-    private async Task CompleteWelcomeAsync(SettingsService settings)
+    private async Task CompleteStartupIntroAsync(SettingsService settings)
     {
         try
         {
-            await _mainWindow!.ShowWelcomeAsync(
-                ElevationService.IsAdministrator,
-                _composition?.Winget.Version?.ToString() ?? "按需检测",
-                AppPaths.BackupRoot);
-
-            settings.Current.HasSeenWelcome = true;
-            settings.Current.WelcomeRevision = CurrentWelcomeRevision;
+            await _mainWindow!.ShowStartupIntroAsync();
+            settings.Current.HasSeenIntro = true;
+            settings.Current.IntroRevision = CurrentIntroRevision;
             settings.SaveNow();
-            Log.Info("欢迎引导已完成并记录");
+            Log.Info("首次启动品牌动画已完成");
         }
         catch (Exception ex)
         {
-            Log.Warn($"显示欢迎引导失败: {ex.Message}");
+            Log.Warn($"启动动画执行失败，直接进入工作台: {ex.Message}");
             if (_mainWindow is not null)
             {
-                _mainWindow.WelcomeHost.Visibility = Visibility.Collapsed;
-                _mainWindow.WelcomeHost.Children.Clear();
+                _mainWindow.StartupIntroHost.Visibility = Visibility.Collapsed;
+                _mainWindow.StartupIntroHost.Children.Clear();
             }
         }
     }
