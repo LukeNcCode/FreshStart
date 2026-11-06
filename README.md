@@ -1,6 +1,10 @@
 # FreshStart GitHub Pages
 
-This branch contains the static product website for FreshStart.
+This branch contains the static product website for FreshStart v0.2.0.
+
+The experience section is a browser-only recreation of the current WPF UI.
+Navigation, search, theme switching and sidebar controls are interactive;
+buttons never read system state or execute FreshStart features.
 
 ## Local preview
 
