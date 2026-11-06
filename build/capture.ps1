@@ -3,7 +3,8 @@ param(
     [string]$Theme = "Light",
     [string]$Out = "",
     [int]$Wait = 2500,
-    [string]$Exe = ""
+    [string]$Exe = "",
+    [switch]$Welcome
 )
 
 $root = Split-Path $PSScriptRoot -Parent
@@ -32,7 +33,9 @@ $exePath = $Exe
 Get-Process FreshStart.Host -ErrorAction SilentlyContinue | Stop-Process -Force
 Start-Sleep -Milliseconds 200
 
-$p = Start-Process -FilePath $exePath -ArgumentList "--page=$Page", "--theme=$Theme" -PassThru
+$arguments = @("--page=$Page", "--theme=$Theme")
+if ($Welcome) { $arguments += "--welcome" }
+$p = Start-Process -FilePath $exePath -ArgumentList $arguments -PassThru
 Start-Sleep -Milliseconds $Wait
 $p.Refresh()
 $hwnd = $p.MainWindowHandle

@@ -125,6 +125,10 @@
                             Margin="0,0,22,20" />
 
         <controls:ModalHost x:Name="ModalHostControl" Grid.ColumnSpan="2" Grid.RowSpan="2" />
+
+        <!-- 首次启动欢迎层：与主窗口共用同一个 HWND，完成后淡出揭示工作台。 -->
+        <Grid x:Name="WelcomeHost" Grid.ColumnSpan="2" Grid.RowSpan="2"
+              Panel.ZIndex="100" Visibility="Collapsed" />
     </Grid>
     </Border>
 </Window>

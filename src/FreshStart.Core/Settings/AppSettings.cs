@@ -42,8 +42,11 @@ public sealed class AppSettings
 
     public int BackupRetentionDays { get; set; } = 60;
 
-    /// <summary>是否已看过首次启动的新手引导（设置页可重新打开）。</summary>
+    /// <summary>是否已看过首次启动的欢迎引导。</summary>
     public bool HasSeenWelcome { get; set; }
+
+    /// <summary>已看过的欢迎引导版本；产品更新后可重新展示一次。</summary>
+    public int WelcomeRevision { get; set; }
 
     /// <summary>已应用的内置桌面壁纸键（空 = 未用内置壁纸）。</summary>
     public string DesktopWallpaper { get; set; } = string.Empty;

@@ -11,6 +11,7 @@ using System.Windows.Threading;
 using FreshStart.App.Animation;
 using FreshStart.App.Dialogs;
 using FreshStart.App.Services;
+using FreshStart.App.Startup;
 using FreshStart.Core;
 using FreshStart.Core.Abstractions;
 using FreshStart.Core.Diagnostics;
@@ -94,6 +95,26 @@ public partial class MainWindow
         Topmost = false;
         var hwnd = new WindowInteropHelper(this).Handle;
         WindowActivation.SetForegroundWindow(hwnd);
+    }
+
+    public async Task ShowWelcomeAsync(
+        bool isAdministrator,
+        string wingetVersion,
+        string backupDirectory)
+    {
+        var completion = new TaskCompletionSource<object?>(
+            TaskCreationOptions.RunContinuationsAsynchronously);
+        var welcome = new WelcomeView(isAdministrator, wingetVersion, backupDirectory);
+        welcome.Completed += (_, _) => completion.TrySetResult(null);
+
+        WelcomeHost.Children.Clear();
+        WelcomeHost.Children.Add(welcome);
+        WelcomeHost.Visibility = Visibility.Visible;
+
+        await completion.Task.ConfigureAwait(true);
+        WelcomeHost.Children.Clear();
+        WelcomeHost.Visibility = Visibility.Collapsed;
+        PageHostControl.Focus();
     }
 
     private void ApplyWindowBounds()

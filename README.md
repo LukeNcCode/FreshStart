@@ -4,7 +4,7 @@
 
 FreshStart 是一个本地优先的 Windows 11 桌面工具，集中处理系统信息、常用设置、隐私、软件、服务、备份与自动化工作流。除明确标注为不可回滚的项目外，写操作遵循“读取当前值 → 备份 → 写入 → 校验 → 失败回滚”的流程。
 
-**当前版本：0.2.0** · Windows 11 · .NET 8 · WPF
+**当前版本：0.2.1** · Windows 11 · .NET 8 · WPF
 
 ![FreshStart 首页浅色主题](docs/images/home-light.png)
 
