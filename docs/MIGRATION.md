@@ -70,4 +70,6 @@ PATH 条目与安全环境变量。
 - 上一版遗留的 `FreshStart\Environments` 目录和 `FreshStart.Environment.*`
   接管式控制面板项会在新原生部署时清理。
 - 安装器失败不会删除已经恢复的数据。
+- 飞书使用官方静默安装参数；如果安装完成后应用或后台进程仍占用
+  `%APPDATA%\LarkShell`，FreshStart 会先关闭相关进程，再切换数据目录。
 - 恢复完成后需要用户自行登录聊天软件。

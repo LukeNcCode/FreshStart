@@ -431,6 +431,12 @@ public sealed class EnvironmentMigrationService
                 var restoredDataTargets = new List<(string Original, string Actual)>();
                 foreach (var data in item.DataRoots)
                 {
+                    if (item.Id == "feishu")
+                    {
+                        await StopFeishuProcessesAsync(
+                                result.Warnings, progress, itemPercent, ct)
+                            .ConfigureAwait(false);
+                    }
                     var originalTarget = Environment.ExpandEnvironmentVariables(data.TargetPath);
                     if (IsProtectedTarget(originalTarget))
                     {
@@ -451,7 +457,32 @@ public sealed class EnvironmentMigrationService
                     if (Directory.Exists(target))
                     {
                         var backup = $"{target}.freshstart-backup-{DateTime.Now:yyyyMMdd-HHmmss}";
-                        Directory.Move(target, backup);
+                        var moved = false;
+                        for (var attempt = 0; attempt < 10 && !moved; attempt++)
+                        {
+                            try
+                            {
+                                Directory.Move(target, backup);
+                                moved = true;
+                            }
+                            catch (IOException) when (attempt < 9)
+                            {
+                                await Task.Delay(500, ct).ConfigureAwait(false);
+                                if (item.Id == "feishu" && attempt == 1)
+                                {
+                                    await StopFeishuProcessesAsync(
+                                            result.Warnings, progress, itemPercent, ct)
+                                        .ConfigureAwait(false);
+                                }
+                            }
+                            catch (IOException ex)
+                            {
+                                throw new IOException(
+                                    $"无法替换 {item.Name} 数据目录：{target}。" +
+                                    "请确认飞书及其后台进程已完全退出后重试。",
+                                    ex);
+                            }
+                        }
                         result.Warnings.Add($"{item.Name} 原数据已备份到 {backup}");
                     }
                     await CopyFilesAsync(source, target, null, null, ct).ConfigureAwait(false);
@@ -1785,7 +1816,10 @@ public sealed class EnvironmentMigrationService
             else
             {
                 start = new ProcessStartInfo(path) { UseShellExecute = false };
-                foreach (var argument in SplitArguments(installer.SilentArguments))
+                var silentArguments = item.Id == "feishu"
+                    ? "--command=quiet_install"
+                    : installer.SilentArguments;
+                foreach (var argument in SplitArguments(silentArguments))
                 {
                     start.ArgumentList.Add(argument);
                 }
@@ -1833,6 +1867,118 @@ public sealed class EnvironmentMigrationService
                     Environment.CurrentDirectory);
                 throw;
             }
+        }
+    }
+
+    private static async Task StopFeishuProcessesAsync(
+        List<string> warnings,
+        IProgress<MigrationProgress>? progress,
+        double progressPercent,
+        CancellationToken ct)
+    {
+        var installDirectory = FindFeishuPaths().InstallDirectory;
+        var processes = Process.GetProcesses()
+            .Where(process => IsFeishuProcess(process, installDirectory))
+            .ToList();
+        if (processes.Count == 0) return;
+
+        progress?.Report(new MigrationProgress
+        {
+            Message = "安装器已启动飞书，正在关闭后台进程并恢复聊天数据…",
+            Percent = progressPercent
+        });
+        foreach (var process in processes)
+        {
+            try
+            {
+                if (!process.HasExited) process.CloseMainWindow();
+            }
+            catch
+            {
+                // Background child processes often have no main window.
+            }
+        }
+
+        using (var graceful = CancellationTokenSource.CreateLinkedTokenSource(ct))
+        {
+            graceful.CancelAfter(TimeSpan.FromSeconds(5));
+            try
+            {
+                await Task.WhenAll(processes.Select(process =>
+                        process.HasExited
+                            ? Task.CompletedTask
+                            : process.WaitForExitAsync(graceful.Token)))
+                    .ConfigureAwait(false);
+            }
+            catch (OperationCanceledException) when (!ct.IsCancellationRequested)
+            {
+                // Force-close remaining Feishu background processes below.
+            }
+        }
+
+        foreach (var process in processes)
+        {
+            try
+            {
+                process.Refresh();
+                if (!process.HasExited) process.Kill(entireProcessTree: true);
+            }
+            catch
+            {
+                // A process may exit between Refresh and Kill.
+            }
+        }
+
+        await Task.Delay(1000, ct).ConfigureAwait(false);
+        var remaining = processes
+            .Where(process =>
+            {
+                try
+                {
+                    process.Refresh();
+                    return !process.HasExited;
+                }
+                catch
+                {
+                    return false;
+                }
+            })
+            .Select(process => process.ProcessName)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        foreach (var process in processes) process.Dispose();
+
+        if (remaining.Count > 0)
+        {
+            throw new IOException(
+                $"无法关闭飞书后台进程：{string.Join("、", remaining)}。请手动退出后重试。");
+        }
+        warnings.Add("安装器自动启动了飞书，FreshStart 已关闭其后台进程后继续恢复数据。");
+    }
+
+    private static bool IsFeishuProcess(Process process, string installDirectory)
+    {
+        try
+        {
+            if (!string.IsNullOrWhiteSpace(installDirectory))
+            {
+                var executable = process.MainModule?.FileName ?? string.Empty;
+                if (executable.Length > 0)
+                {
+                    return executable.StartsWith(
+                               installDirectory.TrimEnd(Path.DirectorySeparatorChar)
+                               + Path.DirectorySeparatorChar,
+                               StringComparison.OrdinalIgnoreCase)
+                           || executable.Contains(
+                               @"\Feishu\", StringComparison.OrdinalIgnoreCase);
+                }
+            }
+
+            return process.ProcessName.Contains("feishu", StringComparison.OrdinalIgnoreCase);
+        }
+        catch
+        {
+            return process.ProcessName.Contains("feishu", StringComparison.OrdinalIgnoreCase);
         }
     }
 
@@ -2338,7 +2484,7 @@ public sealed class EnvironmentMigrationService
             "microsoft.dotnet.sdk.8" => "/install /quiet /norestart",
             "tencent.wechat" or "tencent.wechat.universal" => "/S",
             "tencent.qq.nt" => "/S",
-            "bytedance.feishu" => "/S",
+            "bytedance.feishu" => "--command=quiet_install",
             _ => "/S"
         };
     }
