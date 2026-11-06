@@ -29,6 +29,7 @@ public sealed class MigrationCandidate
     public string Version { get; init; } = string.Empty;
     public string ToolRoot { get; init; } = string.Empty;
     public IReadOnlyList<string> DataRoots { get; set; } = Array.Empty<string>();
+    public IReadOnlyList<string> LocalInstallerPaths { get; init; } = Array.Empty<string>();
     public IReadOnlyList<string> PathEntries { get; init; } = Array.Empty<string>();
     public IReadOnlyDictionary<string, string> EnvironmentVariables { get; init; } =
         new Dictionary<string, string>();
@@ -140,6 +141,7 @@ public sealed class EnvironmentMigrationService
         var installed = await Task.Run(_programs.List, ct).ConfigureAwait(false);
         var wechatConfiguredRoots = FindWeChatConfiguredRoots();
         var qqConfiguredRoots = FindQQConfiguredRoots();
+        var feishuPaths = FindFeishuPaths();
         var candidates = new List<MigrationCandidate>
         {
             CreateSocialCandidate(
@@ -159,8 +161,22 @@ public sealed class EnvironmentMigrationService
                 qqConfiguredRoots),
             CreateSocialCandidate(
                 "feishu", "飞书", "ByteDance.Feishu", installed,
-                new[] { "%USERPROFILE%\\Documents\\Feishu", "%USERPROFILE%\\Documents\\Lark" },
-                new[] { "飞书", "Feishu", "Lark" })
+                new[]
+                {
+                    "%APPDATA%\\LarkShell",
+                    "%APPDATA%\\Feishu",
+                    "%APPDATA%\\Lark",
+                    "%APPDATA%\\lark_public",
+                    "%LOCALAPPDATA%\\Lark\\User Data",
+                    "%USERPROFILE%\\Documents\\Feishu",
+                    "%USERPROFILE%\\Documents\\Lark"
+                },
+                new[] { "飞书", "Feishu", "Lark" },
+                string.IsNullOrWhiteSpace(feishuPaths.DataDirectory)
+                    ? Array.Empty<string>()
+                    : new[] { feishuPaths.DataDirectory },
+                new[] { "Feishu", "Lark" },
+                feishuPaths.InstallDirectory)
         };
         var discoveredRoots = wechatConfiguredRoots.Count > 0 && qqConfiguredRoots.Count > 0
             ? EmptyDiscoveredRoots()
@@ -514,7 +530,9 @@ public sealed class EnvironmentMigrationService
         IReadOnlyList<InstalledProgram> programs,
         IReadOnlyList<string> dataCandidates,
         IReadOnlyList<string> nameHints,
-        IReadOnlyList<string>? configuredRoots = null)
+        IReadOnlyList<string>? configuredRoots = null,
+        IReadOnlyList<string>? installerNameHints = null,
+        string installDirectory = "")
     {
         var installed = programs.FirstOrDefault(program =>
             nameHints.Any(hint => program.DisplayName.Contains(hint, StringComparison.OrdinalIgnoreCase))
@@ -531,6 +549,12 @@ public sealed class EnvironmentMigrationService
                 roots.Add(configured);
             }
         }
+        roots = CollapseNestedRoots(roots);
+        var localInstallers = FindLocalInstallerFiles(
+            installerNameHints ?? Array.Empty<string>(),
+            installed?.Version ?? string.Empty,
+            installDirectory,
+            configuredRoots ?? Array.Empty<string>());
 
         return new MigrationCandidate
         {
@@ -543,8 +567,126 @@ public sealed class EnvironmentMigrationService
             WingetId = wingetId,
             IsInstalled = installed is not null,
             Version = installed?.Version ?? string.Empty,
-            DataRoots = roots
+            DataRoots = roots,
+            LocalInstallerPaths = localInstallers
         };
+    }
+
+    private static List<string> CollapseNestedRoots(IEnumerable<string> roots)
+    {
+        var result = new List<string>();
+        foreach (var root in roots
+                     .Where(path => !string.IsNullOrWhiteSpace(path))
+                     .Select(Path.GetFullPath)
+                     .Distinct(StringComparer.OrdinalIgnoreCase)
+                     .OrderBy(path => path.Length))
+        {
+            if (result.Any(existing =>
+                    root.StartsWith(
+                        existing.TrimEnd(Path.DirectorySeparatorChar)
+                        + Path.DirectorySeparatorChar,
+                        StringComparison.OrdinalIgnoreCase)))
+            {
+                continue;
+            }
+            result.Add(root.TrimEnd(Path.DirectorySeparatorChar));
+        }
+        return result;
+    }
+
+    private static IReadOnlyList<string> FindLocalInstallerFiles(
+        IReadOnlyList<string> nameHints,
+        string version,
+        string installDirectory,
+        IReadOnlyList<string> configuredRoots)
+    {
+        if (nameHints.Count == 0) return Array.Empty<string>();
+
+        var searchDirectories = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        AddUserDownloadDirectories(
+            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+            searchDirectories);
+        if (!string.IsNullOrWhiteSpace(installDirectory))
+        {
+            AddUserDownloadDirectories(
+                InferUserProfileRoot(installDirectory), searchDirectories);
+        }
+        foreach (var configuredRoot in configuredRoots)
+        {
+            AddUserDownloadDirectories(
+                InferUserProfileRoot(configuredRoot), searchDirectories);
+        }
+
+        var candidates = new List<FileInfo>();
+        foreach (var directory in searchDirectories)
+        {
+            try
+            {
+                foreach (var path in Directory.EnumerateFiles(
+                             directory, "*", SearchOption.TopDirectoryOnly))
+                {
+                    if (!IsInstallerFile(path)) continue;
+                    var info = new FileInfo(path);
+                    if (info.Length < 20L * 1024 * 1024) continue;
+                    var fileName = info.Name;
+                    if (fileName.Contains("uninstall", StringComparison.OrdinalIgnoreCase)) continue;
+                    if (!nameHints.Any(hint =>
+                            fileName.Contains(hint, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        continue;
+                    }
+                    candidates.Add(info);
+                }
+            }
+            catch
+            {
+                // Download folders are optional and may be unavailable.
+            }
+        }
+
+        var preferred = candidates
+            .OrderByDescending(file => !string.IsNullOrWhiteSpace(version)
+                                       && file.Name.Contains(version, StringComparison.OrdinalIgnoreCase))
+            .ThenByDescending(file => file.LastWriteTimeUtc)
+            .ThenByDescending(file => file.Length)
+            .FirstOrDefault();
+        return preferred is null
+            ? Array.Empty<string>()
+            : new[] { preferred.FullName };
+    }
+
+    private static void AddUserDownloadDirectories(
+        string? userProfile,
+        HashSet<string> directories)
+    {
+        if (string.IsNullOrWhiteSpace(userProfile)) return;
+        foreach (var relative in new[] { "Downloads", "Desktop", @"OneDrive\Desktop", @"OneDrive\Downloads" })
+        {
+            var path = Path.Combine(userProfile, relative);
+            if (Directory.Exists(path)) directories.Add(Path.GetFullPath(path));
+        }
+    }
+
+    private static string InferUserProfileRoot(string path)
+    {
+        try
+        {
+            var current = Path.GetFullPath(Environment.ExpandEnvironmentVariables(path.Trim('"')));
+            for (var depth = 0; depth < 8 && !string.IsNullOrWhiteSpace(current); depth++)
+            {
+                var name = Path.GetFileName(current.TrimEnd(Path.DirectorySeparatorChar));
+                if (name.Equals("AppData", StringComparison.OrdinalIgnoreCase))
+                {
+                    return Path.GetDirectoryName(current) ?? string.Empty;
+                }
+                current = Path.GetDirectoryName(current);
+            }
+        }
+        catch
+        {
+            // Fall back to the current user's standard folders.
+        }
+        return Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
     }
 
     private sealed record DevelopmentInstallation(string Root, string ExecutablePath);
@@ -1337,41 +1479,47 @@ public sealed class EnvironmentMigrationService
             await CopyFilesAsync(manualDir, installerTarget, stage, checksums, ct)
                 .ConfigureAwait(false);
         }
-        else if (!string.IsNullOrWhiteSpace(candidate.WingetId))
+        else
         {
-            try
+            var copiedDetectedInstaller = await CopyLocalInstallerFilesAsync(
+                    candidate.LocalInstallerPaths, installerTarget, stage, checksums, ct)
+                .ConfigureAwait(false);
+            if (!copiedDetectedInstaller && !string.IsNullOrWhiteSpace(candidate.WingetId))
             {
-                await DownloadInstallerAsync(candidate, installerTarget, ct).ConfigureAwait(false);
-                await AddChecksumsAsync(installerTarget, stage, checksums, ct).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                if (BaseToolId(candidate.Id) == "node")
+                try
                 {
-                    try
+                    await DownloadInstallerAsync(candidate, installerTarget, ct).ConfigureAwait(false);
+                    await AddChecksumsAsync(installerTarget, stage, checksums, ct).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    if (BaseToolId(candidate.Id) == "node")
                     {
-                        if (Directory.Exists(installerTarget))
+                        try
                         {
-                            Directory.Delete(installerTarget, recursive: true);
+                            if (Directory.Exists(installerTarget))
+                            {
+                                Directory.Delete(installerTarget, recursive: true);
+                            }
+                            Directory.CreateDirectory(installerTarget);
+                            await DownloadNodeOfficialInstallerAsync(
+                                candidate, installerTarget, ct).ConfigureAwait(false);
+                            await AddChecksumsAsync(installerTarget, stage, checksums, ct)
+                                .ConfigureAwait(false);
                         }
-                        Directory.CreateDirectory(installerTarget);
-                        await DownloadNodeOfficialInstallerAsync(
-                            candidate, installerTarget, ct).ConfigureAwait(false);
-                        await AddChecksumsAsync(installerTarget, stage, checksums, ct)
-                            .ConfigureAwait(false);
+                        catch (Exception fallbackEx)
+                        {
+                            throw new InvalidOperationException(
+                                $"winget 无法获取 Node.js {ExtractVersionToken(candidate.Version)}，" +
+                                $"官方安装包回退也失败：{fallbackEx.Message}", fallbackEx);
+                        }
                     }
-                    catch (Exception fallbackEx)
+                    else
                     {
                         throw new InvalidOperationException(
-                            $"winget 无法获取 Node.js {ExtractVersionToken(candidate.Version)}，" +
-                            $"官方安装包回退也失败：{fallbackEx.Message}", fallbackEx);
+                            $"无法获取 {candidate.Name} 的原厂离线安装器；" +
+                            $"请在源机器选择对应版本的本地安装包后重试。{ex.Message}", ex);
                     }
-                }
-                else
-                {
-                    throw new InvalidOperationException(
-                        $"无法获取 {candidate.Name} 的原厂离线安装器；" +
-                        $"请在源机器选择对应版本的本地安装包后重试。{ex.Message}", ex);
                 }
             }
         }
@@ -1386,6 +1534,39 @@ public sealed class EnvironmentMigrationService
                 SilentArguments = SilentArgumentsFor(candidate.WingetId, path)
             })
             .ToList();
+    }
+
+    private static async Task<bool> CopyLocalInstallerFilesAsync(
+        IReadOnlyList<string> installerPaths,
+        string destination,
+        string stage,
+        Dictionary<string, string> checksums,
+        CancellationToken ct)
+    {
+        var copied = false;
+        foreach (var source in installerPaths
+                     .Where(File.Exists)
+                     .Where(IsInstallerFile)
+                     .Distinct(StringComparer.OrdinalIgnoreCase))
+        {
+            ct.ThrowIfCancellationRequested();
+            var fileName = Path.GetFileName(source);
+            var target = Path.Combine(destination, fileName);
+            Directory.CreateDirectory(destination);
+            await using (var input = new FileStream(
+                             source, FileMode.Open, FileAccess.Read, FileShare.ReadWrite,
+                             1024 * 1024, FileOptions.Asynchronous | FileOptions.SequentialScan))
+            await using (var output = new FileStream(
+                             target, FileMode.Create, FileAccess.Write, FileShare.None,
+                             1024 * 1024, FileOptions.Asynchronous | FileOptions.SequentialScan))
+            {
+                await input.CopyToAsync(output, ct).ConfigureAwait(false);
+            }
+            checksums[ToArchivePath(stage, target)] = await HashAsync(target, ct)
+                .ConfigureAwait(false);
+            copied = true;
+        }
+        return copied;
     }
 
     private static async Task DownloadInstallerAsync(
@@ -2489,6 +2670,42 @@ public sealed class EnvironmentMigrationService
 
         return roots.ToList();
     }
+
+    private static FeishuPaths FindFeishuPaths()
+    {
+        try
+        {
+            using var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Software\Feishu");
+            if (key is null) return new FeishuPaths(string.Empty, string.Empty);
+
+            var installDirectory = NormalizeExistingDirectory(key.GetValue("InstallDir") as string);
+            var dataDirectory = NormalizeExistingDirectory(key.GetValue("DataDir") as string);
+            return new FeishuPaths(installDirectory, dataDirectory);
+        }
+        catch (Exception ex)
+        {
+            Log.Warn($"读取飞书安装与数据目录失败: {ex.Message}");
+            return new FeishuPaths(string.Empty, string.Empty);
+        }
+    }
+
+    private static string NormalizeExistingDirectory(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return string.Empty;
+        try
+        {
+            var expanded = Environment.ExpandEnvironmentVariables(value.Trim().Trim('"'));
+            return Directory.Exists(expanded)
+                ? Path.GetFullPath(expanded).TrimEnd(Path.DirectorySeparatorChar)
+                : string.Empty;
+        }
+        catch
+        {
+            return string.Empty;
+        }
+    }
+
+    private sealed record FeishuPaths(string InstallDirectory, string DataDirectory);
 
     private static IReadOnlyList<string> FindQQConfiguredRoots()
     {

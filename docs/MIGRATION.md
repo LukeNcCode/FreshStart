@@ -9,7 +9,7 @@ Windows 11 设备上离线恢复。
 |---|---|
 | 微信 | 默认 `Documents\WeChat Files` 或 `Documents\xwechat_files`；可添加自定义数据目录 |
 | QQ | 优先读取 `%APPDATA%\QQ\auth` 中的实际数据路径；配置不可用时回退扫描固定盘中的 `Tencent Files` / `nt_qq` 数据根目录 |
-| 飞书 | 默认 `Documents\Feishu`、`Documents\Lark`；可添加自定义下载目录 |
+| 飞书 | 优先读取 `HKCU\Software\Feishu` 的 `DataDir`（通常为 `%APPDATA%\LarkShell`），并兼容 `Feishu` / `Lark` 的 Documents、Roaming 和 Local 数据目录；自动从常用下载目录识别同版本原厂安装器 |
 | Git | Git 安装目录、PATH 中相关条目和安全的 Git 环境变量 |
 | Python | Python 安装目录、PATH 中相关条目和安全的 Python 环境变量 |
 | Node.js | Node.js 安装目录、npm 全局目录、PATH 中相关条目和安全的环境变量 |
@@ -24,12 +24,11 @@ Windows 11 设备上离线恢复。
 Node.js 的 `winget` 精确版本不可用时会回退到 `nodejs.org` 对应版本 MSI，并使用官方
 `SHASUMS256.txt` 校验后再写入克隆包。
 
-生成克隆包前会重新扫描并执行链路预检，按 Winget 原厂、本地原厂安装器和待准备项目
-分组。弹窗会说明导出阶段是否联网、安装器来源、数据安全边界和无法打包的项目；只有
-用户确认后才会选择保存位置并开始提取。
+生成克隆包前会重新扫描并执行克隆预检。弹窗会逐项说明导出阶段是否联网、安装器来源、
+数据安全边界和无法打包的项目；只有用户确认后才会选择保存位置并开始提取。
 
-社交软件安装器优先从源机器下载并写入克隆包；也可以手动指定本地安装器目录。目标机器
-恢复时不访问软件官网。
+社交软件会优先使用在常用下载目录中识别到的同版本原厂安装器；未找到时才从源机器
+下载并写入克隆包，也可以手动指定本地安装器目录。目标机器恢复时不访问软件官网。
 
 微信使用 `Tencent.WeChat.Universal` 的当前安装介质，避免误装旧版
 `Tencent.WeChat` 导致新数据无法打开。

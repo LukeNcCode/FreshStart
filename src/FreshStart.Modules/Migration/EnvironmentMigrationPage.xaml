@@ -148,6 +148,11 @@
                                            Foreground="{DynamicResource SuccessBrush}"
                                            TextTrimming="CharacterEllipsis" Margin="28,5,0,0"
                                            Visibility="{Binding HasManualInstaller, Converter={StaticResource BoolToVisibility}}" />
+                                <TextBlock Text="{Binding DetectedInstallerText}" FontSize="9.5"
+                                           Foreground="{DynamicResource SuccessBrush}"
+                                           TextTrimming="CharacterEllipsis" Margin="28,5,0,0"
+                                           ToolTip="{Binding DetectedInstallerText}"
+                                           Visibility="{Binding HasDetectedInstaller, Converter={StaticResource BoolToVisibility}}" />
                             </StackPanel>
                         </Border>
                     </DataTemplate>

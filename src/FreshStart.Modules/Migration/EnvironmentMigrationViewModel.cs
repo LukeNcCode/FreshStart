@@ -24,6 +24,10 @@ public sealed partial class MigrationItemViewModel : ObservableObject
     public bool IsSoftware => Candidate.Kind == MigrationItemKind.Software;
     public bool IsInstalled => Candidate.IsInstalled;
     public bool HasPayload => Candidate.HasPayload;
+    public bool HasDetectedInstaller => Candidate.LocalInstallerPaths.Count > 0;
+    public string DetectedInstallerText => HasDetectedInstaller
+        ? $"已发现原厂安装器：{Candidate.LocalInstallerPaths[0]}"
+        : string.Empty;
     public bool CanSelect => HasPayload;
     public string InstallState => !HasPayload
         ? "不可选"
@@ -37,6 +41,8 @@ public sealed partial class MigrationItemViewModel : ObservableObject
         ? "未检测到可迁移内容；添加有效数据目录后才可选择"
         : InstallerDirectory.Length > 0
             ? "使用已选择的本机安装器，目标机离线原生安装"
+            : HasDetectedInstaller
+                ? "已检测到本机原厂安装器，导出阶段不联网"
             : !string.IsNullOrWhiteSpace(Candidate.WingetId)
                 ? "自动提取匹配版本的原厂安装器；导出时联网，目标机恢复不联网"
                 : "选择本地原厂安装器后才能进行原生部署";
@@ -497,8 +503,18 @@ public sealed partial class EnvironmentMigrationViewModel : ObservableObject
         {
             return HasLocalInstallerFiles(item.InstallerDirectory);
         }
+        if (item.HasDetectedInstaller)
+        {
+            return item.Candidate.LocalInstallerPaths.Any(path =>
+                File.Exists(path) && IsInstallerPath(path));
+        }
         return !string.IsNullOrWhiteSpace(item.Candidate.WingetId);
     }
+
+    private static bool IsInstallerPath(string path)
+        => Path.GetExtension(path).ToLowerInvariant() is
+            ".exe" or ".msi" or ".msix" or ".msixbundle"
+            or ".appx" or ".appxbundle";
 
     private static bool HasLocalInstallerFiles(string directory)
     {
