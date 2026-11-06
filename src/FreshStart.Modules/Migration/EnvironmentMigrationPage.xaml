@@ -82,7 +82,16 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Border Style="{StaticResource CardStyle}" Margin="0,0,12,12">
+                        <Border Margin="0,0,12,12">
+                            <Border.Style>
+                                <Style TargetType="{x:Type Border}" BasedOn="{StaticResource CardStyle}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding CanSelect}" Value="False">
+                                            <Setter Property="Opacity" Value="0.48" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
                             <StackPanel>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
