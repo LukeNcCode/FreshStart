@@ -5,32 +5,49 @@
              Focusable="True"
              UseLayoutRounding="True"
              SnapsToDevicePixels="True">
-    <Grid x:Name="LayoutRoot" Background="Black" RenderTransformOrigin="0.5,0.5">
-        <Grid.RenderTransform>
-            <ScaleTransform x:Name="FrameScale" ScaleX="1" ScaleY="1" />
-        </Grid.RenderTransform>
+    <Grid x:Name="LayoutRoot" Background="Black" ClipToBounds="True">
+        <Grid x:Name="NormalLayer">
+            <Viewbox HorizontalAlignment="Center" VerticalAlignment="Center"
+                     Stretch="Uniform" MaxWidth="1120" MaxHeight="310">
+                <Grid Margin="76,42">
+                    <Path x:Name="OutlineWord"
+                          Stroke="#F2FFFFFF" StrokeThickness="1.15"
+                          Fill="Transparent"
+                          StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                          StrokeLineJoin="Round"
+                          Opacity="0" />
+                    <Path x:Name="FillWord" Fill="#FFFFFFFF">
+                        <Path.Clip>
+                            <RectangleGeometry x:Name="FillClip" Rect="0,0,0,0" />
+                        </Path.Clip>
+                    </Path>
+                </Grid>
+            </Viewbox>
+        </Grid>
 
-        <Viewbox HorizontalAlignment="Center" VerticalAlignment="Center"
-                 Stretch="Uniform" MaxWidth="1120" MaxHeight="310">
-            <Grid Margin="76,42">
-                <!-- 完整描边先出现 -->
-                <Path x:Name="OutlineWord"
-                      Stroke="#F2FFFFFF" StrokeThickness="1.15"
-                      Fill="Transparent"
-                      StrokeStartLineCap="Round" StrokeEndLineCap="Round"
-                      StrokeLineJoin="Round"
-                      Opacity="0" />
-
-                <!-- 实心白色从左侧扫入，形成加载进度 -->
-                <Path x:Name="FillWord" Fill="#FFFFFFFF">
-                    <Path.Clip>
-                        <RectangleGeometry x:Name="FillClip" Rect="0,0,0,0" />
-                    </Path.Clip>
-                    <Path.Effect>
-                        <BlurEffect x:Name="FillBlur" Radius="0.9" />
-                    </Path.Effect>
-                </Path>
+        <!--
+          模拟 mix-blend-mode: difference：右侧是白底黑字的反相层，
+          通过一个从右向左移动的矩形裁剪边界与左侧黑底白字拼接。
+        -->
+        <Grid x:Name="InvertLayer" Background="Transparent" IsHitTestVisible="False">
+            <Grid.Clip>
+                <RectangleGeometry x:Name="InvertClip" Rect="0,0,0,0" />
+            </Grid.Clip>
+            <Border x:Name="InvertBackdrop" Background="#FFFFFF" />
+            <Grid x:Name="InvertWordLayer" RenderTransformOrigin="0.5,0.5">
+                <Grid.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform x:Name="InvertWordScale" ScaleX="1" ScaleY="1" />
+                        <TranslateTransform x:Name="InvertWordTranslate" X="0" Y="0" />
+                    </TransformGroup>
+                </Grid.RenderTransform>
+                <Viewbox HorizontalAlignment="Center" VerticalAlignment="Center"
+                         Stretch="Uniform" MaxWidth="1120" MaxHeight="310">
+                    <Grid Margin="76,42">
+                        <Path x:Name="InvertWord" Fill="#000000" />
+                    </Grid>
+                </Viewbox>
             </Grid>
-        </Viewbox>
+        </Grid>
     </Grid>
 </UserControl>

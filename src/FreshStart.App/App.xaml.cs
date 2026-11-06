@@ -174,8 +174,7 @@ public partial class App
             Log.Warn($"启动动画执行失败，直接进入工作台: {ex.Message}");
             if (_mainWindow is not null)
             {
-                _mainWindow.StartupIntroHost.Visibility = Visibility.Collapsed;
-                _mainWindow.StartupIntroHost.Children.Clear();
+                _mainWindow.CancelStartupIntro();
             }
         }
     }

@@ -99,19 +99,63 @@ public partial class MainWindow
 
     public async Task ShowStartupIntroAsync()
     {
+        if (_viewModel.IsSidebarCollapsed)
+        {
+            _viewModel.ToggleSidebar();
+        }
+
         var completion = new TaskCompletionSource<object?>(
             TaskCreationOptions.RunContinuationsAsynchronously);
         var intro = new StartupIntroView();
         intro.Completed += (_, _) => completion.TrySetResult(null);
+        intro.ExitStarted += (_, _) => BeginContentReveal();
+        intro.TargetWordmarkProvider = () =>
+        {
+            var target = SidebarControl.GetBrandWordmarkBounds(WindowFrame);
+            if (target.IsEmpty) return null;
+            var origin = intro.TransformToAncestor(WindowFrame).Transform(new Point(0, 0));
+            return new Rect(
+                target.X - origin.X,
+                target.Y - origin.Y,
+                target.Width,
+                target.Height);
+        };
 
         StartupIntroHost.Children.Clear();
         StartupIntroHost.Children.Add(intro);
         StartupIntroHost.Visibility = Visibility.Visible;
+        SidebarRoot.Opacity = 0;
+        TitleBar.Opacity = 0;
+        ContentHost.Opacity = 0;
 
         await completion.Task.ConfigureAwait(true);
         StartupIntroHost.Children.Clear();
         StartupIntroHost.Visibility = Visibility.Collapsed;
+        if (!intro.HasMotion)
+        {
+            SidebarRoot.Opacity = 1;
+            TitleBar.Opacity = 1;
+            ContentHost.Opacity = 1;
+        }
         PageHostControl.Focus();
+    }
+
+    public void CancelStartupIntro()
+    {
+        StartupIntroHost.Children.Clear();
+        StartupIntroHost.Visibility = Visibility.Collapsed;
+        SidebarRoot.Opacity = 1;
+        TitleBar.Opacity = 1;
+        ContentHost.Opacity = 1;
+    }
+
+    private void BeginContentReveal()
+    {
+        foreach (var element in new FrameworkElement[] { SidebarRoot, TitleBar, ContentHost })
+        {
+            element.BeginAnimation(OpacityProperty, null);
+            element.Opacity = 1;
+        }
     }
 
     private void ApplyWindowBounds()

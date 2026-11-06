@@ -37,7 +37,7 @@
         </Border>
 
         <!-- 内容区 -->
-        <Border Grid.Column="1" Grid.Row="1" Background="{DynamicResource WindowBrush}"
+        <Border x:Name="ContentHost" Grid.Column="1" Grid.Row="1" Background="{DynamicResource WindowBrush}"
                 ClipToBounds="True"
                 MouseLeftButtonDown="Background_MouseLeftButtonDown">
             <shell:PageHost x:Name="PageHostControl" Margin="0,18,0,0" />

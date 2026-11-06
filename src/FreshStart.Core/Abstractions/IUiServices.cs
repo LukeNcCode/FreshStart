@@ -43,7 +43,6 @@ public interface IThemeService
 {
     bool IsDark { get; }
     Task SetThemeAsync(string theme, CancellationToken ct = default);
-    void SetAccent(string hex);
     event EventHandler? ThemeChanged;
 }
 

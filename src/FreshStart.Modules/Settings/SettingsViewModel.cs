@@ -12,15 +12,6 @@ using Microsoft.Win32;
 
 namespace FreshStart.Modules.Settings;
 
-public sealed partial class AccentOption : ObservableObject
-{
-    public string Name { get; init; } = string.Empty;
-    public string Hex { get; init; } = "#007AFF";
-
-    [ObservableProperty]
-    private bool _isSelected;
-}
-
 /// <summary>内置桌面壁纸选项。</summary>
 public sealed partial class WallpaperOption : ObservableObject
 {
@@ -41,34 +32,6 @@ public sealed partial class WallpaperOption : ObservableObject
 /// </summary>
 public sealed partial class SettingsViewModel : ObservableObject
 {
-    public IReadOnlyList<AccentOption> AccentOptions { get; } = new List<AccentOption>
-    {
-        new() { Name = "苹果蓝", Hex = "#007AFF" },
-        new() { Name = "薄荷绿", Hex = "#34C759" },
-        new() { Name = "日落橙", Hex = "#FF9500" },
-        new() { Name = "珊瑚红", Hex = "#FF3B30" },
-        new() { Name = "薰衣草", Hex = "#AF52DE" },
-        new() { Name = "石墨灰", Hex = "#636366" }
-    };
-
-    [RelayCommand]
-    private void SetAccent(AccentOption? option)
-    {
-        if (option is null) return;
-        _theme.SetAccent(option.Hex);
-        RefreshAccentState();
-        _toast.Show($"主题色已切换为「{option.Name}」", ToastKind.Success);
-    }
-
-    private void RefreshAccentState()
-    {
-        var active = _settings.Current.AccentColor;
-        foreach (var option in AccentOptions)
-        {
-            option.IsSelected = string.Equals(option.Hex, active, StringComparison.OrdinalIgnoreCase);
-        }
-    }
-
     public IReadOnlyList<WallpaperOption> WallpaperOptions { get; }
 
     [ObservableProperty] private string _currentWallpaperText = "—";
@@ -172,8 +135,6 @@ public sealed partial class SettingsViewModel : ObservableObject
         _runner.AskRestorePointOnFirstWrite = settings.Current.AskRestorePointOnFirstWrite;
         _activityConsole.EnabledChanged += (_, _) =>
             OnPropertyChanged(nameof(TaskConsoleEnabled));
-        RefreshAccentState();
-
         WallpaperOptions = new List<WallpaperOption>
         {
             new() { Key = "clouds", Name = "云雾", PreviewPath = PreviewOf("clouds") },
@@ -186,7 +147,6 @@ public sealed partial class SettingsViewModel : ObservableObject
         {
             OnPropertyChanged(nameof(IsDarkMode));
             OnPropertyChanged(nameof(ThemeSummary));
-            RefreshAccentState();
         };
 
         var entryAssembly = Assembly.GetEntryAssembly();

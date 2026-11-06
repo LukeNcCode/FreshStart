@@ -86,7 +86,7 @@
                     </StackPanel>
                     <Grid Grid.Column="1" Width="126" Height="126" Margin="22,0,12,0" VerticalAlignment="Center">
                         <controls:ScoreRing Value="{Binding ScorePercent}"
-                                            Stroke="{DynamicResource AccentGradientBrush}"
+                                            Stroke="{DynamicResource HeroTextBrush}"
                                             Track="{DynamicResource HeroBorderBrush}" />
                         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                             <TextBlock Text="{Binding ScoreText}" FontFamily="{StaticResource DisplayFont}"

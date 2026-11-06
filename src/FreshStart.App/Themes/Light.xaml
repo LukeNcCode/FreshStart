@@ -8,17 +8,17 @@
     <Color x:Key="DividerColor">#E4E7EC</Color>
     <Color x:Key="PrimaryTextColor">#141922</Color>
     <Color x:Key="SecondaryTextColor">#687284</Color>
-    <Color x:Key="AccentColor">#1769FF</Color>
+    <Color x:Key="AccentColor">#111111</Color>
     <Color x:Key="SuccessColor">#16A34A</Color>
     <Color x:Key="WarningColor">#D97706</Color>
     <Color x:Key="DangerColor">#DC2626</Color>
     <Color x:Key="HoverColor">#0F111827</Color>
-    <Color x:Key="SelectedTintColor">#1A1769FF</Color>
-    <Color x:Key="AccentTintColor">#121769FF</Color>
+    <Color x:Key="SelectedTintColor">#18111111</Color>
+    <Color x:Key="AccentTintColor">#14111111</Color>
     <Color x:Key="SuccessTintColor">#1A16A34A</Color>
     <Color x:Key="WarningTintColor">#1AD97706</Color>
     <Color x:Key="DangerTintColor">#1ADC2626</Color>
-    <Color x:Key="SidebarTintColor">#101722</Color>
+    <Color x:Key="SidebarTintColor">#F6F5F1</Color>
     <Color x:Key="SkeletonColor">#E9EEF5</Color>
     <Color x:Key="ToggleOffColor">#E4E4E9</Color>
     <Color x:Key="InputColor">#FFFFFF</Color>
@@ -48,19 +48,19 @@
     <SolidColorBrush x:Key="WarningTintBrush" Color="{StaticResource WarningTintColor}" />
     <SolidColorBrush x:Key="DangerTintBrush" Color="{StaticResource DangerTintColor}" />
     <SolidColorBrush x:Key="SidebarTintBrush" Color="{StaticResource SidebarTintColor}" />
-    <SolidColorBrush x:Key="SidebarPrimaryTextBrush" Color="#F6F8FC" />
-    <SolidColorBrush x:Key="SidebarSecondaryTextBrush" Color="#8491A5" />
-    <SolidColorBrush x:Key="SidebarHoverBrush" Color="#171F2C" />
-    <SolidColorBrush x:Key="SidebarSelectedBrush" Color="#14294A" />
-    <SolidColorBrush x:Key="SidebarSelectedTextBrush" Color="#75ABFF" />
-    <SolidColorBrush x:Key="SidebarBorderBrush" Color="#202A39" />
-    <SolidColorBrush x:Key="SidebarInputBrush" Color="#151D29" />
+    <SolidColorBrush x:Key="SidebarPrimaryTextBrush" Color="#111111" />
+    <SolidColorBrush x:Key="SidebarSecondaryTextBrush" Color="#6E6E6A" />
+    <SolidColorBrush x:Key="SidebarHoverBrush" Color="#ECEBE6" />
+    <SolidColorBrush x:Key="SidebarSelectedBrush" Color="#111111" />
+    <SolidColorBrush x:Key="SidebarSelectedTextBrush" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="SidebarBorderBrush" Color="#DEDDD7" />
+    <SolidColorBrush x:Key="SidebarInputBrush" Color="#FFFFFF" />
     <SolidColorBrush x:Key="TitleBarBrush" Color="#F8F7F4" />
-    <SolidColorBrush x:Key="AccentGradientStart" Color="#1769FF" />
-    <SolidColorBrush x:Key="AccentGradientEnd" Color="#35C7FF" />
+    <SolidColorBrush x:Key="AccentGradientStart" Color="#111111" />
+    <SolidColorBrush x:Key="AccentGradientEnd" Color="#4A4A4A" />
     <LinearGradientBrush x:Key="AccentGradientBrush" StartPoint="0,0" EndPoint="1,1">
-        <GradientStop Color="#1769FF" Offset="0" />
-        <GradientStop Color="#35C7FF" Offset="1" />
+        <GradientStop Color="#111111" Offset="0" />
+        <GradientStop Color="#4A4A4A" Offset="1" />
     </LinearGradientBrush>
     <SolidColorBrush x:Key="SkeletonBrush" Color="{StaticResource SkeletonColor}" />
     <SolidColorBrush x:Key="ToggleOffBrush" Color="{StaticResource ToggleOffColor}" />

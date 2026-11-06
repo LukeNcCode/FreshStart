@@ -48,53 +48,17 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel>
-                            <TextBlock Text="主题色" FontSize="13" FontWeight="SemiBold" />
-                            <TextBlock Text="影响按钮、链接与选中高亮；随主题一起保存" Style="{StaticResource CaptionText}"
-                                       Margin="0,4,0,0" />
+                            <TextBlock Text="界面配色" FontSize="13" FontWeight="SemiBold" />
+                            <TextBlock Text="黑白单色界面：浅色主题使用墨黑，深色主题使用银灰"
+                                       Style="{StaticResource CaptionText}" Margin="0,4,0,0" />
                         </StackPanel>
-                        <ItemsControl Grid.Column="1" ItemsSource="{Binding AccentOptions}" VerticalAlignment="Center">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Button Width="26" Height="26" Margin="3,0,0,0"
-                                            Background="{Binding Hex}" ToolTip="{Binding Name}"
-                                            Command="{Binding DataContext.SetAccentCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                            CommandParameter="{Binding}"
-                                            AutomationProperties.Name="{Binding Name}">
-                                        <Button.Template>
-                                            <ControlTemplate TargetType="{x:Type Button}">
-                                                <Grid Width="26" Height="26">
-                                                    <Border x:Name="SelectionRing" CornerRadius="13"
-                                                            BorderBrush="Transparent" BorderThickness="1" />
-                                                    <Border Margin="4" CornerRadius="9"
-                                                            Background="{TemplateBinding Background}"
-                                                            BorderBrush="#28000000" BorderThickness="1" />
-                                                    <Path x:Name="Check" Data="{StaticResource CheckIcon}"
-                                                          Width="8" Height="8" Stretch="Uniform"
-                                                          Stroke="White" StrokeThickness="2"
-                                                          StrokeStartLineCap="Round" StrokeEndLineCap="Round"
-                                                          HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                          Opacity="0" />
-                                                </Grid>
-                                                <ControlTemplate.Triggers>
-                                                    <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                                                        <Setter TargetName="SelectionRing" Property="BorderBrush"
-                                                                Value="{DynamicResource PrimaryTextBrush}" />
-                                                        <Setter TargetName="Check" Property="Opacity" Value="1" />
-                                                    </DataTrigger>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter TargetName="SelectionRing" Property="BorderBrush"
-                                                                Value="{DynamicResource SecondaryTextBrush}" />
-                                                    </Trigger>
-                                                </ControlTemplate.Triggers>
-                                            </ControlTemplate>
-                                        </Button.Template>
-                                    </Button>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                        <Border Grid.Column="1" Width="54" Height="26" CornerRadius="13"
+                                Background="#111111" BorderBrush="{DynamicResource DividerBrush}"
+                                BorderThickness="1" VerticalAlignment="Center">
+                            <TextBlock Text="MONO" FontFamily="{StaticResource MonoFont}"
+                                       FontSize="8" Foreground="White"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
                     </Grid>
 
                     <Grid>

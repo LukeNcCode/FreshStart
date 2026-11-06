@@ -71,41 +71,19 @@
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0" Margin="18,16,18,12">
-            <StackPanel Orientation="Horizontal"
-                        Visibility="{Binding IsCollapsed, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}, Converter={StaticResource BoolToCollapsedVisibility}}">
-                <Border Width="38" Height="38" CornerRadius="12"
-                        Background="{DynamicResource AccentGradientBrush}">
-                    <Grid>
-                        <Border Width="18" Height="3" CornerRadius="2" Background="White"
-                                HorizontalAlignment="Left" VerticalAlignment="Top" Margin="9,11,0,0" />
-                        <Border Width="12" Height="3" CornerRadius="2" Background="#C8FFFFFF"
-                                HorizontalAlignment="Left" VerticalAlignment="Top" Margin="9,18,0,0" />
-                        <Ellipse Width="5" Height="5" Fill="White" HorizontalAlignment="Right"
-                                 VerticalAlignment="Bottom" Margin="0,0,8,8" />
-                    </Grid>
-                </Border>
-                <StackPanel Margin="12,0,0,0" VerticalAlignment="Center">
-                    <TextBlock Text="FreshStart" FontFamily="{StaticResource DisplayFont}"
-                               FontSize="16" FontWeight="Bold"
-                               Foreground="{DynamicResource SidebarPrimaryTextBrush}" />
-                    <TextBlock Text="CONTROL DECK · WIN11" FontFamily="{StaticResource DisplayFont}"
-                               FontSize="8.5" FontWeight="SemiBold" Margin="0,2,0,0"
-                               Foreground="{DynamicResource SidebarSecondaryTextBrush}" />
-                </StackPanel>
-            </StackPanel>
-            <Border Width="38" Height="38" CornerRadius="12"
-                    Background="{DynamicResource AccentGradientBrush}"
-                    HorizontalAlignment="Center"
-                    Visibility="{Binding IsCollapsed, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}, Converter={StaticResource BoolToVisibility}}">
-                <Grid>
-                    <Border Width="18" Height="3" CornerRadius="2" Background="White"
-                            HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,12,0,0" />
-                    <Border Width="12" Height="3" CornerRadius="2" Background="#C8FFFFFF"
-                            HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,19,0,0" />
-                    <Ellipse Width="5" Height="5" Fill="White" HorizontalAlignment="Right"
-                             VerticalAlignment="Bottom" Margin="0,0,9,9" />
-                </Grid>
-            </Border>
+            <TextBlock x:Name="BrandWordmark" Text="FreshStart"
+                       FontFamily="{StaticResource DisplayFont}"
+                       FontSize="20" FontWeight="SemiBold"
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Center" Margin="7,0,0,0"
+                       Foreground="{DynamicResource SidebarPrimaryTextBrush}"
+                       Visibility="{Binding IsCollapsed, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}, Converter={StaticResource BoolToCollapsedVisibility}}" />
+            <TextBlock x:Name="BrandInitial" Text="F"
+                       FontFamily="{StaticResource DisplayFont}"
+                       FontSize="20" FontWeight="SemiBold"
+                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                       Foreground="{DynamicResource SidebarPrimaryTextBrush}"
+                       Visibility="{Binding IsCollapsed, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}, Converter={StaticResource BoolToVisibility}}" />
         </Grid>
 
         <StackPanel Grid.Row="1" Margin="12,0,12,8"

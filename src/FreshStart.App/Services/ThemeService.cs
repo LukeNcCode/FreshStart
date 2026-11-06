@@ -13,13 +13,11 @@ public sealed class ThemeService : IThemeService
 {
     private readonly SettingsService _settings;
     private string _current = "Light";
-    private string _accent;
 
     public ThemeService(SettingsService settings)
     {
         _settings = settings;
         _current = settings.Current.Theme;
-        _accent = string.IsNullOrWhiteSpace(settings.Current.AccentColor) ? "#007AFF" : settings.Current.AccentColor;
     }
 
     public bool IsDark => string.Equals(_current, "Dark", StringComparison.OrdinalIgnoreCase);
@@ -32,7 +30,7 @@ public sealed class ThemeService : IThemeService
     public void ApplyInitial()
     {
         ApplyCore(_current, raiseEvent: false);
-        ApplyAccent((Color)ColorConverter.ConvertFromString(_accent));
+        ApplyAccent(DesignAccent);
     }
 
     public Task SetThemeAsync(string theme, CancellationToken ct = default)
@@ -43,22 +41,9 @@ public sealed class ThemeService : IThemeService
         return Task.CompletedTask;
     }
 
-    public void SetAccent(string hex)
-    {
-        if (string.IsNullOrWhiteSpace(hex)) return;
-        try
-        {
-            var color = (Color)ColorConverter.ConvertFromString(hex);
-            _accent = $"#{color.R:X2}{color.G:X2}{color.B:X2}";
-            _settings.Current.AccentColor = _accent;
-            _settings.SaveNow();
-            ApplyAccent(color);
-        }
-        catch (Exception ex)
-        {
-            Log.Warn($"设置主题色失败: {hex} - {ex.Message}");
-        }
-    }
+    private Color DesignAccent => IsDark
+        ? Color.FromRgb(0x5A, 0x5A, 0x5A)
+        : Color.FromRgb(0x11, 0x11, 0x11);
 
     private void ApplyAccent(Color color)
     {
@@ -69,10 +54,9 @@ public sealed class ThemeService : IThemeService
         brush.Freeze();
         var tint = new SolidColorBrush(Color.FromArgb(0x22, color.R, color.G, color.B));
         tint.Freeze();
-        var gradientEnd = Color.FromRgb(
-            (byte)Math.Min(255, color.R + 42),
-            (byte)Math.Min(255, color.G + 78),
-            (byte)Math.Min(255, color.B + 30));
+        var gradientEnd = IsDark
+            ? Color.FromRgb(0x8C, 0x8C, 0x8C)
+            : Color.FromRgb(0x4A, 0x4A, 0x4A);
         var gradient = new LinearGradientBrush(color, gradientEnd, new Point(0, 0), new Point(1, 1));
         gradient.Freeze();
         var glow = new RadialGradientBrush
@@ -112,7 +96,7 @@ public sealed class ThemeService : IThemeService
 
             _current = theme;
             MotionPreferences.SetEnabled(_settings.Current.AnimationsEnabled);
-            ApplyAccent((Color)ColorConverter.ConvertFromString(_accent));
+            ApplyAccent(DesignAccent);
             Log.Info($"主题已切换: {theme}");
 
             if (raiseEvent) ThemeChanged?.Invoke(this, EventArgs.Empty);

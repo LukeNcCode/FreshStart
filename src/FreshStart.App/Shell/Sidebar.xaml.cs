@@ -68,6 +68,35 @@ public partial class Sidebar
 
     public void SetCollapsed(bool collapsed) => IsCollapsed = collapsed;
 
+    public Rect GetBrandWordmarkBounds(FrameworkElement relativeTo)
+    {
+        if (!BrandWordmark.IsVisible || BrandWordmark.ActualWidth <= 0)
+        {
+            return Rect.Empty;
+        }
+
+        var point = BrandWordmark.TransformToAncestor(relativeTo)
+            .Transform(new Point(0, 0));
+        var typeface = new System.Windows.Media.Typeface(
+            BrandWordmark.FontFamily,
+            BrandWordmark.FontStyle,
+            BrandWordmark.FontWeight,
+            BrandWordmark.FontStretch);
+        var formatted = new System.Windows.Media.FormattedText(
+            BrandWordmark.Text,
+            System.Globalization.CultureInfo.CurrentUICulture,
+            FlowDirection.LeftToRight,
+            typeface,
+            BrandWordmark.FontSize,
+            BrandWordmark.Foreground,
+            System.Windows.Media.VisualTreeHelper.GetDpi(this).PixelsPerDip);
+        var bounds = formatted.BuildGeometry(new Point(0, 0)).Bounds;
+        point.Offset(bounds.X, bounds.Y);
+        return new Rect(point, new Size(
+            Math.Max(1, bounds.Width),
+            Math.Max(1, bounds.Height)));
+    }
+
     private void NavButton_Loaded(object sender, RoutedEventArgs e)
     {
         if (sender is not Button button || button.DataContext is not SidebarItem item) return;

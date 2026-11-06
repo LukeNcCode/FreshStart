@@ -42,13 +42,13 @@
     </Style>
 
     <LinearGradientBrush x:Key="HeroSurfaceBrush" StartPoint="0,0" EndPoint="1,1">
-        <GradientStop Color="#111A28" Offset="0" />
-        <GradientStop Color="#0C1E3B" Offset="0.55" />
-        <GradientStop Color="#10141D" Offset="1" />
+        <GradientStop Color="#050505" Offset="0" />
+        <GradientStop Color="#111111" Offset="0.55" />
+        <GradientStop Color="#050505" Offset="1" />
     </LinearGradientBrush>
-    <SolidColorBrush x:Key="HeroTextBrush" Color="#F7FAFF" />
-    <SolidColorBrush x:Key="HeroMutedTextBrush" Color="#AAB9CE" />
-    <SolidColorBrush x:Key="HeroBorderBrush" Color="#243955" />
+    <SolidColorBrush x:Key="HeroTextBrush" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="HeroMutedTextBrush" Color="#A3A3A3" />
+    <SolidColorBrush x:Key="HeroBorderBrush" Color="#2B2B2B" />
 
     <Style x:Key="BodyText" TargetType="{x:Type TextBlock}">
         <Setter Property="FontSize" Value="13" />

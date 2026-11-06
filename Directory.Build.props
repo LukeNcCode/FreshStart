@@ -10,9 +10,9 @@
     <Company>FreshStart</Company>
     <Product>FreshStart 开荒工具</Product>
     <Copyright>Copyright © 2026</Copyright>
-    <Version>0.2.2</Version>
-    <FileVersion>0.2.2.0</FileVersion>
-    <InformationalVersion>0.2.2</InformationalVersion>
+    <Version>0.2.3</Version>
+    <FileVersion>0.2.3.0</FileVersion>
+    <InformationalVersion>0.2.3</InformationalVersion>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <!-- 禁止把 obj/bin 里的生成文件当作源码编译 -->
     <EnableDefaultCompileItems>true</EnableDefaultCompileItems>

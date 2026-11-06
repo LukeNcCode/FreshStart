@@ -13,12 +13,12 @@
     <Color x:Key="WarningColor">#FBBF24</Color>
     <Color x:Key="DangerColor">#F87171</Color>
     <Color x:Key="HoverColor">#14FFFFFF</Color>
-    <Color x:Key="SelectedTintColor">#264C8DFF</Color>
-    <Color x:Key="AccentTintColor">#264C8DFF</Color>
+    <Color x:Key="SelectedTintColor">#265A5A5A</Color>
+    <Color x:Key="AccentTintColor">#265A5A5A</Color>
     <Color x:Key="SuccessTintColor">#2634D399</Color>
     <Color x:Key="WarningTintColor">#26FBBF24</Color>
     <Color x:Key="DangerTintColor">#26F87171</Color>
-    <Color x:Key="SidebarTintColor">#080D14</Color>
+    <Color x:Key="SidebarTintColor">#F6F5F1</Color>
     <Color x:Key="SkeletonColor">#2B2B31</Color>
     <Color x:Key="ToggleOffColor">#3A3A42</Color>
     <Color x:Key="InputColor">#121922</Color>
@@ -48,13 +48,13 @@
     <SolidColorBrush x:Key="WarningTintBrush" Color="{StaticResource WarningTintColor}" />
     <SolidColorBrush x:Key="DangerTintBrush" Color="{StaticResource DangerTintColor}" />
     <SolidColorBrush x:Key="SidebarTintBrush" Color="{StaticResource SidebarTintColor}" />
-    <SolidColorBrush x:Key="SidebarPrimaryTextBrush" Color="#F1F5FA" />
-    <SolidColorBrush x:Key="SidebarSecondaryTextBrush" Color="#78869A" />
-    <SolidColorBrush x:Key="SidebarHoverBrush" Color="#111A26" />
-    <SolidColorBrush x:Key="SidebarSelectedBrush" Color="#102744" />
-    <SolidColorBrush x:Key="SidebarSelectedTextBrush" Color="#6EA6FF" />
-    <SolidColorBrush x:Key="SidebarBorderBrush" Color="#182230" />
-    <SolidColorBrush x:Key="SidebarInputBrush" Color="#101720" />
+    <SolidColorBrush x:Key="SidebarPrimaryTextBrush" Color="#111111" />
+    <SolidColorBrush x:Key="SidebarSecondaryTextBrush" Color="#6E6E6A" />
+    <SolidColorBrush x:Key="SidebarHoverBrush" Color="#ECEBE6" />
+    <SolidColorBrush x:Key="SidebarSelectedBrush" Color="#111111" />
+    <SolidColorBrush x:Key="SidebarSelectedTextBrush" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="SidebarBorderBrush" Color="#DEDDD7" />
+    <SolidColorBrush x:Key="SidebarInputBrush" Color="#FFFFFF" />
     <SolidColorBrush x:Key="TitleBarBrush" Color="#090D13" />
     <SolidColorBrush x:Key="AccentGradientStart" Color="#4F8DFF" />
     <SolidColorBrush x:Key="AccentGradientEnd" Color="#36D6FF" />
