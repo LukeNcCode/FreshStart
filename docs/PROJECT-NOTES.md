@@ -60,6 +60,8 @@
 
 > 0.2.3：主界面收敛为黑白单色体系，纸白侧栏左上角只保留黑色 `FreshStart` 字标。启动动画按三段严格串行校准：描边 400ms 淡入、填充 2000ms 左向右扫过；缓冲 200ms 后由右向左执行 750ms 黑白反转并停留 250ms。随后黑字缩放移动到左上角与主字标重合，白底以 400ms 淡出，主界面保持完整并自然显露。阶段 C 不使用旋转、缩放或透明度退场。
 
+> 0.2.5：恢复页面正文的主题前景色，修复深色模式中的黑字问题；按钮内容统一继承按钮自身前景色，并为侧栏选中项补充悬停组合状态，避免白字落入浅灰背景。
+
 > 0.2.4：修复按钮文字前景色被全局 TextBlock 样式覆盖的问题，主按钮内容会正确继承模板前景色；同时提高侧栏未选中项、深色次级文字、页签和禁用按钮的对比度。
 
 > 0.29.1：**重新评估后回到 winget 作主通道，并补一条官方直链兜底**。评估结论（均为实测）：winget 覆盖 39/39、有 manifest SHA256 + 安装包签名校验，且上一轮 VM 实测中它成功装上了 QQ NT；Chocolatey 只有 34/39（QQ NT 只对应传统 QQ 9.3.9）、国内没有任何可用镜像（阿里/腾讯 404，华为云非 NuGet）、包脚本是 PowerShell 供应链更弱、VM 还得多装一步，因此 0.29.0-beta 的替换已回滚（`ChocolateyService` / `ChocoInstallBatchOperation` 代码保留但不注册）。新增 **`DirectInstallerCatalog` + `DirectInstallerService`**：对 7 个高频软件（微信 / Chrome / VS Code / 7-Zip / Everything / Bandizip / PotPlayer）登记厂商官方安装包，**winget 失败时自动改用直链**（HTTPS 强制、可选 SHA256、登记好的静默参数、20 分钟超时、安装后按 ARP 名称检测）。实测下载延迟：微信 285ms、Chrome 437ms、VS Code 741ms、Everything 824ms、Bandizip 1.2s、7-Zip 1.9s、PotPlayer 3.6s。QQ NT / 钉钉 / 火狐 / Notepad++ 的直链是版本化地址或国内不可达，不登记，继续走 winget。启动门槛（内置包版本）、索引刷新、`0x8A15005E` 自愈、自定义安装路径全部恢复。

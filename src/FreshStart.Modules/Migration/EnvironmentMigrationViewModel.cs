@@ -121,6 +121,10 @@ public sealed partial class EnvironmentMigrationViewModel : ObservableObject
     [ObservableProperty]
     private string _selectedText = "0";
 
+    public string ExportButtonText => $"生成克隆包 · {SelectedText}";
+
+    partial void OnSelectedTextChanged(string value) => OnPropertyChanged(nameof(ExportButtonText));
+
     public async Task LoadAsync()
     {
         if (Items.Count > 0 || IsLoading) return;

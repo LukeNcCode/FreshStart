@@ -22,10 +22,8 @@
                             Command="{Binding RestoreCommand}" Margin="0,0,8,0" />
                     <Button Style="{StaticResource PrimaryButton}" Command="{Binding ExportCommand}"
                             MinWidth="142">
-                        <TextBlock>
-                            <Run Text="生成克隆包 · " />
-                            <Run Text="{Binding SelectedText, Mode=OneWay}" />
-                        </TextBlock>
+                        <TextBlock Text="{Binding ExportButtonText}"
+                                   Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}" />
                     </Button>
                 </StackPanel>
             </Grid>

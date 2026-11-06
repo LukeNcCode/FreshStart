@@ -43,6 +43,15 @@
                                 <Setter TargetName="Label" Property="FontWeight" Value="SemiBold" />
                                 <Setter TargetName="Indicator" Property="Visibility" Value="Visible" />
                             </DataTrigger>
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding IsSelected}" Value="True" />
+                                    <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource TemplatedParent}}"
+                                               Value="True" />
+                                </MultiDataTrigger.Conditions>
+                                <Setter TargetName="HoverBg" Property="Background"
+                                        Value="{DynamicResource SidebarSelectedBrush}" />
+                            </MultiDataTrigger>
                             <DataTrigger Binding="{Binding IsAvailable}" Value="False">
                                 <Setter Property="Opacity" Value="0.5" />
                             </DataTrigger>
