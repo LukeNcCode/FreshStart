@@ -89,6 +89,31 @@ public sealed class OperationStep
     public bool IsError { get; set; }
 }
 
+public enum OperationActivityPhase
+{
+    Started,
+    Progress,
+    Completed,
+    Failed,
+    Cancelled
+}
+
+/// <summary>
+/// 全局任务控制台事件。Runner 在操作开始、进度更新和结束时发布，
+/// App 层负责渲染；Core 不依赖 WPF。
+/// </summary>
+public sealed class OperationActivity
+{
+    public DateTimeOffset Timestamp { get; set; } = DateTimeOffset.Now;
+    public string OperationId { get; set; } = string.Empty;
+    public string OperationName { get; set; } = string.Empty;
+    public string Message { get; set; } = string.Empty;
+    public int? Percent { get; set; }
+    public bool IsError { get; set; }
+    public OperationActivityPhase Phase { get; set; }
+    public RiskLevel Risk { get; set; }
+}
+
 /// <summary>一次执行的结果，UI 用它决定 Toast、错误面板与是否显示"撤销"。</summary>
 public sealed class OperationExecution
 {

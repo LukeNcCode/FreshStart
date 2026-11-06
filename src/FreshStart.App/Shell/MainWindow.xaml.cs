@@ -6,6 +6,7 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Shell;
 using System.Windows.Threading;
 using FreshStart.App.Animation;
 using FreshStart.App.Dialogs;
@@ -30,7 +31,11 @@ public partial class MainWindow
     public MainWindow()
     {
         InitializeComponent();
-        SourceInitialized += (_, _) => WindowMaximizeFix.Attach(this);
+        SourceInitialized += (_, _) =>
+        {
+            WindowMaximizeFix.Attach(this);
+            WindowCornerService.Apply(this);
+        };
         StateChanged += (_, _) => UpdateMaximizeVisual();
     }
 
@@ -229,6 +234,10 @@ public partial class MainWindow
     {
         if (MaxButton is null) return;
         var maximized = WindowState == WindowState.Maximized;
+        WindowFrame.CornerRadius = maximized ? new CornerRadius(0) : new CornerRadius(13);
+        WindowFrame.BorderThickness = maximized ? new Thickness(0) : new Thickness(1);
+        var chrome = WindowChrome.GetWindowChrome(this);
+        if (chrome is not null) chrome.CornerRadius = maximized ? new CornerRadius(0) : new CornerRadius(13);
         MaxButton.Tag = FindResource(maximized ? "RestoreGlyphIcon" : "MaxGlyphIcon");
         MaxButton.ToolTip = maximized ? "还原" : "最大化";
     }

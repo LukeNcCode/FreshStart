@@ -49,6 +49,7 @@ public sealed class OperationRunner
     }
 
     public event EventHandler? HistoryChanged;
+    public event EventHandler<OperationActivity>? Activity;
 
     public async Task<OperationExecution> ExecuteAsync(
         ISystemOperation operation,
@@ -73,15 +74,38 @@ public sealed class OperationRunner
 
         using var lease = await _writeLock.EnterAsync(ct).ConfigureAwait(false);
         var execution = new OperationExecution { Preview = preview, StartedAt = DateTimeOffset.Now };
+        RaiseActivity(new OperationActivity
+        {
+            OperationId = operation.Id,
+            OperationName = operation.Name,
+            Message = "已获得确认，正在准备执行",
+            Percent = 0,
+            Phase = OperationActivityPhase.Started,
+            Risk = operation.RiskLevel
+        });
+        var observedProgress = new OperationProgress(step =>
+        {
+            progress?.Report(step);
+            RaiseActivity(new OperationActivity
+            {
+                OperationId = operation.Id,
+                OperationName = operation.Name,
+                Message = step.Message,
+                Percent = step.Percent,
+                IsError = step.IsError,
+                Phase = OperationActivityPhase.Progress,
+                Risk = operation.RiskLevel
+            });
+        });
         try
         {
             // 第 1 步：读取当前值（失败则不产生任何写入）
-            progress?.Report(new OperationStep { Message = "正在读取当前状态…", Percent = 10 });
+            observedProgress.Report(new OperationStep { Message = "正在读取当前状态…", Percent = 10 });
             var snapshot = await operation.CaptureCurrentStateAsync(ct).ConfigureAwait(false);
             execution.Snapshot = snapshot;
 
             // 第 2 步：备份（失败则中止）
-            progress?.Report(new OperationStep { Message = "正在创建备份…", Percent = 25 });
+            observedProgress.Report(new OperationStep { Message = "正在创建备份…", Percent = 25 });
             var handle = await _backupStore.SaveAsync(snapshot, preview, ct).ConfigureAwait(false);
             execution.BackupDirectory = handle.Directory;
 
@@ -89,7 +113,7 @@ public sealed class OperationRunner
             if (SessionRestorePointChoice == RestorePointChoice.EnabledForSession &&
                 operation.RiskLevel == RiskLevel.High)
             {
-                progress?.Report(new OperationStep { Message = "正在创建系统还原点（可能需要数秒）…", Percent = 35 });
+                observedProgress.Report(new OperationStep { Message = "正在创建系统还原点（可能需要数秒）…", Percent = 35 });
                 var rp = await _restorePoints.CreateAsync($"FreshStart · {operation.Name}", ct).ConfigureAwait(false);
                 execution.RestorePointMessage = rp.Message;
                 if (!rp.Success)
@@ -100,11 +124,11 @@ public sealed class OperationRunner
             }
 
             // 第 3 步：写入
-            progress?.Report(new OperationStep { Message = "正在应用变更…", Percent = 55 });
+            observedProgress.Report(new OperationStep { Message = "正在应用变更…", Percent = 55 });
             OperationResult applyResult;
             try
             {
-                applyResult = await operation.ApplyAsync(snapshot, progress, ct).ConfigureAwait(false);
+                applyResult = await operation.ApplyAsync(snapshot, observedProgress, ct).ConfigureAwait(false);
                 if (!applyResult.Success)
                 {
                     throw new OperationFailedException(applyResult.Message, applyResult.Error);
@@ -119,7 +143,7 @@ public sealed class OperationRunner
                     Log.Error(cancelled
                         ? $"操作被取消，开始回滚已应用的步骤: {operation.Id}"
                         : $"操作失败，开始回滚: {operation.Id}", ex);
-                    progress?.Report(new OperationStep
+                    observedProgress.Report(new OperationStep
                     {
                         Message = cancelled ? "已取消，正在回滚已应用的步骤…" : "执行失败，正在自动回滚…",
                         Percent = 80,
@@ -127,7 +151,7 @@ public sealed class OperationRunner
                     });
                     execution.Cancelled = cancelled;
                     execution.RolledBack = true;
-                    var rollback = await operation.RollbackAsync(snapshot, progress, CancellationToken.None).ConfigureAwait(false);
+                    var rollback = await operation.RollbackAsync(snapshot, observedProgress, CancellationToken.None).ConfigureAwait(false);
                     execution.RollbackFailed = !rollback.Success;
                     execution.Result = OperationResult.Fail(
                         execution.RollbackFailed
@@ -153,11 +177,12 @@ public sealed class OperationRunner
                 }
                 execution.FinishedAt = DateTimeOffset.Now;
                 await AppendHistoryAsync(execution, operation).ConfigureAwait(false);
+                RaiseCompletion(operation, execution, observedProgress);
                 return execution;
             }
 
             // 第 4 步（成功分支）：只有可回滚的操作才进入撤销栈
-            progress?.Report(new OperationStep { Message = "完成", Percent = 100 });
+            observedProgress.Report(new OperationStep { Message = "完成", Percent = 100 });
             execution.Result = OperationResult.Ok(applyResult.Message);
             execution.FinishedAt = DateTimeOffset.Now;
             if (operation.CanRollback)
@@ -166,6 +191,7 @@ public sealed class OperationRunner
             }
             await AppendHistoryAsync(execution, operation).ConfigureAwait(false);
             Log.Info($"操作成功: {operation.Id}，备份: {handle.Directory}");
+            RaiseCompletion(operation, execution, observedProgress);
             return execution;
         }
         catch (OperationCanceledException)
@@ -174,6 +200,7 @@ public sealed class OperationRunner
             execution.Result = OperationResult.Fail("已取消");
             execution.FinishedAt = DateTimeOffset.Now;
             await AppendHistoryAsync(execution, operation).ConfigureAwait(false);
+            RaiseCompletion(operation, execution, observedProgress);
             return execution;
         }
         catch (Exception ex)
@@ -182,6 +209,7 @@ public sealed class OperationRunner
             execution.FinishedAt = DateTimeOffset.Now;
             Log.Error($"操作中止: {operation.Id}", ex);
             await AppendHistoryAsync(execution, operation).ConfigureAwait(false);
+            RaiseCompletion(operation, execution, observedProgress);
             return execution;
         }
     }
@@ -197,12 +225,36 @@ public sealed class OperationRunner
             _undoStack.RemoveAt(_undoStack.Count - 1);
         }
 
+        RaiseActivity(new OperationActivity
+        {
+            OperationId = entry.Preview.OperationId,
+            OperationName = $"撤销 · {entry.Preview.Name}",
+            Message = "正在准备撤销",
+            Percent = 0,
+            Phase = OperationActivityPhase.Started,
+            Risk = entry.Preview.Risk
+        });
+        var observedProgress = new OperationProgress(step =>
+        {
+            progress?.Report(step);
+            RaiseActivity(new OperationActivity
+            {
+                OperationId = entry.Preview.OperationId,
+                OperationName = $"撤销 · {entry.Preview.Name}",
+                Message = step.Message,
+                Percent = step.Percent,
+                IsError = step.IsError,
+                Phase = OperationActivityPhase.Progress,
+                Risk = entry.Preview.Risk
+            });
+        });
+
         using var lease = await _writeLock.EnterAsync(ct).ConfigureAwait(false);
 
-        progress?.Report(new OperationStep { Message = $"正在撤销：{entry.Preview.Name}", Percent = 20 });
+        observedProgress.Report(new OperationStep { Message = $"正在撤销：{entry.Preview.Name}", Percent = 20 });
         // 一旦开始撤销就必须完整执行；取消只允许发生在获得写锁之前。
         var result = await entry.Operation.RollbackAsync(
-            entry.Snapshot, progress, CancellationToken.None).ConfigureAwait(false);
+            entry.Snapshot, observedProgress, CancellationToken.None).ConfigureAwait(false);
         var execution = new OperationExecution
         {
             Preview = entry.Preview,
@@ -239,6 +291,18 @@ public sealed class OperationRunner
         }
 
         RaiseHistoryChanged();
+        RaiseActivity(new OperationActivity
+        {
+            OperationId = entry.Preview.OperationId,
+            OperationName = $"撤销 · {entry.Preview.Name}",
+            Message = result.Message,
+            Percent = 100,
+            IsError = !result.Success,
+            Phase = result.Success
+                ? OperationActivityPhase.Completed
+                : OperationActivityPhase.Failed,
+            Risk = entry.Preview.Risk
+        });
         return execution;
     }
 
@@ -280,6 +344,42 @@ public sealed class OperationRunner
         catch (Exception ex) { Log.Warn($"历史变更事件处理失败: {ex.Message}"); }
     }
 
+    private void RaiseCompletion(
+        ISystemOperation operation,
+        OperationExecution execution,
+        IProgress<OperationStep> progress)
+    {
+        if (!execution.Success && !execution.Cancelled)
+        {
+            progress.Report(new OperationStep
+            {
+                Message = execution.Result.Message,
+                Percent = 100,
+                IsError = true
+            });
+        }
+        RaiseActivity(new OperationActivity
+        {
+            OperationId = operation.Id,
+            OperationName = operation.Name,
+            Message = execution.Result.Message,
+            Percent = execution.Success ? 100 : 90,
+            IsError = !execution.Success,
+            Phase = execution.Cancelled
+                ? OperationActivityPhase.Cancelled
+                : execution.Success
+                    ? OperationActivityPhase.Completed
+                    : OperationActivityPhase.Failed,
+            Risk = operation.RiskLevel
+        });
+    }
+
+    private void RaiseActivity(OperationActivity activity)
+    {
+        try { Activity?.Invoke(this, activity); }
+        catch (Exception ex) { Log.Warn($"任务控制台事件处理失败: {ex.Message}"); }
+    }
+
     private static OperationPreview BuildPreview(ISystemOperation operation) => new()
     {
         OperationId = operation.Id,
@@ -295,6 +395,12 @@ public sealed class OperationRunner
         OperationSnapshot Snapshot,
         string BackupDirectory,
         OperationPreview Preview);
+
+    private sealed class OperationProgress(Action<OperationStep> report)
+        : IProgress<OperationStep>
+    {
+        public void Report(OperationStep value) => report(value);
+    }
 }
 
 public sealed class OperationFailedException : Exception

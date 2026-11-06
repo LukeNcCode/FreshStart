@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Text;
+using FreshStart.Core.Diagnostics;
 
 namespace FreshStart.Services.System;
 
@@ -127,6 +128,10 @@ public static class SystemProcessRunner
     {
         try
         {
+            var adminCommand =
+                $"cmd.exe /c \"{wrapperPath}\"";
+            NativeCommandTrace.Started(adminCommand, Environment.CurrentDirectory);
+            var stopwatch = Stopwatch.StartNew();
             using var process = Process.Start(new ProcessStartInfo
             {
                 FileName = Path.Combine(Environment.SystemDirectory, "cmd.exe"),
@@ -138,6 +143,9 @@ public static class SystemProcessRunner
 
             if (process is null)
             {
+                NativeCommandTrace.Completed(
+                    adminCommand, -1, "无法启动 cmd.exe；" + reason,
+                    stopwatch.Elapsed, Environment.CurrentDirectory);
                 return new SystemProcessResult { Error = "无法启动 cmd.exe；" + reason };
             }
 
@@ -150,16 +158,20 @@ public static class SystemProcessRunner
             catch (OperationCanceledException)
             {
                 try { process.Kill(entireProcessTree: true); } catch { /* ignore */ }
-                return new SystemProcessResult
+                var timedOut = new SystemProcessResult
                 {
                     Started = true,
                     ExitCode = -1,
                     Output = ReadLog(logPath),
                     Error = "执行超时；" + reason
                 };
+                NativeCommandTrace.Completed(
+                    adminCommand, -1, timedOut.Output + Environment.NewLine + timedOut.Error,
+                    stopwatch.Elapsed, Environment.CurrentDirectory);
+                return timedOut;
             }
 
-            return new SystemProcessResult
+            var result = new SystemProcessResult
             {
                 Started = true,
                 UsedSystemToken = false,
@@ -167,15 +179,25 @@ public static class SystemProcessRunner
                 Output = ReadLog(logPath),
                 Error = reason
             };
+            NativeCommandTrace.Completed(
+                adminCommand, result.ExitCode, result.Output + Environment.NewLine + result.Error,
+                stopwatch.Elapsed, Environment.CurrentDirectory);
+            return result;
         }
         catch (Exception ex)
         {
+            NativeCommandTrace.Completed(
+                $"cmd.exe /c \"{wrapperPath}\"", -1, ex.ToString(), TimeSpan.Zero,
+                Environment.CurrentDirectory);
             return new SystemProcessResult { Error = ex.Message + "；" + reason };
         }
     }
 
     private static (int ExitCode, string Output) Run(string fileName, string[] arguments, TimeSpan timeout)
     {
+        var command = NativeCommandTrace.Format(fileName, arguments);
+        NativeCommandTrace.Started(command, Environment.CurrentDirectory);
+        var stopwatch = Stopwatch.StartNew();
         try
         {
             var startInfo = new ProcessStartInfo
@@ -184,25 +206,42 @@ public static class SystemProcessRunner
                 UseShellExecute = false,
                 CreateNoWindow = true,
                 RedirectStandardOutput = true,
-                RedirectStandardError = true
+                RedirectStandardError = true,
+                StandardOutputEncoding = ConsoleEncoding.OemCodePage,
+                StandardErrorEncoding = ConsoleEncoding.OemCodePage
             };
             foreach (var argument in arguments) startInfo.ArgumentList.Add(argument);
 
             using var process = Process.Start(startInfo);
-            if (process is null) return (-1, "无法启动进程");
+            if (process is null)
+            {
+                NativeCommandTrace.Completed(
+                    command, -1, "无法启动进程", stopwatch.Elapsed, Environment.CurrentDirectory);
+                return (-1, "无法启动进程");
+            }
 
             var output = process.StandardOutput.ReadToEndAsync();
             var error = process.StandardError.ReadToEndAsync();
             if (!process.WaitForExit((int)Math.Clamp(timeout.TotalMilliseconds, 1, int.MaxValue)))
             {
                 try { process.Kill(entireProcessTree: true); } catch { /* ignore */ }
+                NativeCommandTrace.Completed(
+                    command, -1, "命令超时", stopwatch.Elapsed, Environment.CurrentDirectory);
                 return (-1, "命令超时");
             }
 
-            return (process.ExitCode, output.GetAwaiter().GetResult() + error.GetAwaiter().GetResult());
+            var result = (
+                ExitCode: process.ExitCode,
+                Output: output.GetAwaiter().GetResult() + error.GetAwaiter().GetResult());
+            NativeCommandTrace.Completed(
+                command, result.ExitCode, result.Output, stopwatch.Elapsed,
+                Environment.CurrentDirectory);
+            return result;
         }
         catch (Exception ex)
         {
+            NativeCommandTrace.Completed(
+                command, -1, ex.ToString(), stopwatch.Elapsed, Environment.CurrentDirectory);
             return (-1, ex.Message);
         }
     }

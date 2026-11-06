@@ -74,6 +74,8 @@ public sealed class CompositionRoot
     public DialogService Dialogs { get; }
     public RegistryService Registry { get; }
     public OperationRunner Runner { get; }
+    public ActivityConsoleService ActivityConsole { get; }
+    public ActivityConsoleWindowManager ActivityConsoleHost { get; }
     public NavigationService Navigation { get; }
     public MainViewModel MainViewModel { get; }
     public UnattendedService Unattended { get; }
@@ -102,6 +104,11 @@ public sealed class CompositionRoot
         {
             AskRestorePointOnFirstWrite = settings.Current.AskRestorePointOnFirstWrite
         };
+        ActivityConsole = new ActivityConsoleService(
+            System.Windows.Threading.Dispatcher.CurrentDispatcher);
+        ActivityConsoleHost = new ActivityConsoleWindowManager(
+            ActivityConsole, settings,
+            System.Windows.Threading.Dispatcher.CurrentDispatcher);
 
         var systemInfo = new SystemInfoService();
         var quickActions = new QuickActionService();
@@ -172,11 +179,13 @@ public sealed class CompositionRoot
             ["cleanup"] = () => new CleanupViewModel(cleanup, Dialogs, Toast),
             ["restore"] = () => new RestoreViewModel(restore, Runner, Toast, Dialogs),
             ["history"] = () => new HistoryViewModel(historyRestore, Dialogs, Toast),
-            ["migration"] = () => new EnvironmentMigrationViewModel(environmentMigration, Toast, Dialogs),
+            ["migration"] = () => new EnvironmentMigrationViewModel(
+                environmentMigration, Toast, Dialogs),
             ["score"] = () => new ScoreViewModel(score, Toast),
             ["settings"] = () => new SettingsViewModel(
                 settings, Theme, Motion, Toast, Dialogs, Runner, Registry,
-                new FreshStart.Services.System.SystemWallpaperService())
+                new FreshStart.Services.System.SystemWallpaperService(),
+                ActivityConsoleHost)
         };
 
         Navigation = new NavigationService(factories, Toast);

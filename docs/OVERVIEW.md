@@ -1,6 +1,6 @@
 ﻿# FreshStart · 当前功能 / 实现链路 / 架构 / 技术路线
 
-版本 **0.2.0-alpha.5**（环境克隆实验版）；5 个工程、4 层、25 个导航页面、24 种执行步骤类型、26 项注册表调优 + 4 套预设、7 个推荐软件、41 个内置原生应用条目、3 步首次启动引导、3 张可设为系统壁纸的内置图。
+版本 **0.2.0-alpha.16**（环境克隆实验版）；5 个工程、4 层、25 个导航页面、24 种执行步骤类型、26 项注册表调优 + 4 套预设、8 个推荐软件、41 个内置原生应用条目、3 步首次启动引导、3 张可设为系统壁纸的内置图。
 
 ---
 
@@ -88,7 +88,7 @@ ApplyAsync()                              ← 必须幂等，写后读回校验
 | 页面 | 实现链路 |
 |---|---|
 | 原生应用 | `NativeAppCatalog`（41 条静态清单）→ `AppxRemoveBatchOperation`：先记录 `RemovedAppxInfo` → `Remove-AppxPackage`；受保护组件走 `AppxForceRemoveOperation`（DISM 解除策略 → 必要时 takeown/删目录，**仅限 `WindowsApps` / `SystemApps` 等合法安装目录**）；`AppxRestoreOperation` 重新注册 |
-| 推荐软件 | `SoftwareCatalog`（7 条：解压缩 ×2 / 浏览器 ×2 / Everything / PotPlayer / OBS）→ `WingetService`：按需检测/在线更新/离线包导入 → `EnsureOfficialSourceAsync`（只用微软官方源）→ `WingetInstallBatchOperation` 逐个 `install --id …`，失败且有直链条目时走官方直链兜底；单失败继续、成功保留、重试只重失败项（详见第五节） |
+| 推荐软件 | `SoftwareCatalog`（8 条：解压缩 ×2 / 浏览器 ×2 / Everything / PotPlayer / OBS / UU远程）→ `WingetService`：按需检测/在线更新/离线包导入 → `EnsureOfficialSourceAsync`（只用微软官方源）→ `WingetInstallBatchOperation` 逐个 `install --id …`，失败且有直链条目时走官方直链兜底；单失败继续、成功保留、重试只重失败项（详见第五节） |
 | 软件卸载 | `InstalledProgramService`（注册表 Uninstall 键，WOW6432 双视图）→ `UninstallProgramOperation`；卸载后 `ResidueService` 扫残留目录/注册表，可清理（拒绝搬迁盘符根与系统目录） |
 | 自启动 | `StartupService` 合并四来源（Run/RunOnce、启动文件夹、计划任务、第三方自动服务）+ `StartupApproved` 状态；启停分别落到 `RegistryValueOperation` / 文件改名 / `ScheduledTaskToggleOperation` / `ServiceStartModeOperation` |
 

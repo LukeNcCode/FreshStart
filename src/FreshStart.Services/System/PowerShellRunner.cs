@@ -3,6 +3,7 @@ using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using FreshStart.Core;
+using FreshStart.Core.Diagnostics;
 
 namespace FreshStart.Services.System;
 
@@ -28,6 +29,9 @@ public sealed class PowerShellRunner
 {
     public async Task<PowerShellResult> RunAsync(string script, TimeSpan timeout, CancellationToken ct = default)
     {
+        var command = $"powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command {script}";
+        NativeCommandTrace.Started(command, Environment.CurrentDirectory);
+        var stopwatch = Stopwatch.StartNew();
         var fullScript = "[Console]::OutputEncoding=[System.Text.Encoding]::UTF8;$ProgressPreference='SilentlyContinue';" + script;
         var encoded = Convert.ToBase64String(Encoding.Unicode.GetBytes(fullScript));
         var powershell = Path.Combine(Environment.SystemDirectory, "WindowsPowerShell", "v1.0", "powershell.exe");
@@ -54,6 +58,8 @@ public sealed class PowerShellRunner
         catch (Exception ex)
         {
             Log.Warn($"PowerShell 启动失败: {ex.Message}");
+            NativeCommandTrace.Completed(
+                command, -1, ex.ToString(), stopwatch.Elapsed, Environment.CurrentDirectory);
             return new PowerShellResult { ExitCode = -1, StdErr = ex.Message };
         }
 
@@ -74,21 +80,29 @@ public sealed class PowerShellRunner
 
             // 用户取消走标准取消异常，让 OperationRunner 正确标记 Cancelled 并回滚。
             ct.ThrowIfCancellationRequested();
-            return new PowerShellResult
+            var timedOut = new PowerShellResult
             {
                 ExitCode = -1,
                 StdOut = await SafeReadAsync(stdout).ConfigureAwait(false),
                 StdErr = CleanError(await SafeReadAsync(stderr).ConfigureAwait(false)),
                 TimedOut = true
             };
+            NativeCommandTrace.Completed(
+                command, -1, timedOut.StdOut + Environment.NewLine + timedOut.StdErr,
+                stopwatch.Elapsed, Environment.CurrentDirectory);
+            return timedOut;
         }
 
-        return new PowerShellResult
+        var result = new PowerShellResult
         {
             ExitCode = process.ExitCode,
             StdOut = await SafeReadAsync(stdout).ConfigureAwait(false),
             StdErr = CleanError(await SafeReadAsync(stderr).ConfigureAwait(false))
         };
+        NativeCommandTrace.Completed(
+            command, result.ExitCode, result.StdOut + Environment.NewLine + result.StdErr,
+            stopwatch.Elapsed, Environment.CurrentDirectory);
+        return result;
     }
 
     /// <summary>PowerShell 的错误流常是 CLIXML 序列化文本，转成可读的多行纯文本。</summary>

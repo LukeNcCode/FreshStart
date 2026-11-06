@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Security.Cryptography;
 using FreshStart.Core;
+using FreshStart.Core.Diagnostics;
 using FreshStart.Core.Operations;
 using FreshStart.Services.System;
 using FreshStart.Services.Uninstall;
@@ -136,8 +137,16 @@ public sealed class DirectInstallerService
                 WorkingDirectory = downloadRoot
             };
 
+            var command = $"\"{target}\" {app.SilentArguments}".TrimEnd();
+            NativeCommandTrace.Started(command, downloadRoot);
+            var stopwatch = Stopwatch.StartNew();
             using var process = Process.Start(startInfo);
-            if (process is null) return OperationResult.Fail($"无法启动安装器：{target}");
+            if (process is null)
+            {
+                NativeCommandTrace.Completed(
+                    command, -1, "installer start failed", stopwatch.Elapsed, downloadRoot);
+                return OperationResult.Fail($"无法启动安装器：{target}");
+            }
 
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
             cts.CancelAfter(TimeSpan.FromMinutes(20));
@@ -148,9 +157,13 @@ public sealed class DirectInstallerService
             catch (OperationCanceledException)
             {
                 try { process.Kill(entireProcessTree: true); } catch { /* ignore */ }
+                NativeCommandTrace.Completed(
+                    command, -1, "installer cancelled", stopwatch.Elapsed, downloadRoot);
                 throw;
             }
 
+            NativeCommandTrace.Completed(
+                command, process.ExitCode, string.Empty, stopwatch.Elapsed, downloadRoot);
             if (process.ExitCode is not (0 or 3010))
             {
                 return OperationResult.Fail(

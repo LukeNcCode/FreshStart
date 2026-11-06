@@ -22,6 +22,9 @@ public sealed class AppSettings
     /// <summary>每次启动后第一次写入前，询问是否创建系统还原点。</summary>
     public bool AskRestorePointOnFirstWrite { get; set; } = true;
 
+    /// <summary>在独立窗口中实时显示后台任务控制台。</summary>
+    public bool TaskConsoleEnabled { get; set; }
+
     /// <summary>高风险操作前创建系统还原点（会话内选择开启后生效）。</summary>
     public bool CreateRestorePointForHighRisk { get; set; } = true;
 

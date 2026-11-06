@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
 using FreshStart.Core;
+using FreshStart.Core.Diagnostics;
 using FreshStart.Core.Operations;
 using FreshStart.Services.Registry;
 
@@ -186,13 +187,18 @@ public sealed class ServiceControlService
 
     private static async Task<(int ExitCode, string Output)> RunScAsync(string arguments, CancellationToken ct)
     {
+        var command = $"sc.exe {arguments}";
+        NativeCommandTrace.Started(command, Environment.CurrentDirectory);
+        var stopwatch = Stopwatch.StartNew();
         var startInfo = new ProcessStartInfo("sc.exe", arguments)
         {
             UseShellExecute = false,
             CreateNoWindow = true,
             WindowStyle = ProcessWindowStyle.Hidden,
             RedirectStandardOutput = true,
-            RedirectStandardError = true
+            RedirectStandardError = true,
+            StandardOutputEncoding = ConsoleEncoding.OemCodePage,
+            StandardErrorEncoding = ConsoleEncoding.OemCodePage
         };
 
         using var process = new Process { StartInfo = startInfo };
@@ -206,10 +212,14 @@ public sealed class ServiceControlService
         catch (OperationCanceledException)
         {
             try { process.Kill(true); } catch { /* ignore */ }
+            NativeCommandTrace.Completed(
+                command, -1, "sc.exe cancelled", stopwatch.Elapsed, Environment.CurrentDirectory);
             throw;
         }
 
         var output = (await outputTask.ConfigureAwait(false)) + (await errorTask.ConfigureAwait(false));
+        NativeCommandTrace.Completed(
+            command, process.ExitCode, output, stopwatch.Elapsed, Environment.CurrentDirectory);
         return (process.ExitCode, output);
     }
 }

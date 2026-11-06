@@ -5,16 +5,19 @@
         xmlns:controls="clr-namespace:FreshStart.App.Controls"
         Title="FreshStart" Width="1180" Height="760" MinWidth="980" MinHeight="640"
         Icon="pack://application:,,,/FreshStart.Host;component/Assets/app.ico"
-        WindowStyle="None" ResizeMode="CanResize" Background="{DynamicResource WindowBrush}"
+        WindowStyle="None" ResizeMode="CanResize" Background="Transparent"
         WindowStartupLocation="CenterScreen"
         FontFamily="{StaticResource AppFont}"
         UseLayoutRounding="True" SnapsToDevicePixels="True"
         TextOptions.TextFormattingMode="Ideal">
     <WindowChrome.WindowChrome>
-        <WindowChrome CaptionHeight="0" ResizeBorderThickness="6" GlassFrameThickness="0"
-                      UseAeroCaptionButtons="False" CornerRadius="0" />
+        <WindowChrome CaptionHeight="0" ResizeBorderThickness="7" GlassFrameThickness="0"
+                      UseAeroCaptionButtons="False" CornerRadius="13" />
     </WindowChrome.WindowChrome>
 
+    <Border x:Name="WindowFrame" CornerRadius="13" BorderThickness="1"
+            BorderBrush="{DynamicResource DividerBrush}"
+            Background="{DynamicResource WindowBrush}" ClipToBounds="True">
     <Grid x:Name="RootGrid">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
@@ -123,4 +126,5 @@
 
         <controls:ModalHost x:Name="ModalHostControl" Grid.ColumnSpan="2" Grid.RowSpan="2" />
     </Grid>
+    </Border>
 </Window>

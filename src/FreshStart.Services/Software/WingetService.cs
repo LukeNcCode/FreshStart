@@ -9,6 +9,7 @@ using FreshStart.Core;
 using FreshStart.Core.Operations;
 using FreshStart.Services.System;
 using Microsoft.Win32;
+using FreshStart.Core.Diagnostics;
 
 namespace FreshStart.Services.Software;
 
@@ -42,7 +43,8 @@ public static class SoftwareCatalog
             Aliases = new() { "Mozilla.Firefox.ESR", "Mozilla.Firefox.DeveloperEdition" } },
         new() { Id = "voidtools.Everything", Name = "Everything", Description = "基于 NTFS 索引的本地文件搜索，几乎即时返回结果", Category = "系统工具" },
         new() { Id = "Daum.PotPlayer", Name = "PotPlayer", Description = "本地视频播放器，硬解与字幕支持完善", Category = "影音" },
-        new() { Id = "OBSProject.OBSStudio", Name = "OBS Studio", Description = "开源录屏与直播推流工具，支持多场景切换", Category = "影音" }
+        new() { Id = "OBSProject.OBSStudio", Name = "OBS Studio", Description = "开源录屏与直播推流工具，支持多场景切换", Category = "影音" },
+        new() { Id = "NetEase.UURemote", Name = "UU远程", Description = "网易出品的低延迟远程控制工具，支持跨设备远程桌面与文件传输", Category = "远程控制" }
     };
 }
 
@@ -1563,6 +1565,11 @@ public sealed class WingetService
         string arguments, Action<string>? onOutput, TimeSpan timeout, CancellationToken ct,
         int maxBufferChars = 12000, IReadOnlyList<string>? argumentList = null)
     {
+        var command = argumentList is null
+            ? $"winget.exe {arguments}".TrimEnd()
+            : NativeCommandTrace.Format("winget.exe", argumentList);
+        NativeCommandTrace.Started(command, Environment.CurrentDirectory);
+        var stopwatch = Stopwatch.StartNew();
         var startInfo = new ProcessStartInfo
         {
             FileName = "winget.exe",
@@ -1571,8 +1578,8 @@ public sealed class WingetService
             WindowStyle = ProcessWindowStyle.Hidden,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
-            StandardOutputEncoding = Encoding.UTF8,
-            StandardErrorEncoding = Encoding.UTF8
+            StandardOutputEncoding = ConsoleEncoding.OemCodePage,
+            StandardErrorEncoding = ConsoleEncoding.OemCodePage
         };
 
         // 含外部输入（winget ID）的调用走 ArgumentList，由系统负责引号转义
@@ -1593,6 +1600,8 @@ public sealed class WingetService
         catch (Exception ex)
         {
             Log.Warn($"winget 启动失败: {ex.Message}");
+            NativeCommandTrace.Completed(
+                command, -1, ex.ToString(), stopwatch.Elapsed, Environment.CurrentDirectory);
             return new WingetResult { ExitCode = -1, Output = ex.Message };
         }
 
@@ -1628,11 +1637,17 @@ public sealed class WingetService
         {
             try { process.Kill(entireProcessTree: true); } catch { /* ignore */ }
             await Task.WhenAny(Task.WhenAll(outTask, errTask), Task.Delay(800)).ConfigureAwait(false);
-            return new WingetResult { ExitCode = -1, Output = output.ToString(), Canceled = true };
+            var canceledOutput = output.ToString();
+            NativeCommandTrace.Completed(
+                command, -1, canceledOutput, stopwatch.Elapsed, Environment.CurrentDirectory);
+            return new WingetResult { ExitCode = -1, Output = canceledOutput, Canceled = true };
         }
 
         await Task.WhenAny(Task.WhenAll(outTask, errTask), Task.Delay(1000)).ConfigureAwait(false);
-        return new WingetResult { ExitCode = process.ExitCode, Output = output.ToString() };
+        var finalOutput = output.ToString();
+        NativeCommandTrace.Completed(
+            command, process.ExitCode, finalOutput, stopwatch.Elapsed, Environment.CurrentDirectory);
+        return new WingetResult { ExitCode = process.ExitCode, Output = finalOutput };
     }
 
     /// <summary>参数列表入口：含外部输入（winget ID、路径、URL）的调用走这里，由系统转义。</summary>

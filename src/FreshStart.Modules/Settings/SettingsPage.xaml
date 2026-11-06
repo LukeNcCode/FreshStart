@@ -120,6 +120,28 @@
                                                VerticalAlignment="Center"/>
                     </Grid>
 
+                    <Grid Margin="0,18,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="独立任务控制台" FontSize="13" FontWeight="SemiBold"/>
+                                <Path Data="{StaticResource InfoIcon}" Width="14" Height="14" Stretch="Uniform"
+                                      Stroke="{DynamicResource SecondaryTextBrush}" StrokeThickness="1.5"
+                                      Margin="6,1,0,0" VerticalAlignment="Center"
+                                      ToolTip="在单独窗口中显示实际执行的命令行、原始输出、退出码与耗时。主界面不添加入口或覆盖层。"/>
+                            </StackPanel>
+                            <TextBlock Text="开启后使用独立终端窗口显示原生命令、输出和 exit code，关闭即隐藏"
+                                       Style="{StaticResource CaptionText}" Margin="0,4,0,0"/>
+                        </StackPanel>
+                        <controls:ToggleSwitch Grid.Column="1" Style="{StaticResource ToggleSwitchStyle}"
+                                               IsChecked="{Binding TaskConsoleEnabled, Mode=TwoWay}"
+                                               AutomationProperties.Name="独立任务控制台"
+                                               VerticalAlignment="Center"/>
+                    </Grid>
+
                     <Border Height="1" Background="{DynamicResource DividerBrush}" Margin="0,16,0,16"/>
 
                     <StackPanel>

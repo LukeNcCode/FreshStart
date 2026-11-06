@@ -116,6 +116,7 @@ public partial class App
         StartupProbe.Mark("shell-built");
 
         _mainWindow.Show();
+        _composition.ActivityConsoleHost.ApplyInitial(settings.Current.TaskConsoleEnabled);
         // ThemeService 已按命令行主题初始化；恢复持久化值，避免一次预览覆盖用户偏好。
         settings.Current.Theme = persistedTheme;
         ShutdownMode = ShutdownMode.OnMainWindowClose;

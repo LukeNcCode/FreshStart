@@ -1,4 +1,7 @@
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.IO;
+using System.Windows.Data;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FreshStart.Core;
@@ -29,6 +32,20 @@ public sealed partial class MigrationItemViewModel : ObservableObject
             ? "尚未添加数据目录"
             : string.Join(Environment.NewLine, Candidate.DataRoots)
         : Candidate.ToolRoot;
+    public string CloneRouteText => !HasPayload
+        ? "缺少可迁移内容"
+        : InstallerDirectory.Length > 0
+            ? "本地原厂安装器链路"
+            : !string.IsNullOrWhiteSpace(Candidate.WingetId)
+                ? "Winget 原厂链路"
+                : "待选择安装器";
+    public string CloneRouteHint => CloneRouteText switch
+    {
+        "Winget 原厂链路" => "源机器下载精确版本安装器，目标机离线原生安装",
+        "本地原厂安装器链路" => "使用已选择的本机安装器，不联网下载",
+        "待选择安装器" => "必须选择本地安装器后才能进行原生部署",
+        _ => "未检测到安装内容或可迁移数据"
+    };
 
     [ObservableProperty]
     private bool _isSelected;
@@ -38,12 +55,21 @@ public sealed partial class MigrationItemViewModel : ObservableObject
 
     public bool HasManualInstaller => InstallerDirectory.Length > 0;
 
-    partial void OnInstallerDirectoryChanged(string value) => OnPropertyChanged(nameof(HasManualInstaller));
+    partial void OnInstallerDirectoryChanged(string value)
+    {
+        OnPropertyChanged(nameof(HasManualInstaller));
+        OnPropertyChanged(nameof(CloneRouteText));
+        OnPropertyChanged(nameof(CloneRouteHint));
+    }
 
     public void NotifyDataRootsChanged()
     {
         OnPropertyChanged(nameof(SelectionState));
         OnPropertyChanged(nameof(Description));
+        OnPropertyChanged(nameof(HasPayload));
+        OnPropertyChanged(nameof(InstallState));
+        OnPropertyChanged(nameof(CloneRouteText));
+        OnPropertyChanged(nameof(CloneRouteHint));
     }
 }
 
@@ -53,6 +79,10 @@ public sealed partial class EnvironmentMigrationViewModel : ObservableObject
     private readonly IToastService _toast;
     private readonly IUserPromptService _prompts;
     private CancellationTokenSource? _cts;
+    private readonly Dictionary<string, string> _manualInstallerDirectories =
+        new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, List<string>> _manualDataRoots =
+        new(StringComparer.OrdinalIgnoreCase);
 
     public EnvironmentMigrationViewModel(
         EnvironmentMigrationService service,
@@ -62,6 +92,12 @@ public sealed partial class EnvironmentMigrationViewModel : ObservableObject
         _service = service;
         _toast = toast;
         _prompts = prompts;
+        var view = (ListCollectionView)CollectionViewSource.GetDefaultView(Items);
+        view.GroupDescriptions.Add(new PropertyGroupDescription(
+            nameof(MigrationItemViewModel.CloneRouteText)));
+        view.SortDescriptions.Add(new SortDescription(
+            nameof(MigrationItemViewModel.CloneRouteText),
+            ListSortDirection.Ascending));
     }
 
     public ObservableCollection<MigrationItemViewModel> Items { get; } = new();
@@ -91,6 +127,26 @@ public sealed partial class EnvironmentMigrationViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void SelectAllDevelopment()
+    {
+        foreach (var item in Items.Where(item => !item.IsSoftware && item.HasPayload))
+        {
+            item.IsSelected = true;
+        }
+        UpdateSelectedText();
+    }
+
+    [RelayCommand]
+    private void ClearSelection()
+    {
+        foreach (var item in Items)
+        {
+            item.IsSelected = false;
+        }
+        UpdateSelectedText();
+    }
+
+    [RelayCommand]
     private async Task ScanAsync()
     {
         if (IsBusy) return;
@@ -99,13 +155,31 @@ public sealed partial class EnvironmentMigrationViewModel : ObservableObject
         try
         {
             var selected = Items.Where(item => item.IsSelected).Select(item => item.Candidate.Id).ToHashSet();
+            foreach (var item in Items.Where(item => item.InstallerDirectory.Length > 0))
+            {
+                _manualInstallerDirectories[item.Candidate.Id] = item.InstallerDirectory;
+            }
             var candidates = await _service.ScanAsync();
             Items.Clear();
             foreach (var candidate in candidates)
             {
+                if (_manualDataRoots.TryGetValue(candidate.Id, out var manualRoots))
+                {
+                    var roots = candidate.DataRoots.ToList();
+                    foreach (var root in manualRoots)
+                    {
+                        if (!roots.Contains(root, StringComparer.OrdinalIgnoreCase))
+                        {
+                            roots.Add(root);
+                        }
+                    }
+                    candidate.DataRoots = roots;
+                }
                 var item = new MigrationItemViewModel(candidate)
                 {
-                    IsSelected = selected.Contains(candidate.Id)
+                    IsSelected = selected.Contains(candidate.Id),
+                    InstallerDirectory = _manualInstallerDirectories.GetValueOrDefault(candidate.Id)
+                                        ?? string.Empty
                 };
                 item.PropertyChanged += (_, args) =>
                 {
@@ -144,6 +218,7 @@ public sealed partial class EnvironmentMigrationViewModel : ObservableObject
         if (dialog.ShowDialog() == true)
         {
             item.InstallerDirectory = dialog.FolderName;
+            _manualInstallerDirectories[item.Candidate.Id] = dialog.FolderName;
             item.IsSelected = true;
             UpdateSelectedText();
         }
@@ -155,7 +230,7 @@ public sealed partial class EnvironmentMigrationViewModel : ObservableObject
         if (item is null) return;
         var dialog = new OpenFolderDialog
         {
-            Title = $"选择 {item.Name} 的聊天或下载数据目录",
+            Title = $"选择 {item.Name} 的数据或配置目录",
             Multiselect = false
         };
         if (dialog.ShowDialog() != true) return;
@@ -165,6 +240,15 @@ public sealed partial class EnvironmentMigrationViewModel : ObservableObject
         {
             roots.Add(dialog.FolderName);
             item.Candidate.DataRoots = roots;
+            if (!_manualDataRoots.TryGetValue(item.Candidate.Id, out var manualRoots))
+            {
+                manualRoots = new List<string>();
+                _manualDataRoots[item.Candidate.Id] = manualRoots;
+            }
+            if (!manualRoots.Contains(dialog.FolderName, StringComparer.OrdinalIgnoreCase))
+            {
+                manualRoots.Add(dialog.FolderName);
+            }
             item.NotifyDataRootsChanged();
             item.IsSelected = true;
             UpdateSelectedText();
@@ -175,10 +259,81 @@ public sealed partial class EnvironmentMigrationViewModel : ObservableObject
     private async Task ExportAsync()
     {
         if (IsBusy) return;
+        if (!Items.Any(item => item.IsSelected))
+        {
+            _toast.Show("请至少选择一项", ToastKind.Warning);
+            return;
+        }
+
+        StatusText = "正在重新扫描并生成克隆方案…";
+        await ScanAsync();
         var selected = Items.Where(item => item.IsSelected).ToList();
         if (selected.Count == 0)
         {
-            _toast.Show("请至少选择一项", ToastKind.Warning);
+            _toast.Show("扫描后没有保留已选择项目，请重新选择", ToastKind.Warning);
+            return;
+        }
+
+        var ready = selected.Where(IsReadyToClone).ToList();
+        var blocked = selected.Except(ready).ToList();
+        var details = new List<string>();
+        foreach (var group in selected
+                     .GroupBy(item => item.CloneRouteText)
+                     .OrderBy(group => CloneRouteOrder(group.Key)))
+        {
+            details.Add($"{group.Key} · {group.Count()} 项");
+            foreach (var item in group)
+            {
+                var version = string.IsNullOrWhiteSpace(item.Version) ? "版本未知" : item.Version;
+                details.Add($"  {item.Name} · {version}");
+                details.Add($"  {item.CloneRouteHint}");
+                if (group.Key == "Winget 原厂链路")
+                {
+                    details.Add("  导出阶段需要联网调用 winget download；目标机恢复不联网");
+                }
+                else if (group.Key == "本地原厂安装器链路")
+                {
+                    details.Add("  使用用户选择的本地安装器，导出阶段不联网");
+                }
+                else if (!IsReadyToClone(item))
+                {
+                    details.Add("  当前未准备完整，不会写入克隆包");
+                }
+            }
+        }
+        details.Add("迁移不包含登录令牌、密码、Cookie 或机器绑定许可证");
+        details.Add("克隆包可能包含私人聊天记录和下载文件，请妥善保管");
+        details.Add("原厂安装器失败或需要重启时，软件安装不能保证自动回滚");
+        if (blocked.Count > 0)
+        {
+            details.Add($"共有 {blocked.Count} 项未准备完整，本次将跳过这些项目");
+        }
+
+        if (ready.Count == 0)
+        {
+            await _prompts.ConfirmAsync(new UserPrompt
+            {
+                Title = "当前没有可打包项目",
+                Message = "所选项目缺少安装内容或可迁移数据。",
+                Details = details,
+                ConfirmText = "返回修改",
+                CancelText = "关闭"
+            });
+            StatusText = "克隆预检未通过，请补充本地安装器或数据目录";
+            return;
+        }
+
+        var confirmed = await _prompts.ConfirmAsync(new UserPrompt
+        {
+            Title = "确认克隆方案？",
+            Message = $"扫描完成，将打包 {ready.Count} 项。请先确认各软件的克隆链路和限制。",
+            Details = details,
+            ConfirmText = $"继续生成 {ready.Count} 项",
+            CancelText = "返回修改"
+        });
+        if (!confirmed)
+        {
+            StatusText = "已取消克隆预检";
             return;
         }
 
@@ -198,7 +353,7 @@ public sealed partial class EnvironmentMigrationViewModel : ObservableObject
         _cts = new CancellationTokenSource();
         try
         {
-            var installerDirectories = selected
+            var installerDirectories = ready
                 .Where(item => item.InstallerDirectory.Length > 0)
                 .ToDictionary(item => item.Candidate.Id, item => item.InstallerDirectory);
             var progress = new Progress<MigrationProgress>(value =>
@@ -207,7 +362,7 @@ public sealed partial class EnvironmentMigrationViewModel : ObservableObject
                 ProgressPercent = value.Percent;
             });
             var package = await _service.ExportAsync(
-                selected.Select(item => item.Candidate).ToList(),
+                ready.Select(item => item.Candidate).ToList(),
                 installerDirectories,
                 dialog.FileName,
                 progress,
@@ -293,7 +448,7 @@ public sealed partial class EnvironmentMigrationViewModel : ObservableObject
         }
         details.Add("聊天软件需要关闭后再恢复数据");
         details.Add("已有的同名数据目录会先移动到同级的 freshstart-backup 目录");
-        details.Add("开发环境会恢复到 FreshStart 独立目录并更新用户 PATH");
+        details.Add("开发环境会运行原厂安装器，再恢复用户数据、PATH 和环境变量");
         details.Add("迁移包不包含登录令牌、浏览器密码或聊天软件登录状态");
         details.Add("软件安装不保证可以自动回滚");
 
@@ -350,6 +505,40 @@ public sealed partial class EnvironmentMigrationViewModel : ObservableObject
 
     [RelayCommand]
     private void Cancel() => _cts?.Cancel();
+
+    private static bool IsReadyToClone(MigrationItemViewModel item)
+    {
+        if (!item.HasPayload) return false;
+        if (item.InstallerDirectory.Length > 0)
+        {
+            return HasLocalInstallerFiles(item.InstallerDirectory);
+        }
+        return !string.IsNullOrWhiteSpace(item.Candidate.WingetId);
+    }
+
+    private static bool HasLocalInstallerFiles(string directory)
+    {
+        try
+        {
+            return Directory.Exists(directory)
+                   && Directory.EnumerateFiles(directory, "*", SearchOption.AllDirectories)
+                       .Any(path => Path.GetExtension(path).ToLowerInvariant() is
+                           ".exe" or ".msi" or ".msix" or ".msixbundle"
+                           or ".appx" or ".appxbundle");
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static int CloneRouteOrder(string route) => route switch
+    {
+        "Winget 原厂链路" => 0,
+        "本地原厂安装器链路" => 1,
+        "待选择安装器" => 2,
+        _ => 3
+    };
 
     public void UpdateSelectedText()
     {

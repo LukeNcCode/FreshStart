@@ -147,6 +147,7 @@ public sealed partial class SettingsViewModel : ObservableObject
     private readonly OperationRunner _runner;
     private readonly RegistryService _registry;
     private readonly FreshStart.Services.System.SystemWallpaperService _wallpaper;
+    private readonly IActivityConsoleHost _activityConsole;
 
     public SettingsViewModel(
         SettingsService settings,
@@ -156,7 +157,8 @@ public sealed partial class SettingsViewModel : ObservableObject
         IUserPromptService prompts,
         OperationRunner runner,
         RegistryService registry,
-        FreshStart.Services.System.SystemWallpaperService wallpaper)
+        FreshStart.Services.System.SystemWallpaperService wallpaper,
+        IActivityConsoleHost activityConsole)
     {
         _settings = settings;
         _theme = theme;
@@ -166,7 +168,10 @@ public sealed partial class SettingsViewModel : ObservableObject
         _runner = runner;
         _registry = registry;
         _wallpaper = wallpaper;
+        _activityConsole = activityConsole;
         _runner.AskRestorePointOnFirstWrite = settings.Current.AskRestorePointOnFirstWrite;
+        _activityConsole.EnabledChanged += (_, _) =>
+            OnPropertyChanged(nameof(TaskConsoleEnabled));
         RefreshAccentState();
 
         WallpaperOptions = new List<WallpaperOption>
@@ -251,6 +256,20 @@ public sealed partial class SettingsViewModel : ObservableObject
             _runner.AskRestorePointOnFirstWrite = value;
             _ = _settings.UpdateAsync(s => s.AskRestorePointOnFirstWrite = value);
             _toast.Show(value ? "每次启动后首次修改前会询问还原点" : "已关闭还原点询问，仅保留 JSON 快照");
+        }
+    }
+
+    public bool TaskConsoleEnabled
+    {
+        get => _activityConsole.IsEnabled;
+        set
+        {
+            if (value == _activityConsole.IsEnabled) return;
+            _activityConsole.SetEnabled(value);
+            OnPropertyChanged();
+            _toast.Show(value
+                ? "任务控制台已开启，将使用独立窗口显示实时进度"
+                : "任务控制台已关闭");
         }
     }
 
