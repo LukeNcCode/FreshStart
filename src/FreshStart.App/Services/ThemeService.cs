@@ -55,7 +55,7 @@ public sealed class ThemeService : IThemeService
         var tint = new SolidColorBrush(Color.FromArgb(0x22, color.R, color.G, color.B));
         tint.Freeze();
         var gradientEnd = IsDark
-            ? Color.FromRgb(0x8C, 0x8C, 0x8C)
+            ? Color.FromRgb(0x70, 0x70, 0x70)
             : Color.FromRgb(0x4A, 0x4A, 0x4A);
         var gradient = new LinearGradientBrush(color, gradientEnd, new Point(0, 0), new Point(1, 1));
         gradient.Freeze();

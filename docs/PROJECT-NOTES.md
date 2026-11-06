@@ -60,6 +60,8 @@
 
 > 0.2.3：主界面收敛为黑白单色体系，纸白侧栏左上角只保留黑色 `FreshStart` 字标。启动动画按三段严格串行校准：描边 400ms 淡入、填充 2000ms 左向右扫过；缓冲 200ms 后由右向左执行 750ms 黑白反转并停留 250ms。随后黑字缩放移动到左上角与主字标重合，白底以 400ms 淡出，主界面保持完整并自然显露。阶段 C 不使用旋转、缩放或透明度退场。
 
+> 0.2.4：修复按钮文字前景色被全局 TextBlock 样式覆盖的问题，主按钮内容会正确继承模板前景色；同时提高侧栏未选中项、深色次级文字、页签和禁用按钮的对比度。
+
 > 0.29.1：**重新评估后回到 winget 作主通道，并补一条官方直链兜底**。评估结论（均为实测）：winget 覆盖 39/39、有 manifest SHA256 + 安装包签名校验，且上一轮 VM 实测中它成功装上了 QQ NT；Chocolatey 只有 34/39（QQ NT 只对应传统 QQ 9.3.9）、国内没有任何可用镜像（阿里/腾讯 404，华为云非 NuGet）、包脚本是 PowerShell 供应链更弱、VM 还得多装一步，因此 0.29.0-beta 的替换已回滚（`ChocolateyService` / `ChocoInstallBatchOperation` 代码保留但不注册）。新增 **`DirectInstallerCatalog` + `DirectInstallerService`**：对 7 个高频软件（微信 / Chrome / VS Code / 7-Zip / Everything / Bandizip / PotPlayer）登记厂商官方安装包，**winget 失败时自动改用直链**（HTTPS 强制、可选 SHA256、登记好的静默参数、20 分钟超时、安装后按 ARP 名称检测）。实测下载延迟：微信 285ms、Chrome 437ms、VS Code 741ms、Everything 824ms、Bandizip 1.2s、7-Zip 1.9s、PotPlayer 3.6s。QQ NT / 钉钉 / 火狐 / Notepad++ 的直链是版本化地址或国内不可达，不登记，继续走 winget。启动门槛（内置包版本）、索引刷新、`0x8A15005E` 自愈、自定义安装路径全部恢复。
 
 > 0.29.0-beta（实验分支）：**软件安装后端从 winget 换成 Chocolatey**，只做安装链路，属于 beta。① 新增 `ChocolateyService`（检测 / 官方脚本安装 / 源检查 / 安装 / 已装列表）与 `ChocoInstallBatchOperation`（逐个安装、单失败继续、已成功保留、不整批回滚）；② 只用**官方源** `community.chocolatey.org`——实测阿里云 `mirrors.aliyun.com/chocolatey`、`/nuget` 与腾讯云均为 404，华为云只有一个非 NuGet 的目录页，国内**没有**可用的 Chocolatey 公共镜像；③ winget ID → choco 包名映射 **34/39**，5 条在 Chocolatey 无包（搜狗输入法 / WPS / 飞书 / B站 / QQ音乐）会标记「无 Chocolatey 包」并跳过，`Tencent.QQ.NT` 对应的是传统 PC QQ（`tencentqq` 9.3.x，不是 NT）；④ 启动不再强制 winget 版本门槛，Chocolatey 缺失时「推荐软件」页一键安装（官方安装脚本，需联网 + 管理员）；⑤ 非管理员环境会被**前置拦截**（choco 在非管理员下会弹 20 秒交互确认）；⑥ 无人值守 `install` 步骤改用 choco 包名；⑦ beta 未做：卸载、已装检测的扩展字段、自定义安装路径（choco 无通用 `--location`）。

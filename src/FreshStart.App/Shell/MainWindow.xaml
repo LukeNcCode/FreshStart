@@ -6,6 +6,7 @@
         Title="FreshStart" Width="1180" Height="760" MinWidth="980" MinHeight="640"
         Icon="pack://application:,,,/FreshStart.Host;component/Assets/app.ico"
         WindowStyle="None" ResizeMode="CanResize" Background="Transparent"
+        Foreground="{DynamicResource PrimaryTextBrush}"
         WindowStartupLocation="CenterScreen"
         FontFamily="{StaticResource AppFont}"
         UseLayoutRounding="True" SnapsToDevicePixels="True"
