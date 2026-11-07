@@ -7,10 +7,11 @@ five switchable product surfaces, a dark execution-model section, environment
 handoff, download, and FAQs. The former browser-based app simulator has been
 removed; all product imagery is static and does not read system state.
 
-The scroll treatment follows the reference site's structure without importing
-its paid plugins: inertial wheel movement, scroll-linked hero parallax, a pinned
-product sequence that advances through all five surfaces, drifting feature
-cards, and image parallax. Mobile and reduced-motion visitors use native scroll.
+The page uses a one-gesture, one-screen scroll model. A wheel gesture advances
+to the next editorial page; inside the product chapter, successive gestures walk
+through all five software surfaces before continuing to the next section.
+Scroll-linked hero motion, drifting feature cards, and image parallax remain.
+Mobile and reduced-motion visitors use gentle native scroll snapping.
 
 Background music uses `site-assets/bgm.mp3`. As soon as the loading rail reaches
 100% and the `F` begins to form, the track starts at a low volume with a soft

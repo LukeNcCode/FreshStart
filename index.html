@@ -21,12 +21,12 @@
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter+Tight:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
   </noscript>
-  <link rel="stylesheet" href="styles.css?v=20261107-4">
-  <link rel="stylesheet" href="neo.css?v=20261107-4">
-  <link rel="stylesheet" href="noomo.css?v=20261107-4">
+  <link rel="stylesheet" href="styles.css?v=20261107-5">
+  <link rel="stylesheet" href="neo.css?v=20261107-5">
+  <link rel="stylesheet" href="noomo.css?v=20261107-5">
   <script>document.documentElement.classList.add("js");</script>
-  <script src="preloader.js?v=20261107-4" defer></script>
-  <script src="site-v2.js?v=20261107-4" defer></script>
+  <script src="preloader.js?v=20261107-5" defer></script>
+  <script src="site-v2.js?v=20261107-5" defer></script>
 </head>
 <body class="neo-site n-site">
   <div class="fs-preloader" data-preloader aria-label="正在载入 FreshStart">
@@ -49,7 +49,7 @@
     </div>
   </div>
 
-  <audio class="n-background-audio" src="site-assets/bgm.mp3?v=20261107-4" loop preload="metadata" data-background-music></audio>
+  <audio class="n-background-audio" src="site-assets/bgm.mp3?v=20261107-5" loop preload="metadata" data-background-music></audio>
   <aside class="n-audio-prompt" data-audio-prompt hidden>
     <div class="n-audio-prompt-icon" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
     <div>
@@ -383,28 +383,57 @@
     </section>
 
     <section class="n-faq">
-      <div class="n-shell n-faq-grid">
-        <div class="n-reveal">
-          <div class="n-mono">07 / BEFORE YOU START</div>
-          <h2>QUESTIONS,<br>ANSWERED<br>PLAINLY.</h2>
+      <div class="n-shell">
+        <div class="n-faq-grid">
+          <div class="n-reveal">
+            <div class="n-mono">07 / BEFORE YOU START</div>
+            <h2>QUESTIONS,<br>ANSWERED<br>PLAINLY.</h2>
+          </div>
+          <div class="n-faq-list n-reveal" data-delay="2">
+            <details>
+              <summary><span>01</span>FreshStart 会上传系统信息吗？</summary>
+              <p>不会。没有账户、遥测或云端控制台，配置、日志、备份和报告都保存在本机。</p>
+            </details>
+            <details>
+              <summary><span>02</span>所有修改都能撤销吗？</summary>
+              <p>明确支持回滚的写操作会先生成快照。卸载、原生应用移除和部分清理操作本身不可撤销，界面会在执行前说明。</p>
+            </details>
+            <details>
+              <summary><span>03</span>环境克隆会迁移登录状态吗？</summary>
+              <p>不会主动迁移登录令牌、Cookie、密码或机器绑定许可证。数据可以恢复，登录需要用户自行完成。</p>
+            </details>
+            <details>
+              <summary><span>04</span>需要一直联网吗？</summary>
+              <p>核心系统功能在本地运行。软件安装会优先使用 winget，也可按需更新 App Installer 或导入微软官方离线包。</p>
+            </details>
+            <details>
+              <summary><span>05</span>支持 Windows 10 吗？</summary>
+              <p>FreshStart 面向 Windows 11 22H2 及以上版本。部分功能可能能在旧系统启动，但不在支持范围内。</p>
+            </details>
+            <details>
+              <summary><span>06</span>为什么需要管理员权限？</summary>
+              <p>服务、系统策略和部分注册表位置需要管理员权限。只读页面无需提权，涉及系统写入时会在界面中明确提示。</p>
+            </details>
+            <details>
+              <summary><span>07</span>FreshStart 是开源的吗？</summary>
+              <p>是，原创源代码使用 MIT License。软件内置操作、背景组件和第三方资源继续遵循各自的授权说明。</p>
+            </details>
+            <details>
+              <summary><span>08</span>卸载后会留下数据吗？</summary>
+              <p>配置、备份和操作记录默认位于用户本地应用数据目录。卸载软件不会自动删除这些恢复材料，可按需手动清理。</p>
+            </details>
+          </div>
         </div>
-        <div class="n-faq-list n-reveal" data-delay="2">
-          <details>
-            <summary><span>01</span>FreshStart 会上传系统信息吗？</summary>
-            <p>不会。没有账户、遥测或云端控制台，配置、日志、备份和报告都保存在本机。</p>
-          </details>
-          <details>
-            <summary><span>02</span>所有修改都能撤销吗？</summary>
-            <p>明确支持回滚的写操作会先生成快照。卸载、原生应用移除和部分清理操作本身不可撤销，界面会在执行前说明。</p>
-          </details>
-          <details>
-            <summary><span>03</span>环境克隆会迁移登录状态吗？</summary>
-            <p>不会主动迁移登录令牌、Cookie、密码或机器绑定许可证。数据可以恢复，登录需要用户自行完成。</p>
-          </details>
-          <details>
-            <summary><span>04</span>需要一直联网吗？</summary>
-            <p>核心系统功能在本地运行。软件安装会优先使用 winget，也可按需更新 App Installer 或导入微软官方离线包。</p>
-          </details>
+
+        <div class="n-faq-support n-reveal" data-delay="3">
+          <div>
+            <span class="n-mono">STILL UNSURE?</span>
+            <h3>先确认你的具体系统场景。</h3>
+            <p>可以在 GitHub Issues 中说明 Windows 版本、目标功能和当前状态，不要直接套用不适合的优化方案。</p>
+          </div>
+          <a class="n-button n-button-line" href="https://github.com/LukeNcCode/FreshStart/issues" target="_blank" rel="noreferrer">
+            打开 GitHub Issues <span>↗</span>
+          </a>
         </div>
       </div>
     </section>
@@ -412,6 +441,34 @@
 
   <footer class="n-footer">
     <div class="n-shell">
+      <section class="n-footer-projects" aria-labelledby="github-projects-title">
+        <div class="n-footer-projects-head">
+          <span class="n-mono">MORE FROM LUKE / OPEN SOURCE</span>
+          <h3 id="github-projects-title">OTHER<br>GITHUB PROJECTS.</h3>
+          <a class="n-footer-all" href="https://github.com/LukeNcCode?tab=repositories" target="_blank" rel="noreferrer">
+            查看全部项目 <span>↗</span>
+          </a>
+        </div>
+        <div class="n-footer-project-grid">
+          <a class="n-footer-project" href="https://github.com/LukeNcCode/logic-blog" target="_blank" rel="noreferrer">
+            <span class="n-mono">PROJECT / 01</span>
+            <div>
+              <strong>logic-blog</strong>
+              <p>围绕技术、逻辑与工程实践整理的博客项目。</p>
+            </div>
+            <span class="n-project-arrow">↗</span>
+          </a>
+          <a class="n-footer-project" href="https://github.com/LukeNcCode/vscodetostm32" target="_blank" rel="noreferrer">
+            <span class="n-mono">PROJECT / 02</span>
+            <div>
+              <strong>vscodetostm32</strong>
+              <p>连接 VS Code 工作流与 STM32 嵌入式开发的实验项目。</p>
+            </div>
+            <span class="n-project-arrow">↗</span>
+          </a>
+        </div>
+      </section>
+
       <div class="n-footer-top">
         <div class="n-footer-brand">FreshStart<span>.</span></div>
         <p>LOCAL-FIRST WINDOWS 11 PREPARATION.<br>BUILT FOR PEOPLE WHO WANT TO KNOW WHAT CHANGES.</p>

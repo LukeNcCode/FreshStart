@@ -4,6 +4,7 @@
   const menuToggle = document.querySelector("[data-menu-toggle]");
   const mobileMenu = document.querySelector("[data-mobile-menu]");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (!reducedMotion) document.documentElement.classList.add("n-snap");
   const suiteStage = document.querySelector("[data-suite-stage]");
   const suiteImage = document.querySelector("[data-suite-image]");
   const suiteTitle = document.querySelector("[data-suite-title]");
@@ -429,11 +430,6 @@
       suiteBrowser.style.setProperty("--suite-tilt", `${tilt}deg`);
       suiteBrowser.style.setProperty("--suite-lift", `${Math.sin(progress * Math.PI) * -8}px`);
 
-      if (window.innerWidth > 1120 && suiteTabs.length && !reducedMotion) {
-        const nextIndex = clamp(Math.floor(progress * suiteTabs.length), 0, suiteTabs.length - 1);
-        const nextKey = suiteTabs[nextIndex]?.dataset.suiteTab;
-        if (nextKey && nextKey !== activeSuiteKey) setSuite(nextKey);
-      }
     }
 
     interfaceCards.forEach((card, index) => {
@@ -459,88 +455,110 @@
   window.addEventListener("scroll", requestScrollEffects, { passive: true });
   window.addEventListener("resize", requestScrollEffects, { passive: true });
 
-  const supportsInertialScroll =
+  const pageSections = [
+    ...document.querySelectorAll(
+      ".n-hero, .n-statement, .n-suite, .n-feature-wall, .n-process, .n-handoff, .n-download, .n-faq, .n-footer"
+    )
+  ];
+  const suitePageIndex = pageSections.indexOf(suiteScene);
+  let pageLockedUntil = 0;
+  let wheelAmount = 0;
+  let wheelResetTimer = 0;
+
+  const getCurrentPageIndex = () => {
+    const anchor = window.scrollY + window.innerHeight * 0.42;
+    let current = 0;
+    pageSections.forEach((section, index) => {
+      if (section.offsetTop <= anchor) current = index;
+    });
+    return current;
+  };
+
+  const advancePage = (direction) => {
+    const now = performance.now();
+    if (now < pageLockedUntil) return;
+
+    const currentPage = getCurrentPageIndex();
+    if (currentPage === suitePageIndex && suiteTabs.length) {
+      const activeIndex = Math.max(
+        0,
+        suiteTabs.findIndex((tab) => tab.dataset.suiteTab === activeSuiteKey)
+      );
+      const nextSuiteIndex = activeIndex + direction;
+      if (nextSuiteIndex >= 0 && nextSuiteIndex < suiteTabs.length) {
+        setSuite(suiteTabs[nextSuiteIndex].dataset.suiteTab);
+        pageLockedUntil = now + 620;
+        return;
+      }
+    }
+
+    const targetIndex = clamp(currentPage + direction, 0, pageSections.length - 1);
+    if (targetIndex === currentPage) return;
+
+    if (targetIndex === suitePageIndex) {
+      setSuite(direction > 0 ? "overview" : "automation");
+    }
+
+    pageLockedUntil = now + 900;
+    pageSections[targetIndex].scrollIntoView({
+      behavior: reducedMotion ? "auto" : "smooth",
+      block: "start"
+    });
+  };
+
+  const supportsPagedWheel =
     !reducedMotion
     && window.innerWidth > 1024
     && window.matchMedia("(hover: hover) and (pointer: fine)").matches;
 
-  if (supportsInertialScroll) {
-    let targetScroll = window.scrollY;
-    let inertialFrame = 0;
-    let animating = false;
-    let lastRenderedScroll = window.scrollY;
-
-    const cancelInertia = () => {
-      if (inertialFrame) cancelAnimationFrame(inertialFrame);
-      inertialFrame = 0;
-      animating = false;
-      targetScroll = window.scrollY;
-      lastRenderedScroll = targetScroll;
-    };
-
-    const animateScroll = () => {
-      const current = window.scrollY;
-      if (Math.abs(current - lastRenderedScroll) > 2) {
-        cancelInertia();
-        return;
-      }
-      const distance = targetScroll - current;
-      if (Math.abs(distance) < 0.6) {
-        window.scrollTo(0, targetScroll);
-        animating = false;
-        inertialFrame = 0;
-        return;
-      }
-      lastRenderedScroll = current + distance * 0.3;
-      window.scrollTo(0, lastRenderedScroll);
-      inertialFrame = requestAnimationFrame(animateScroll);
-    };
-
+  if (supportsPagedWheel) {
     window.addEventListener(
       "wheel",
       (event) => {
         if (event.ctrlKey || body.classList.contains("n-menu-open")) return;
         if (document.documentElement.classList.contains("is-preloading")) return;
-        const multiplier = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? window.innerHeight : 1;
-        const max = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
-        targetScroll = clamp(targetScroll + event.deltaY * multiplier * 13, 0, max);
+        if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
+
         event.preventDefault();
-        if (!animating) {
-          animating = true;
-          inertialFrame = requestAnimationFrame(animateScroll);
-        }
+        const multiplier =
+          event.deltaMode === 1
+            ? 16
+            : event.deltaMode === 2
+              ? window.innerHeight
+              : 1;
+        wheelAmount += event.deltaY * multiplier;
+        clearTimeout(wheelResetTimer);
+        wheelResetTimer = window.setTimeout(() => {
+          wheelAmount = 0;
+        }, 140);
+
+        if (Math.abs(wheelAmount) < 24) return;
+        const direction = wheelAmount > 0 ? 1 : -1;
+        wheelAmount = 0;
+        advancePage(direction);
       },
       { passive: false }
     );
 
-    document.addEventListener(
-      "pointerdown",
-      (event) => {
-        if (
-          event.target instanceof Element
-          && event.target.closest("a, button, input, summary")
-        ) {
-          cancelInertia();
-        }
-      },
-      { passive: true }
-    );
-
     document.addEventListener("keydown", (event) => {
-      if (
-        ["ArrowDown", "ArrowUp", "PageDown", "PageUp", "Home", "End", " "].includes(event.key)
-      ) {
-        cancelInertia();
+      if (event.repeat || event.ctrlKey || event.metaKey || event.altKey) return;
+      if (event.target instanceof Element && event.target.closest("input, textarea, select")) {
+        return;
+      }
+      if (["ArrowDown", "PageDown", " "].includes(event.key)) {
+        event.preventDefault();
+        advancePage(1);
+      } else if (["ArrowUp", "PageUp"].includes(event.key)) {
+        event.preventDefault();
+        advancePage(-1);
+      } else if (event.key === "Home") {
+        event.preventDefault();
+        pageSections[0]?.scrollIntoView({ behavior: "smooth", block: "start" });
+      } else if (event.key === "End") {
+        event.preventDefault();
+        pageSections.at(-1)?.scrollIntoView({ behavior: "smooth", block: "start" });
       }
     });
-
-    window.addEventListener(
-      "scroll",
-      () => {
-        if (!animating) targetScroll = window.scrollY;
-      },
-      { passive: true }
-    );
   }
 
   const year = document.querySelector("[data-year]");
