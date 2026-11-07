@@ -3,261 +3,402 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="light dark">
-  <meta name="theme-color" content="#f4f3ef">
-  <title>FreshStart · 把新电脑调到顺手</title>
-  <meta name="description" content="FreshStart 是一款本地优先的 Windows 11 开荒、维护与迁移工具。在线浏览完整软件界面，所有操作均为演示。">
-  <meta property="og:title" content="FreshStart · 把新电脑调到顺手">
-  <meta property="og:description" content="本地优先、可回滚、可审计的 Windows 11 开荒工具。立即浏览可交互产品界面。">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#f2f4f4">
+  <title>FreshStart — Windows, under your control.</title>
+  <meta name="description" content="FreshStart 是一款本地优先、可回滚、可审计的 Windows 11 开荒与迁移工具。">
+  <meta property="og:title" content="FreshStart — Windows, under your control.">
+  <meta property="og:description" content="本地优先、可回滚、可审计的 Windows 11 开荒与迁移工具。">
   <meta property="og:type" content="website">
   <link rel="icon" href="site-assets/app.ico">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter+Tight:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="neo.css">
   <script>document.documentElement.classList.add("js");</script>
   <script src="script.js" defer></script>
 </head>
-<body>
+<body class="neo-site">
   <a class="skip-link" href="#main">跳到主要内容</a>
+  <div class="fs-grid-lines" aria-hidden="true"></div>
 
-  <header class="site-header" data-header>
-    <div class="container header-inner">
-      <a class="brand" href="#top" aria-label="FreshStart 首页">
-        <img src="site-assets/app.ico" alt="" width="34" height="34">
-        <span>
+  <header class="fs-header" data-header>
+    <div class="fs-shell fs-header-inner">
+      <a class="fs-brand" href="#top" aria-label="FreshStart 首页">
+        <span class="fs-brand-mark">FS</span>
+        <span class="fs-brand-copy">
           <strong>FreshStart</strong>
-          <small>Windows 11 Toolkit</small>
+          <small>SYSTEM INSTRUMENT / 027</small>
         </span>
       </a>
 
-      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" data-nav-toggle>
-        <span></span><span></span>
-        <span class="sr-only">打开导航</span>
+      <button class="fs-menu" type="button" aria-expanded="false" aria-controls="site-nav" data-nav-toggle>
+        <span class="fs-menu-label">MENU</span>
+        <span class="fs-menu-icon" aria-hidden="true"></span>
       </button>
 
-      <nav class="nav-links" id="site-nav" data-nav>
-        <a href="#experience">在线体验</a>
-        <a href="#features">功能</a>
-        <a href="#migration">环境克隆</a>
-        <a href="#download">下载</a>
-        <a class="nav-github" href="https://github.com/LukeNcCode/FreshStart" target="_blank" rel="noreferrer">
-          GitHub <span aria-hidden="true">↗</span>
-        </a>
+      <nav class="fs-nav" id="site-nav" data-nav aria-label="主导航">
+        <a href="#principles"><span>01</span>原则</a>
+        <a href="#experience"><span>02</span>在线体验</a>
+        <a href="#capabilities"><span>03</span>能力</a>
+        <a href="#migration"><span>04</span>迁移</a>
+        <a href="#download"><span>05</span>下载</a>
+        <a class="fs-nav-external" href="https://github.com/LukeNcCode/FreshStart" target="_blank" rel="noreferrer">GitHub ↗</a>
       </nav>
     </div>
   </header>
 
   <main id="main">
-    <section class="hero" id="top">
-      <div class="hero-glow" aria-hidden="true"></div>
-      <div class="container hero-grid">
-        <div class="hero-copy reveal">
-          <p class="eyebrow"><span></span> WINDOWS 11 / LOCAL-FIRST / OPEN SOURCE</p>
-          <h1>把新电脑，<br><em>调到顺手。</em></h1>
-          <p class="hero-lede">
-            FreshStart 把系统优化、软件安装、隐私设置、环境迁移和可回滚执行放进一个安静的桌面工作台。
-            现在可以直接在浏览器里浏览与当前版本一致的产品界面。
+    <section class="fs-hero" id="top">
+      <div class="fs-shell">
+        <div class="fs-hero-rail">
+          <span>WINDOWS 11 TOOLKIT</span>
+          <span>LOCAL-FIRST / OPEN SOURCE</span>
+          <span>REV. 0.2.7</span>
+        </div>
+
+        <div class="fs-hero-title-field">
+          <p class="fs-vertical-label">ONE CLEAN SYSTEM / ZERO CLOUD</p>
+          <h1 class="fs-hero-title">
+            <span>FRESH</span>
+            <span class="fs-outline-word">START.</span>
+          </h1>
+          <p class="fs-hero-aside">
+            <span>01—07</span>
+            A Windows utility for people who want control over every change.
           </p>
-          <div class="hero-actions">
-            <a class="button button-primary" href="#experience">
-              进入交互预览 <span aria-hidden="true">→</span>
-            </a>
-            <a class="button button-quiet" href="https://github.com/LukeNcCode/FreshStart/releases" target="_blank" rel="noreferrer">
-              下载 v0.2.0 <span aria-hidden="true">↓</span>
-            </a>
-          </div>
-          <div class="hero-note"><span class="status-dot"></span>Windows 11 · x64 · 本地运行 · MIT License</div>
         </div>
 
-        <div class="hero-visual reveal" data-delay="100" aria-label="FreshStart 产品界面预览">
-          <div class="mini-app" aria-hidden="true">
-            <aside class="mini-sidebar">
-              <div class="mini-brand">
-                <i class="mini-logo"><b></b><b></b><em></em></i>
-                <span><strong>FreshStart</strong><small>CONTROL DECK · WIN11</small></span>
+        <div class="fs-hero-stage">
+          <div class="fs-hero-intro reveal">
+            <p class="fs-kicker">SYSTEM PREPARATION, WITHOUT THE NOISE.</p>
+            <h2>不是重装系统。<br>是重新掌握你的 Windows。</h2>
+            <p class="fs-lede">
+              FreshStart 把优化、软件、隐私、环境迁移和可回滚执行收进一个本地工作台。
+              不登录、不上传、不把系统变成黑盒。
+            </p>
+            <div class="fs-actions">
+              <a class="fs-button fs-button-primary" href="#experience">进入在线体验 <span>→</span></a>
+              <a class="fs-button fs-button-line" href="#download">获取 0.2.7 <span>↓</span></a>
+            </div>
+            <ul class="fs-proof-list" aria-label="产品特性">
+              <li><span>LOCAL</span>所有处理在本机完成</li>
+              <li><span>REVERSIBLE</span>写操作优先保留退路</li>
+              <li><span>AUDITABLE</span>每一步都有记录</li>
+            </ul>
+          </div>
+
+          <figure class="fs-object reveal" data-delay="90" aria-label="FreshStart 深色主题界面">
+            <div class="fs-object-back" aria-hidden="true"></div>
+            <div class="fs-screen">
+              <div class="fs-screen-bar">
+                <span class="fs-screen-dots"><i></i><i></i><i></i></span>
+                <span>FRESHSTART / LIVE SURFACE</span>
+                <span>0.2.7</span>
               </div>
-              <div class="mini-search">⌕ <span>搜索页面或功能</span></div>
-              <div class="mini-group-label">总览</div>
-              <div class="mini-nav is-active"><i></i>开荒工作台</div>
-              <div class="mini-nav"><i></i>系统信息</div>
-              <div class="mini-group-label">常用</div>
-              <div class="mini-nav"><i></i>推荐软件</div>
-              <div class="mini-nav"><i></i>一键开荒</div>
-              <div class="mini-nav"><i></i>系统清理</div>
-              <div class="mini-group-label">优化</div>
-              <div class="mini-nav"><i></i>执行中心</div>
-              <div class="mini-nav"><i></i>隐私清理</div>
-              <div class="mini-status"><b></b><span><strong>本地运行 · 支持回滚</strong><small>v0.2.0 · 本地开荒工具</small></span></div>
+              <img src="site-assets/home-dark.png" alt="FreshStart 开荒工作台界面">
+            </div>
+            <figcaption>
+              <span>AURORA WORKSPACE</span>
+              <strong>Windows 11 · x64 · WPF</strong>
+            </figcaption>
+          </figure>
+        </div>
+
+        <a class="fs-scroll-cue" href="#principles">
+          <span>SCROLL TO EXPLORE</span>
+          <i aria-hidden="true"></i>
+        </a>
+      </div>
+    </section>
+
+    <section class="fs-principles" id="principles">
+      <div class="fs-shell">
+        <header class="fs-section-flag reveal">
+          <span>01 / PRINCIPLES</span>
+          <span>LOCAL — REVERSIBLE — AUDITABLE</span>
+        </header>
+
+        <div class="fs-principles-layout">
+          <h2 class="fs-display reveal">CHANGE<br>WITH A<br>WAY BACK.</h2>
+          <div class="fs-principles-copy reveal" data-delay="80">
+            <p class="fs-kicker">SYSTEMS SHOULD EARN TRUST.</p>
+            <p class="fs-large-copy">
+              改变系统之前，先把退路准备好。FreshStart 不隐藏过程，也不要求你相信一个不可见的“一键优化”。
+            </p>
+          </div>
+        </div>
+
+        <ol class="fs-principle-grid">
+          <li class="reveal">
+            <span class="fs-index">01</span>
+            <h3>LOCAL BY DEFAULT</h3>
+            <p>没有账户、遥测或云端控制台。配置、日志、备份和克隆包始终留在本机。</p>
+          </li>
+          <li class="reveal" data-delay="60">
+            <span class="fs-index">02</span>
+            <h3>READ. THEN WRITE.</h3>
+            <p>先读取当前状态并生成快照，再执行修改；校验失败时按逆序自动回滚。</p>
+          </li>
+          <li class="reveal" data-delay="120">
+            <span class="fs-index">03</span>
+            <h3>KEEP THE RECEIPTS.</h3>
+            <p>高风险动作明确说明影响范围。操作历史保留每一步，随时可以查看或撤销。</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="fs-live-section" id="experience">
+      <div class="fs-shell">
+        <header class="fs-live-heading reveal">
+          <div>
+            <p class="fs-section-index">02 / INTERACTIVE SURFACE</p>
+            <h2>DON'T LOOK AT<br>A SCREENSHOT.</h2>
+          </div>
+          <div>
+            <p>直接操作当前产品界面。导航、搜索、主题和侧栏均可使用；演示不会读取系统状态或执行任何功能。</p>
+            <span class="fs-mono">LIVE HTML RECONSTRUCTION / V0.2.7</span>
+          </div>
+        </header>
+
+        <div class="fs-live-frame reveal" data-delay="80">
+          <div class="fs-live-caption">
+            <span>INTERACTIVE OBJECT</span>
+            <span>THE BROWSER IS THE ONLY RUNTIME</span>
+          </div>
+
+          <div class="app-window" data-app-window data-theme="light">
+            <aside class="app-sidebar" data-app-sidebar>
+              <div class="app-brand">
+                <span class="app-logo" aria-hidden="true"><b></b><b></b><i></i></span>
+                <span class="app-brand-copy"><strong>FreshStart</strong><small>WINDOWS 11 / 0.2.7</small></span>
+              </div>
+              <label class="app-search">
+                <span aria-hidden="true">⌕</span>
+                <input type="search" placeholder="搜索页面或功能" aria-label="搜索页面" data-nav-search>
+              </label>
+              <nav class="app-nav" aria-label="FreshStart 页面导航" data-app-nav></nav>
+              <div class="app-sidebar-footer">
+                <span><i></i>本地运行 · 支持回滚</span>
+                <small>v0.2.7 · 本地开荒工具</small>
+              </div>
             </aside>
-            <div class="mini-workspace">
-              <div class="mini-topbar">
-                <div class="mini-page-title"><i></i><span><small>WORKSPACE</small><strong>开荒工作台</strong></span></div>
-                <div class="mini-top-actions"><span><b></b>标准权限</span><i>☾</i><i>‹</i><i>−</i><i>□</i><i>×</i></div>
-              </div>
-              <div class="mini-content">
-                <div class="mini-hero">
-                  <small>SYSTEM READINESS / 01</small>
-                  <h3>你的 Windows，随时进入状态</h3>
-                  <p>把刚装好的 Windows 11 调到顺手的状态。所有修改都会先备份，随时可以撤销。</p>
-                  <div class="mini-badges"><span><i></i> 标准权限</span><span>◇ 本机处理 · 不上传数据</span></div>
-                  <div class="mini-triad"><span><b>本地</b><small>执行边界</small></span><span><b>可回滚</b><small>写入策略</small></span><span><b>可审计</b><small>操作记录</small></span></div>
-                  <div class="mini-score"><b>55</b><small>就绪评分</small></div>
+
+            <div class="app-workspace">
+              <header class="app-topbar">
+                <div class="app-page-title">
+                  <i aria-hidden="true"></i>
+                  <span><small>WORKSPACE</small><strong data-app-title>开荒工作台</strong></span>
                 </div>
-                <div class="mini-section-title"><small>COMMAND DECK / 02</small><h4>快捷操作</h4></div>
-                <div class="mini-cards">
-                  <span><i>▣</i><b>重启资源管理器</b><small>任务栏卡死时使用</small></span>
-                  <span><i>⏻</i><b>电源选项</b><small>电源计划与合盖行为</small></span>
-                  <span><i>☷</i><b>控制面板</b><small>经典控制面板入口</small></span>
+                <div class="app-top-actions">
+                  <span class="app-permission"><i></i>管理员模式</span>
+                  <button type="button" class="app-icon-button" aria-label="切换主题" title="切换主题" data-theme-toggle>☾</button>
+                  <button type="button" class="app-icon-button" aria-label="收起或展开侧边栏" title="收起侧边栏" data-sidebar-toggle>‹</button>
+                  <span class="app-top-divider"></span>
+                  <button type="button" class="app-window-control" aria-label="最小化" data-demo-action>−</button>
+                  <button type="button" class="app-window-control" aria-label="最大化" data-demo-action>□</button>
+                  <button type="button" class="app-window-control close" aria-label="关闭" data-demo-action>×</button>
                 </div>
-              </div>
+              </header>
+              <main class="app-view" data-app-view tabindex="-1"></main>
             </div>
+            <div class="app-toast" data-app-toast role="status" aria-live="polite"></div>
           </div>
-          <div class="hero-preview-label"><span>LIVE UI</span><strong>基于 v0.2.0 当前界面代码复刻</strong></div>
+
+          <div class="fs-live-meta">
+            <span><b>01</b> NAVIGATE</span>
+            <span><b>02</b> SEARCH</span>
+            <span><b>03</b> SWITCH THEME</span>
+            <span><b>04</b> EXPLORE SAFELY</span>
+          </div>
         </div>
       </div>
     </section>
 
-    <section class="section experience-section" id="experience">
-      <div class="container experience-heading reveal">
-        <div>
-          <p class="eyebrow"><span></span> INTERACTIVE PRODUCT TOUR</p>
-          <h2>自己逛一遍，<br>比截图更清楚。</h2>
+    <section class="fs-capabilities" id="capabilities">
+      <div class="fs-shell fs-capability-layout">
+        <div class="fs-capability-intro reveal">
+          <p class="fs-section-index">03 / CAPABILITIES</p>
+          <h2>ONE<br>INSTRUMENT.<br>MANY JOBS.</h2>
+          <p>
+            从第一天的系统准备，到之后的软件维护、环境迁移与恢复。功能不是散落的快捷方式，而是一套有边界的执行系统。
+          </p>
+          <button type="button" class="fs-text-button" data-open-page="home">
+            打开开荒工作台 <span>↗</span>
+          </button>
         </div>
-        <p>侧边栏、主题、页面布局、卡片和状态都按 v0.2.0 的实际 XAML 复刻。点击导航即可浏览所有页面；演示不会读取系统信息，也不会执行任何功能。</p>
-      </div>
 
-      <div class="container experience-shell reveal" data-delay="80">
-        <div class="app-window" data-app-window data-theme="light">
-          <aside class="app-sidebar" data-app-sidebar>
-            <div class="app-brand">
-              <span class="app-logo" aria-hidden="true"><b></b><b></b><i></i></span>
-              <span class="app-brand-copy"><strong>FreshStart</strong><small>CONTROL DECK · WIN11</small></span>
+        <div class="fs-capability-list">
+          <article class="fs-capability reveal">
+            <span class="fs-index">01</span>
+            <div>
+              <p class="fs-mono">SYSTEM</p>
+              <h3>READ THE MACHINE</h3>
+              <p>CPU、内存、主板、显卡、磁盘、网卡和激活状态，一屏建立基线。</p>
             </div>
-            <label class="app-search">
-              <span aria-hidden="true">⌕</span>
-              <input type="search" placeholder="搜索页面或功能" aria-label="搜索页面" data-nav-search>
-            </label>
-            <nav class="app-nav" aria-label="FreshStart 页面导航" data-app-nav></nav>
-            <div class="app-sidebar-footer"><span><i></i>本地运行 · 支持回滚</span><small>v0.2.0 · 本地开荒工具</small></div>
-          </aside>
-
-          <div class="app-workspace">
-            <header class="app-topbar">
-              <div class="app-page-title"><i aria-hidden="true"></i><span><small>WORKSPACE</small><strong data-app-title>开荒工作台</strong></span></div>
-              <div class="app-top-actions">
-                <span class="app-permission"><i></i>标准权限</span>
-                <button type="button" class="app-icon-button" aria-label="切换主题" title="切换主题" data-theme-toggle>☾</button>
-                <button type="button" class="app-icon-button" aria-label="收起或展开侧边栏" title="收起侧边栏" data-sidebar-toggle>‹</button>
-                <span class="app-top-divider"></span>
-                <button type="button" class="app-window-control" aria-label="最小化" data-demo-action>−</button>
-                <button type="button" class="app-window-control" aria-label="最大化" data-demo-action>□</button>
-                <button type="button" class="app-window-control close" aria-label="关闭" data-demo-action>×</button>
-              </div>
-            </header>
-            <main class="app-view" data-app-view tabindex="-1"></main>
-          </div>
-          <div class="app-toast" data-app-toast role="status" aria-live="polite"></div>
-        </div>
-        <div class="preview-note"><span>交互说明</span>导航、搜索、主题和侧边栏可以操作；其余按钮只会显示提示，不会修改浏览器之外的任何内容。</div>
-      </div>
-    </section>
-
-    <section class="section" id="features">
-      <div class="container">
-        <div class="section-heading reveal">
-          <p class="eyebrow"><span></span> ONE QUIET CONTROL DECK</p>
-          <h2>少一点折腾，<br>多一点掌控。</h2>
-          <p>常用设置不必散落在控制面板、注册表、PowerShell 和十几个安装器里。</p>
-        </div>
-        <div class="feature-grid">
-          <article class="feature-card feature-large reveal">
-            <div class="feature-kicker">01 / WORKSPACE</div>
-            <h3>开荒工作台</h3>
-            <p>系统信息、常用入口和就绪评分集中在一个界面。先看清机器状态，再决定要改什么。</p>
-            <button class="feature-link" type="button" data-open-page="home">打开界面 <span>→</span></button>
+            <button type="button" aria-label="查看系统信息" data-open-page="system-info">↗</button>
           </article>
-          <article class="feature-card reveal" data-delay="60"><div class="feature-icon">↺</div><h3>可回滚执行</h3><p>写入前读取当前值、生成快照，校验失败时逆序回滚。操作历史可以查到每一步。</p></article>
-          <article class="feature-card reveal" data-delay="100"><div class="feature-icon">⌘</div><h3>执行中心</h3><p>把多个系统步骤编排成一条工作流，先预检风险，再统一执行并生成报告。</p><button class="feature-link" type="button" data-open-page="execution">浏览工作流 <span>→</span></button></article>
-          <article class="feature-card feature-tall reveal" data-delay="140"><div class="feature-kicker">LOCAL ONLY</div><h3>你的数据，留在你的电脑。</h3><p>没有账户、没有云端控制台、没有遥测。设置、备份、日志和迁移包都只存在本机。</p><div class="local-seal" aria-hidden="true"><span>LOCAL</span><small>NO CLOUD</small></div></article>
-          <article class="feature-card reveal"><div class="feature-icon">▦</div><h3>软件与应用</h3><p>推荐软件、winget 安装更新、原生应用管理、卸载和残留清理放在同一条维护链路里。</p></article>
-          <article class="feature-card reveal" data-delay="60"><div class="feature-icon">◎</div><h3>系统与网络</h3><p>服务、启动项、计划任务、驱动、DNS、电源、防火墙和 Windows 更新都有明确的边界。</p></article>
+          <article class="fs-capability reveal" data-delay="40">
+            <span class="fs-index">02</span>
+            <div>
+              <p class="fs-mono">SOFTWARE</p>
+              <h3>INSTALL WITH INTENT</h3>
+              <p>winget、官方直链兜底、软件升级、卸载与残留清理，共用一条可追踪链路。</p>
+            </div>
+            <button type="button" aria-label="查看推荐软件" data-open-page="software">↗</button>
+          </article>
+          <article class="fs-capability reveal" data-delay="80">
+            <span class="fs-index">03</span>
+            <div>
+              <p class="fs-mono">AUTOMATION</p>
+              <h3>COMPOSE A WORKFLOW</h3>
+              <p>把多个系统动作组织成一步到位的执行方案，先预检风险，再运行并生成报告。</p>
+            </div>
+            <button type="button" aria-label="查看执行中心" data-open-page="execution">↗</button>
+          </article>
+          <article class="fs-capability reveal" data-delay="120">
+            <span class="fs-index">04</span>
+            <div>
+              <p class="fs-mono">MAINTENANCE</p>
+              <h3>KEEP THE SYSTEM LEAN</h3>
+              <p>清理、启动项、服务、任务、驱动、网络和 Windows 更新都有明确入口。</p>
+            </div>
+            <button type="button" aria-label="查看系统清理" data-open-page="cleanup">↗</button>
+          </article>
+          <article class="fs-capability reveal" data-delay="160">
+            <span class="fs-index">05</span>
+            <div>
+              <p class="fs-mono">IDENTITY</p>
+              <h3>MOVE THE ENVIRONMENT</h3>
+              <p>软件、聊天数据和开发工具链可以本地打包，在新系统中离线释放。</p>
+            </div>
+            <button type="button" aria-label="查看环境克隆" data-open-page="migration">↗</button>
+          </article>
         </div>
       </div>
     </section>
 
-    <section class="section migration-section" id="migration">
-      <div class="container migration-grid">
-        <div class="migration-copy reveal">
-          <p class="eyebrow"><span></span> ENVIRONMENT CLONER / LAB</p>
-          <h2>把熟悉的环境，<br>带到下一台电脑。</h2>
-          <p>在本机打包聊天数据、安装介质与开发工具链，在新系统离线释放。不依赖官网重新下载，也不迁移登录令牌、浏览器密码或机器绑定许可证。</p>
-          <div class="tag-list" aria-label="支持迁移的项目"><span>微信</span><span>QQ</span><span>飞书</span><span>Git</span><span>Python</span><span>Node.js</span><span>Java</span><span>Rust</span><span>.NET SDK</span></div>
-          <button class="text-link" type="button" data-open-page="migration">浏览环境克隆界面 <span>→</span></button>
+    <section class="fs-migration" id="migration">
+      <div class="fs-shell">
+        <header class="fs-section-flag fs-section-flag-light reveal">
+          <span>04 / ENVIRONMENT CLONER</span>
+          <span>TAKE YOUR CONTEXT WITH YOU</span>
+        </header>
+
+        <div class="fs-migration-grid">
+          <div class="fs-migration-copy reveal">
+            <p class="fs-kicker">THE NEXT MACHINE SHOULD FEEL FAMILIAR.</p>
+            <h2>YOUR<br>ENVIRONMENT.<br>NOT A FRESH HELLO.</h2>
+            <p>
+              在本机提取软件、聊天记录、下载文件、开发工具与系统 PATH，在新电脑离线释放。
+              不重新去官网下载，也不带走登录令牌和机器绑定许可证。
+            </p>
+            <div class="fs-tags" aria-label="支持迁移的项目">
+              <span>微信</span><span>QQ</span><span>飞书</span><span>Git</span>
+              <span>Python</span><span>Node.js</span><span>Java</span><span>Rust</span><span>.NET SDK</span>
+            </div>
+            <button type="button" class="fs-button fs-button-light" data-open-page="migration">
+              浏览环境克隆 <span>→</span>
+            </button>
+          </div>
+
+          <figure class="fs-migration-visual reveal" data-delay="90">
+            <img src="site-assets/environment-migration.png" alt="FreshStart 环境克隆界面">
+            <figcaption>SCAN → VALIDATE → PACKAGE → RESTORE</figcaption>
+          </figure>
         </div>
-        <div class="migration-visual reveal" data-delay="100">
-          <div class="migration-stack" aria-hidden="true">
-            <article><span>01</span><div><strong>扫描</strong><small>应用 · 数据 · 开发环境</small></div><i>✓</i></article>
-            <article><span>02</span><div><strong>校验</strong><small>安装器 · SHA256 · 阻塞项</small></div><i>✓</i></article>
-            <article><span>03</span><div><strong>打包</strong><small>一个可离线释放的 .fclone</small></div><i>✓</i></article>
-            <article class="active"><span>04</span><div><strong>释放</strong><small>原厂安装器原生部署</small></div><i>→</i></article>
+
+        <ol class="fs-flow">
+          <li class="reveal"><span>01</span><strong>SCAN</strong><p>识别应用、数据目录和多个开发环境版本。</p></li>
+          <li class="reveal" data-delay="50"><span>02</span><strong>VALIDATE</strong><p>检查本机安装器、路径与逐文件哈希。</p></li>
+          <li class="reveal" data-delay="100"><span>03</span><strong>PACKAGE</strong><p>封装成可离线释放的本地 .fclone。</p></li>
+          <li class="reveal" data-delay="150"><span>04</span><strong>RESTORE</strong><p>运行原生安装器并恢复数据与环境变量。</p></li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="fs-sequence">
+      <div class="fs-shell">
+        <header class="fs-section-flag reveal">
+          <span>05 / EXECUTION MODEL</span>
+          <span>NO SILENT WRITES</span>
+        </header>
+        <div class="fs-sequence-title reveal">
+          <p class="fs-kicker">A VISIBLE PATH FROM CHANGE TO RECOVERY.</p>
+          <h2>READ.<br>SNAPSHOT.<br>WRITE.<br>VERIFY.</h2>
+        </div>
+        <div class="fs-sequence-steps">
+          <article class="reveal"><span>01</span><h3>READ CURRENT STATE</h3><p>记录现有值，而不是直接覆盖。</p></article>
+          <article class="reveal" data-delay="50"><span>02</span><h3>CREATE A SNAPSHOT</h3><p>备份注册表、目录或服务状态。</p></article>
+          <article class="reveal" data-delay="100"><span>03</span><h3>WRITE + VERIFY</h3><p>读回结果，确认修改真实生效。</p></article>
+          <article class="reveal" data-delay="150"><span>04</span><h3>KEEP THE HISTORY</h3><p>失败时回滚，随后保留审计记录。</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="fs-download" id="download">
+      <div class="fs-shell">
+        <div class="fs-download-top reveal">
+          <span class="fs-section-index">06 / DOWNLOAD</span>
+          <span>WINDOWS 11 22H2+ · X64 · ADMIN</span>
+        </div>
+        <div class="fs-download-title reveal">
+          <h2>INSTALL<br><span>ONCE.</span></h2>
+          <div>
+            <p>从一台刚装好的 Windows 开始。选择轻量安装器，或在无法联网安装 winget 的环境使用完整离线版。</p>
+            <a class="fs-button fs-button-primary" href="https://github.com/LukeNcCode/FreshStart/releases" target="_blank" rel="noreferrer">
+              打开 GitHub Releases <span>↗</span>
+            </a>
           </div>
         </div>
-      </div>
-      <div class="container migration-flow">
-        <article class="flow-step reveal"><span>01</span><h3>扫描</h3><p>发现应用、聊天数据、多个开发环境版本与安全的环境变量。</p></article>
-        <article class="flow-step reveal" data-delay="60"><span>02</span><h3>打包</h3><p>生成带逐文件 SHA256 校验的本地 <code>.fclone</code> 包。</p></article>
-        <article class="flow-step reveal" data-delay="120"><span>03</span><h3>原生释放</h3><p>运行原厂安装器，再恢复用户数据、PATH 和环境变量。</p></article>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="container">
-        <div class="safety-panel reveal">
-          <div class="safety-copy">
-            <p class="eyebrow light"><span></span> REVERSIBLE BY DESIGN</p>
-            <h2>改变系统之前，<br>先把退路准备好。</h2>
-            <p>FreshStart 不是“一键黑盒”。每个高风险动作都应说明将修改什么、影响在哪里、如何撤销。</p>
-          </div>
-          <ol class="safety-list">
-            <li><span>01</span><div><strong>读取当前值</strong><p>先记录现有状态，而不是直接覆盖。</p></div></li>
-            <li><span>02</span><div><strong>生成快照</strong><p>备份注册表、目录或服务状态。</p></div></li>
-            <li><span>03</span><div><strong>写入并校验</strong><p>读回结果，失败时自动回滚。</p></div></li>
-            <li><span>04</span><div><strong>留下审计记录</strong><p>随时回到操作历史，查看或撤销。</p></div></li>
-          </ol>
+        <div class="fs-release-row reveal" data-delay="80">
+          <span>FRESHSTART V0.2.7</span>
+          <span>SETUP / 53.35 MB</span>
+          <span>OFFLINE SETUP / 324.49 MB</span>
+          <span>MIT LICENSE</span>
         </div>
       </div>
     </section>
 
-    <section class="section download-section" id="download">
-      <div class="container download-card reveal">
-        <div>
-          <p class="eyebrow"><span></span> FRESHSTART V0.2.0</p>
-          <h2>从一台干净的 Windows 开始。</h2>
-          <p>选择轻量安装器，或使用包含 winget 离线组件的完整版本。只发布安装器，不发布 ZIP。</p>
+    <section class="fs-faq">
+      <div class="fs-shell fs-faq-grid">
+        <div class="reveal">
+          <p class="fs-section-index">07 / BEFORE YOU START</p>
+          <h2>QUESTIONS,<br>ANSWERED PLAINLY.</h2>
         </div>
-        <div class="download-actions">
-          <a class="button button-primary" href="https://github.com/LukeNcCode/FreshStart/releases" target="_blank" rel="noreferrer">打开 GitHub Releases <span aria-hidden="true">↗</span></a>
-          <span>Windows 11 22H2+ · x64 · 管理员权限</span>
-        </div>
-      </div>
-    </section>
-
-    <section class="section faq-section">
-      <div class="container faq-grid">
-        <div class="faq-heading reveal"><p class="eyebrow"><span></span> BEFORE YOU START</p><h2>常见问题</h2></div>
-        <div class="faq-list reveal" data-delay="60">
-          <details><summary>官网上的按钮会操作我的电脑吗？</summary><p>不会。官网只复刻界面和交互状态，不连接本地系统，也不会执行任何优化、安装或迁移操作。</p></details>
-          <details><summary>FreshStart 会上传我的系统信息吗？</summary><p>不会。FreshStart 不包含遥测，不要求账户，配置、日志、备份和报告都保存在本机。</p></details>
-          <details><summary>所有系统修改都能撤销吗？</summary><p>明确支持回滚的写操作会先生成快照。卸载、原生应用移除、部分清理操作本身不可撤销，界面会在执行前说明。</p></details>
-          <details><summary>环境克隆会迁移登录状态吗？</summary><p>不会主动迁移登录令牌、浏览器 Cookie、密码或机器绑定许可证。聊天记录和文件会恢复，登录需要用户自行完成。</p></details>
+        <div class="fs-faq-list reveal" data-delay="60">
+          <details>
+            <summary><span>01</span>官网上的按钮会操作我的电脑吗？</summary>
+            <p>不会。在线体验只复刻界面和状态，不连接本地系统，也不会执行优化、安装或迁移。</p>
+          </details>
+          <details>
+            <summary><span>02</span>FreshStart 会上传系统信息吗？</summary>
+            <p>不会。没有账户、遥测或云端控制台，配置、日志、备份和报告都保存在本机。</p>
+          </details>
+          <details>
+            <summary><span>03</span>所有修改都能撤销吗？</summary>
+            <p>明确支持回滚的写操作会先生成快照。卸载、原生应用移除和部分清理操作本身不可撤销，界面会在执行前说明。</p>
+          </details>
+          <details>
+            <summary><span>04</span>环境克隆会迁移登录状态吗？</summary>
+            <p>不会主动迁移登录令牌、Cookie、密码或机器绑定许可证。数据可以恢复，登录需要用户自行完成。</p>
+          </details>
         </div>
       </div>
     </section>
   </main>
 
-  <footer class="site-footer">
-    <div class="container footer-inner">
-      <div class="footer-brand"><img src="site-assets/app.ico" alt="" width="28" height="28"><span>FreshStart</span></div>
-      <p>本地优先的 Windows 11 开荒、维护与迁移工具。</p>
-      <div class="footer-links"><a href="https://github.com/LukeNcCode/FreshStart" target="_blank" rel="noreferrer">GitHub</a><a href="https://github.com/LukeNcCode/FreshStart/blob/main/LICENSE" target="_blank" rel="noreferrer">MIT License</a><span>© <span data-year></span></span></div>
+  <footer class="fs-footer">
+    <div class="fs-shell fs-footer-grid">
+      <a class="fs-footer-brand" href="#top">FreshStart<span>.</span></a>
+      <p>LOCAL-FIRST WINDOWS 11 PREPARATION.</p>
+      <div>
+        <a href="https://github.com/LukeNcCode/FreshStart" target="_blank" rel="noreferrer">GITHUB ↗</a>
+        <a href="https://github.com/LukeNcCode/FreshStart/blob/main/LICENSE" target="_blank" rel="noreferrer">MIT LICENSE</a>
+      </div>
+      <small>© <span data-year></span> FRESHSTART</small>
     </div>
   </footer>
 </body>

@@ -1,6 +1,6 @@
 # FreshStart GitHub Pages
 
-This branch contains the static product website for FreshStart v0.2.0.
+This branch contains the Neo-Swiss product website for FreshStart v0.2.7.
 
 The experience section is a browser-only recreation of the current WPF UI.
 Navigation, search, theme switching and sidebar controls are interactive;

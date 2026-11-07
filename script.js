@@ -241,7 +241,7 @@ const renderHome = () => `
           <span><strong>可审计</strong><small>操作记录</small></span>
         </div>
       </div>
-      <div class="app-score"><strong>55</strong><small>就绪评分</small></div>
+      <div class="app-score"><strong>53</strong><small>就绪评分</small></div>
     </section>
 
     <div class="app-section-row">
@@ -475,7 +475,7 @@ const renderSettings = () => `
     <section class="app-card">
       <div class="app-card-icon-title">${icon("info")}<h3 class="app-section-title">关于</h3></div>
       <div class="app-divider"></div>
-      <p style="font-size:12.5px;margin:0">FreshStart 0.2.0 · Windows 11 · .NET 8 · WPF</p>
+      <p style="font-size:12.5px;margin:0">FreshStart 0.2.7 · Windows 11 · .NET 8 · WPF</p>
       <p class="app-footer-note" style="margin-top:8px">不采集、不上传任何用户数据；不内置广告与捆绑安装。所有修改都保存在本机，并生成可回滚的备份。</p>
     </section>
   </div>`;
@@ -489,7 +489,7 @@ const settingsPage = (key, iconName, rows, actions = `${pageButton("刷新")}${p
       <div class="app-divider"></div>
       ${toggleRows(rows)}
     </section>
-    <p class="app-footer-note">页面布局、状态与组件样式按 FreshStart v0.2.0 当前 XAML 复刻。</p>
+    <p class="app-footer-note">页面布局、状态与组件样式按 FreshStart v0.2.7 当前 XAML 复刻。</p>
   </div>`;
 
 const renderPerformance = () => `
