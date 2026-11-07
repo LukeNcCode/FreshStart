@@ -6,6 +6,9 @@ The experience section is a browser-only recreation of the current WPF UI.
 Navigation, search, theme switching and sidebar controls are interactive;
 buttons never read system state or execute FreshStart features.
 
+The first load uses a FreshStart-specific folding `F` preloader instead of the
+previous static entrance.
+
 ## Local preview
 
 ```powershell
