@@ -20,23 +20,36 @@
   const audioDismiss = document.querySelector("[data-audio-dismiss]");
   const musicStorageKey = "freshstart:background-music";
   const musicVolume = 0.18;
-  let musicEnabled = true;
+  let musicPreference = null;
   let musicStarted = false;
   let musicFadeFrame = 0;
   let musicAutoplayBlocked = false;
+  let musicStartPromise = null;
 
   try {
-    musicEnabled = window.localStorage.getItem(musicStorageKey) !== "off";
+    musicPreference = window.localStorage.getItem(musicStorageKey);
   } catch {
-    musicEnabled = true;
+    musicPreference = null;
   }
+  let musicEnabled = musicPreference !== "off";
+
+  const isMusicPlaying = () =>
+    Boolean(
+      musicEnabled
+      && backgroundMusic
+      && !backgroundMusic.paused
+      && !backgroundMusic.ended
+      && backgroundMusic.readyState >= 2
+      && backgroundMusic.volume > 0.01
+    );
 
   const updateAudioControls = () => {
+    const playing = isMusicPlaying();
     audioToggles.forEach((button) => {
       button.setAttribute("aria-pressed", String(musicEnabled));
       button.setAttribute("aria-label", musicEnabled ? "关闭背景音乐" : "开启背景音乐");
-      button.classList.toggle("is-waiting", musicEnabled && !musicStarted);
-      button.classList.toggle("is-playing", musicEnabled && musicStarted);
+      button.classList.toggle("is-waiting", musicEnabled && !playing);
+      button.classList.toggle("is-playing", playing);
     });
   };
 
@@ -45,7 +58,7 @@
   };
 
   const showAudioPrompt = () => {
-    if (!audioPrompt || !musicEnabled || musicStarted) return;
+    if (!audioPrompt || !musicEnabled || musicPreference !== null || isMusicPlaying()) return;
     audioPrompt.hidden = false;
   };
 
@@ -61,38 +74,59 @@
       if (progress < 1) {
         musicFadeFrame = requestAnimationFrame(step);
       } else {
+        backgroundMusic.volume = targetVolume;
+        updateAudioControls();
         finish?.();
       }
     };
     musicFadeFrame = requestAnimationFrame(step);
   };
 
-  const startMusic = async () => {
+  const startMusic = async ({ fadeIn = false } = {}) => {
     if (!backgroundMusic || !musicEnabled) return;
-    cancelAnimationFrame(musicFadeFrame);
-    if (!backgroundMusic.paused) {
-      musicStarted = true;
-      updateAudioControls();
-      fadeMusic(musicVolume);
-      return;
-    }
-    backgroundMusic.volume = 0;
-    try {
-      await backgroundMusic.play();
-      musicStarted = true;
-      musicAutoplayBlocked = false;
-      hideAudioPrompt();
-      updateAudioControls();
-      fadeMusic(musicVolume);
-    } catch {
-      musicStarted = false;
-      musicAutoplayBlocked = true;
-      updateAudioControls();
-      if (document.documentElement.classList.contains("has-preloaded")) {
-        window.setTimeout(showAudioPrompt, 120);
+    if (musicStartPromise) return musicStartPromise;
+
+    musicStartPromise = (async () => {
+      cancelAnimationFrame(musicFadeFrame);
+      backgroundMusic.muted = false;
+      backgroundMusic.volume = fadeIn ? Math.min(0.03, musicVolume) : musicVolume;
+
+      if (!backgroundMusic.paused) {
+        musicStarted = true;
+        musicAutoplayBlocked = false;
+        hideAudioPrompt();
+        updateAudioControls();
+        fadeMusic(musicVolume);
+        return;
       }
-    }
+
+      try {
+        await backgroundMusic.play();
+        if (backgroundMusic.paused) throw new Error("Audio was paused before playback started.");
+        musicStarted = true;
+        musicAutoplayBlocked = false;
+        hideAudioPrompt();
+        updateAudioControls();
+        if (fadeIn) fadeMusic(musicVolume);
+      } catch {
+        musicStarted = false;
+        musicAutoplayBlocked = true;
+        backgroundMusic.volume = 0;
+        updateAudioControls();
+        if (document.documentElement.classList.contains("has-preloaded")) {
+          window.setTimeout(showAudioPrompt, 120);
+        }
+      } finally {
+        musicStartPromise = null;
+      }
+    })();
+
+    return musicStartPromise;
   };
+
+  ["play", "playing", "pause", "ended", "waiting", "canplay"].forEach((eventName) => {
+    backgroundMusic?.addEventListener(eventName, updateAudioControls);
+  });
 
   const stopMusic = () => {
     if (!backgroundMusic) return;
@@ -106,7 +140,8 @@
   const toggleMusic = () => {
     musicEnabled = !musicEnabled;
     try {
-      window.localStorage.setItem(musicStorageKey, musicEnabled ? "on" : "off");
+      musicPreference = musicEnabled ? "on" : "off";
+      window.localStorage.setItem(musicStorageKey, musicPreference);
     } catch {}
     if (musicEnabled) {
       updateAudioControls();
@@ -120,6 +155,7 @@
   audioToggles.forEach((button) => button.addEventListener("click", toggleMusic));
   audioAccept?.addEventListener("click", () => {
     musicEnabled = true;
+    musicPreference = "on";
     try {
       window.localStorage.setItem(musicStorageKey, "on");
     } catch {}
@@ -129,6 +165,7 @@
   });
   audioDismiss?.addEventListener("click", () => {
     musicEnabled = false;
+    musicPreference = "off";
     try {
       window.localStorage.setItem(musicStorageKey, "off");
     } catch {}
@@ -144,7 +181,7 @@
     ) {
       return;
     }
-    if (musicEnabled && !musicStarted) startMusic();
+    if (musicEnabled && !isMusicPlaying()) startMusic();
   };
 
   ["pointerdown", "keydown", "touchstart", "wheel"].forEach((eventName) => {
@@ -158,7 +195,7 @@
   const preloader = document.querySelector("[data-preloader]");
   const startMusicWhenLetterAppears = () => {
     if (preloader?.classList.contains("is-folding")) {
-      startMusic();
+      startMusic({ fadeIn: true });
       musicObserver?.disconnect();
     }
   };
@@ -169,20 +206,21 @@
   startMusicWhenLetterAppears();
 
   if (!preloader && document.documentElement.classList.contains("has-preloaded")) {
-    window.setTimeout(startMusic, 180);
+    window.setTimeout(() => startMusic({ fadeIn: true }), 180);
   }
 
   window.addEventListener("freshstart:loaded", () => {
-    if (musicAutoplayBlocked && musicEnabled && !musicStarted) {
+    if (musicAutoplayBlocked && musicEnabled && !isMusicPlaying()) {
       window.setTimeout(showAudioPrompt, 420);
     }
   }, { once: true });
 
   document.addEventListener("visibilitychange", () => {
-    if (!backgroundMusic || !musicStarted) return;
+    if (!backgroundMusic || !musicEnabled) return;
     if (document.hidden) {
-      backgroundMusic.pause();
-    } else if (musicEnabled) {
+      if (!backgroundMusic.paused) backgroundMusic.pause();
+      updateAudioControls();
+    } else if (!isMusicPlaying()) {
       startMusic();
     }
   });
