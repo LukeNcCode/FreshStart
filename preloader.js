@@ -10,7 +10,7 @@
   const compositionContext = compositionCanvas.getContext("2d");
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const minimumDuration = reduceMotion ? 180 : 2050;
-  const startedAt = performance.now();
+  let startedAt = null;
   let documentReady = document.readyState === "complete";
   let finished = false;
 
@@ -154,6 +154,11 @@
   };
 
   const tick = (now) => {
+    if (startedAt === null) {
+      startedAt = now;
+      requestAnimationFrame(tick);
+      return;
+    }
     const elapsed = now - startedAt;
     const timeProgress = Math.min(1, elapsed / minimumDuration);
     const eased = 1 - (1 - timeProgress) ** 3;

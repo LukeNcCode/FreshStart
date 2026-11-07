@@ -15,11 +15,15 @@
   let activeSuiteKey = "";
   const backgroundMusic = document.querySelector("[data-background-music]");
   const audioToggles = [...document.querySelectorAll("[data-audio-toggle]")];
+  const audioPrompt = document.querySelector("[data-audio-prompt]");
+  const audioAccept = document.querySelector("[data-audio-accept]");
+  const audioDismiss = document.querySelector("[data-audio-dismiss]");
   const musicStorageKey = "freshstart:background-music";
   const musicVolume = 0.18;
   let musicEnabled = true;
   let musicStarted = false;
   let musicFadeFrame = 0;
+  let musicAutoplayBlocked = false;
 
   try {
     musicEnabled = window.localStorage.getItem(musicStorageKey) !== "off";
@@ -34,6 +38,15 @@
       button.classList.toggle("is-waiting", musicEnabled && !musicStarted);
       button.classList.toggle("is-playing", musicEnabled && musicStarted);
     });
+  };
+
+  const hideAudioPrompt = () => {
+    if (audioPrompt) audioPrompt.hidden = true;
+  };
+
+  const showAudioPrompt = () => {
+    if (!audioPrompt || !musicEnabled || musicStarted) return;
+    audioPrompt.hidden = false;
   };
 
   const fadeMusic = (targetVolume, finish) => {
@@ -67,11 +80,17 @@
     try {
       await backgroundMusic.play();
       musicStarted = true;
+      musicAutoplayBlocked = false;
+      hideAudioPrompt();
       updateAudioControls();
       fadeMusic(musicVolume);
     } catch {
       musicStarted = false;
+      musicAutoplayBlocked = true;
       updateAudioControls();
+      if (document.documentElement.classList.contains("has-preloaded")) {
+        window.setTimeout(showAudioPrompt, 120);
+      }
     }
   };
 
@@ -93,17 +112,35 @@
       updateAudioControls();
       startMusic();
     } else {
+      hideAudioPrompt();
       stopMusic();
     }
   };
 
   audioToggles.forEach((button) => button.addEventListener("click", toggleMusic));
+  audioAccept?.addEventListener("click", () => {
+    musicEnabled = true;
+    try {
+      window.localStorage.setItem(musicStorageKey, "on");
+    } catch {}
+    hideAudioPrompt();
+    updateAudioControls();
+    startMusic();
+  });
+  audioDismiss?.addEventListener("click", () => {
+    musicEnabled = false;
+    try {
+      window.localStorage.setItem(musicStorageKey, "off");
+    } catch {}
+    hideAudioPrompt();
+    updateAudioControls();
+  });
   updateAudioControls();
 
   const startMusicAfterGesture = (event) => {
     if (
       event.target instanceof Element
-      && event.target.closest("[data-audio-toggle]")
+      && event.target.closest("[data-audio-toggle], [data-audio-prompt]")
     ) {
       return;
     }
@@ -134,6 +171,12 @@
   if (!preloader && document.documentElement.classList.contains("has-preloaded")) {
     window.setTimeout(startMusic, 180);
   }
+
+  window.addEventListener("freshstart:loaded", () => {
+    if (musicAutoplayBlocked && musicEnabled && !musicStarted) {
+      window.setTimeout(showAudioPrompt, 420);
+    }
+  }, { once: true });
 
   document.addEventListener("visibilitychange", () => {
     if (!backgroundMusic || !musicStarted) return;

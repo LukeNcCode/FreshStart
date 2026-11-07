@@ -318,6 +318,102 @@ body.n-site::before {
   100% { height: 8px; }
 }
 
+.n-audio-prompt {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 1004;
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 14px;
+  width: min(380px, calc(100vw - 36px));
+  padding: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 18px;
+  color: var(--n-white);
+  background: rgba(15, 22, 35, 0.9);
+  box-shadow: 0 24px 70px rgba(18, 31, 55, 0.34);
+  backdrop-filter: blur(18px);
+  animation: n-audio-prompt-in 420ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.n-audio-prompt[hidden] {
+  display: none;
+}
+
+.n-audio-prompt-icon {
+  display: flex;
+  height: 22px;
+  align-items: flex-end;
+  gap: 3px;
+}
+
+.n-audio-prompt-icon i {
+  width: 3px;
+  height: 6px;
+  border-radius: 2px;
+  background: #8fb2ff;
+  animation: n-audio-level 760ms ease-in-out infinite alternate;
+}
+
+.n-audio-prompt-icon i:nth-child(2) { animation-delay: -340ms; }
+.n-audio-prompt-icon i:nth-child(3) { animation-delay: -120ms; }
+.n-audio-prompt-icon i:nth-child(4) { animation-delay: -520ms; }
+
+.n-audio-prompt .n-mono {
+  color: #8291a8;
+  font-size: 8px;
+}
+
+.n-audio-prompt strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 17px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.n-audio-prompt p {
+  margin: 6px 0 0;
+  color: #99a5b8;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.n-audio-prompt-actions {
+  grid-column: 2;
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.n-audio-prompt-actions button {
+  min-height: 36px;
+  padding: 0 13px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 999px;
+  color: inherit;
+  background: transparent;
+  font-family: var(--n-mono);
+  font-size: 9px;
+  cursor: pointer;
+}
+
+.n-audio-prompt-actions button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.n-audio-prompt-actions .n-audio-prompt-enable {
+  color: #111722;
+  border-color: #eef3ff;
+  background: #eef3ff;
+}
+
+@keyframes n-audio-prompt-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+
 .n-button {
   display: inline-flex;
   align-items: center;
@@ -1637,6 +1733,13 @@ body.n-site::before {
   .n-hero {
     min-height: auto;
     padding: 104px 0 38px;
+  }
+
+  .n-audio-prompt {
+    right: 18px;
+    bottom: 18px;
+    left: 18px;
+    width: auto;
   }
 
   .n-hero-inner {

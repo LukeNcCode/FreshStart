@@ -13,8 +13,14 @@
   <link rel="icon" href="site-assets/app.ico">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter+Tight:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter+Tight:wght@300;400;500;600;700&display=swap">
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter+Tight:wght@300;400;500;600;700&display=swap" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600&display=swap" media="print" onload="this.media='all'">
+  <noscript>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter+Tight:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
+  </noscript>
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="neo.css">
   <link rel="stylesheet" href="noomo.css">
@@ -44,6 +50,18 @@
   </div>
 
   <audio class="n-background-audio" src="site-assets/bgm.mp3" loop preload="metadata" data-background-music></audio>
+  <aside class="n-audio-prompt" data-audio-prompt hidden>
+    <div class="n-audio-prompt-icon" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+    <div>
+      <span class="n-mono">BACKGROUND AUDIO</span>
+      <strong>开启 FreshStart 配乐？</strong>
+      <p>浏览器阻止了自动播放音频。需要一次点击才能开始播放。</p>
+    </div>
+    <div class="n-audio-prompt-actions">
+      <button type="button" class="n-audio-prompt-enable" data-audio-accept>开启声音</button>
+      <button type="button" class="n-audio-prompt-dismiss" data-audio-dismiss>保持静音</button>
+    </div>
+  </aside>
   <div class="n-scroll-progress" aria-hidden="true"><span data-scroll-progress></span></div>
   <a class="n-skip" href="#main">跳到主要内容</a>
 
