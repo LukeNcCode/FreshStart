@@ -7,8 +7,9 @@
         <StackPanel MaxWidth="1200" HorizontalAlignment="Stretch" Margin="40,30,40,56">
 
             <!-- 欢迎卡片 -->
-            <Border CornerRadius="22" Padding="30,27" Background="{DynamicResource HeroSurfaceBrush}"
-                    BorderBrush="{DynamicResource HeroBorderBrush}" BorderThickness="1">
+            <Border CornerRadius="26" Padding="34,30" Background="{DynamicResource HeroSurfaceBrush}"
+                    BorderBrush="{DynamicResource HeroBorderBrush}" BorderThickness="1"
+                    Effect="{StaticResource CardShadowEffect}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
@@ -18,23 +19,26 @@
                         <Ellipse Width="390" Height="390" Fill="{DynamicResource AccentGlowBrush}"
                                  HorizontalAlignment="Right" VerticalAlignment="Center"
                                  Margin="0,-180,-145,0" />
+                        <Ellipse Width="520" Height="420" Fill="{DynamicResource HeroBlueGlowBrush}"
+                                 HorizontalAlignment="Right" VerticalAlignment="Center"
+                                 Margin="0,-120,-80,0" />
                         <Ellipse Width="235" Height="235" Stroke="#24FFFFFF" StrokeThickness="1"
                                  HorizontalAlignment="Right" VerticalAlignment="Center"
                                  Margin="0,-125,28,0" />
                     </Grid>
                     <StackPanel>
                         <TextBlock Text="SYSTEM READINESS / 01" Style="{StaticResource EyebrowText}"
-                                   Foreground="{DynamicResource SidebarSelectedTextBrush}" />
+                                   Foreground="{DynamicResource HeroAccentBrush}" />
                         <TextBlock Text="你的 Windows，随时进入状态" FontFamily="{StaticResource DisplayFont}"
-                                   FontSize="29" FontWeight="Bold" Margin="0,8,0,0"
+                                   FontSize="32" FontWeight="SemiBold" Margin="0,9,0,0"
                                    Foreground="{DynamicResource HeroTextBrush}" />
                         <TextBlock Text="把刚装好的 Windows 11 调到顺手的状态。所有修改都会先备份，随时可以撤销。"
                                    FontSize="12.5" LineHeight="20" TextWrapping="Wrap" MaxWidth="500"
                                    HorizontalAlignment="Left"
                                    Foreground="{DynamicResource HeroMutedTextBrush}" Margin="0,9,0,0"/>
                         <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
-                            <Border CornerRadius="7" Padding="9,5" Background="#16FFFFFF"
-                                    BorderBrush="#2BFFFFFF" BorderThickness="1">
+                            <Border CornerRadius="9" Padding="10,5" Background="#16FFFFFF"
+                                    BorderBrush="#32FFFFFF" BorderThickness="1">
                                 <StackPanel Orientation="Horizontal">
                                     <Ellipse Width="6" Height="6" VerticalAlignment="Center"
                                              Fill="{DynamicResource SuccessBrush}"/>
@@ -42,12 +46,12 @@
                                                Foreground="{DynamicResource HeroMutedTextBrush}"/>
                                 </StackPanel>
                             </Border>
-                            <Border CornerRadius="7" Padding="9,5" Margin="8,0,0,0"
+                            <Border CornerRadius="9" Padding="10,5" Margin="8,0,0,0"
                                     Background="#16FFFFFF"
-                                    BorderBrush="#2BFFFFFF" BorderThickness="1">
+                                    BorderBrush="#32FFFFFF" BorderThickness="1">
                                 <StackPanel Orientation="Horizontal">
                                     <Path Data="{StaticResource ShieldIcon}" Width="11" Height="11"
-                                          Stretch="Uniform" Stroke="{DynamicResource SidebarSelectedTextBrush}"
+                                          Stretch="Uniform" Stroke="{DynamicResource HeroAccentBrush}"
                                           StrokeThickness="1.5" VerticalAlignment="Center" />
                                     <TextBlock Text="本机处理 · 不上传数据" FontSize="11" Margin="7,0,0,0"
                                                Foreground="{DynamicResource HeroMutedTextBrush}" />
@@ -86,7 +90,7 @@
                     </StackPanel>
                     <Grid Grid.Column="1" Width="126" Height="126" Margin="22,0,12,0" VerticalAlignment="Center">
                         <controls:ScoreRing Value="{Binding ScorePercent}"
-                                            Stroke="{DynamicResource HeroTextBrush}"
+                                            Stroke="{DynamicResource HeroAccentBrush}"
                                             Track="{DynamicResource HeroBorderBrush}" />
                         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                             <TextBlock Text="{Binding ScoreText}" FontFamily="{StaticResource DisplayFont}"
@@ -102,7 +106,7 @@
             </Border>
 
             <!-- 区块标题 -->
-            <Grid Margin="0,28,0,14">
+            <Grid Margin="0,32,0,16">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
@@ -140,7 +144,7 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <Border Width="36" Height="36" CornerRadius="10"
-                                        Background="{DynamicResource AccentTintBrush}" VerticalAlignment="Top">
+                                        Background="{DynamicResource IconSurfaceBrush}" VerticalAlignment="Top">
                                     <Path Data="{Binding IconData}" Width="18" Height="18" Stretch="Uniform"
                                           Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.5"
                                           StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>

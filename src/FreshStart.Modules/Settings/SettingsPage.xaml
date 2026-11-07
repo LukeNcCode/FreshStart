@@ -49,7 +49,7 @@
                         </Grid.ColumnDefinitions>
                         <StackPanel>
                             <TextBlock Text="界面配色" FontSize="13" FontWeight="SemiBold" />
-                            <TextBlock Text="黑白单色界面：浅色主题使用墨黑，深色主题使用银灰"
+                            <TextBlock Text="冷调极光界面：浅色主题使用冷灰蓝，深色主题使用深海蓝黑"
                                        Style="{StaticResource CaptionText}" Margin="0,4,0,0" />
                         </StackPanel>
                         <Border Grid.Column="1" Width="54" Height="26" CornerRadius="13"

@@ -13,9 +13,9 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type Button}">
-                        <Grid x:Name="RootGrid" Height="40" Background="Transparent">
-                            <Border x:Name="HoverBg" CornerRadius="9" Background="Transparent" />
-                            <Border x:Name="Indicator" Width="3" Height="16" CornerRadius="1.5"
+                        <Grid x:Name="RootGrid" Height="42" Background="Transparent">
+                            <Border x:Name="HoverBg" CornerRadius="12" Background="Transparent" />
+                            <Border x:Name="Indicator" Width="4" Height="18" CornerRadius="2"
                                     HorizontalAlignment="Left" VerticalAlignment="Center"
                                     Background="{DynamicResource AccentBrush}" Visibility="Collapsed" />
                             <Grid x:Name="ContentGrid" Margin="13,0,10,0">
@@ -79,17 +79,17 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0" Margin="18,16,18,12">
+        <Grid Grid.Row="0" Margin="18,19,18,14">
             <TextBlock x:Name="BrandWordmark" Text="FreshStart"
                        FontFamily="{StaticResource DisplayFont}"
-                       FontSize="20" FontWeight="SemiBold"
+                       FontSize="21" FontWeight="Bold"
                        HorizontalAlignment="Left"
                        VerticalAlignment="Center" Margin="7,0,0,0"
                        Foreground="{DynamicResource SidebarPrimaryTextBrush}"
                        Visibility="{Binding IsCollapsed, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}, Converter={StaticResource BoolToCollapsedVisibility}}" />
             <TextBlock x:Name="BrandInitial" Text="F"
                        FontFamily="{StaticResource DisplayFont}"
-                       FontSize="20" FontWeight="SemiBold"
+                       FontSize="21" FontWeight="Bold"
                        HorizontalAlignment="Center" VerticalAlignment="Center"
                        Foreground="{DynamicResource SidebarPrimaryTextBrush}"
                        Visibility="{Binding IsCollapsed, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}, Converter={StaticResource BoolToVisibility}}" />
@@ -127,7 +127,7 @@
             <Grid>
                 <!-- 选中背景块：滑动过渡由 code-behind 完成 -->
                 <Canvas x:Name="PillCanvas" ClipToBounds="True" IsHitTestVisible="False">
-                    <Border x:Name="SelectionPill" Width="224" Height="40" CornerRadius="10"
+                    <Border x:Name="SelectionPill" Width="224" Height="42" CornerRadius="12"
                             Background="{DynamicResource SidebarSelectedBrush}" Visibility="Collapsed" />
                 </Canvas>
 

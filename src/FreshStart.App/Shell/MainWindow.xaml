@@ -17,7 +17,7 @@
     </WindowChrome.WindowChrome>
 
     <Border x:Name="WindowFrame" CornerRadius="13" BorderThickness="1"
-            BorderBrush="{DynamicResource DividerBrush}"
+            BorderBrush="{DynamicResource SidebarBorderBrush}"
             Background="{DynamicResource WindowBrush}" ClipToBounds="True">
     <Grid x:Name="RootGrid">
         <Grid.ColumnDefinitions>
@@ -29,7 +29,17 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <!-- 深墨色控制台导航 -->
+        <!-- 冷调极光背景：固定在窗口底层，不参与滚动 -->
+        <Ellipse Grid.RowSpan="2" Grid.ColumnSpan="2" Width="760" Height="620"
+                 HorizontalAlignment="Right" VerticalAlignment="Top"
+                 Margin="0,-250,-180,0" Fill="{DynamicResource AuroraBlueBrush}"
+                 IsHitTestVisible="False" />
+        <Ellipse Grid.RowSpan="2" Grid.ColumnSpan="2" Width="560" Height="480"
+                 HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                 Margin="-180,0,0,-220" Fill="{DynamicResource AuroraCyanBrush}"
+                 IsHitTestVisible="False" />
+
+        <!-- 半透明磨砂侧栏 -->
         <Border x:Name="SidebarRoot" Grid.Column="0" Grid.RowSpan="2" Width="248"
                 Background="{DynamicResource SidebarTintBrush}" ClipToBounds="True"
                 BorderBrush="{DynamicResource SidebarBorderBrush}" BorderThickness="0,0,1,0"
@@ -37,27 +47,28 @@
             <shell:Sidebar x:Name="SidebarControl" />
         </Border>
 
-        <!-- 内容区 -->
-        <Border x:Name="ContentHost" Grid.Column="1" Grid.Row="1" Background="{DynamicResource WindowBrush}"
+        <!-- 内容区：仅页面内部滚动，窗口本身不产生全局滚动条 -->
+        <Border x:Name="ContentHost" Grid.Column="1" Grid.Row="1" Background="Transparent"
                 ClipToBounds="True"
                 MouseLeftButtonDown="Background_MouseLeftButtonDown">
-            <shell:PageHost x:Name="PageHostControl" Margin="0,18,0,0" />
+            <shell:PageHost x:Name="PageHostControl" Margin="0,14,0,0" />
         </Border>
 
-        <!-- 顶栏：页面标识、权限状态和系统窗控 -->
+        <!-- 半透明顶栏：页面标识、权限状态和系统窗控 -->
         <Grid x:Name="TitleBar" Grid.Column="1" Grid.Row="0" Height="72"
               MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
             <Border Background="{DynamicResource TitleBarBrush}"
-                    BorderBrush="{DynamicResource DividerBrush}" BorderThickness="0,0,0,1" />
+                    BorderBrush="{DynamicResource DividerBrush}" BorderThickness="0,0,0,1"
+                    Opacity="0.96" />
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center"
                         Margin="34,0,0,0" IsHitTestVisible="False">
-                <Border Width="5" Height="24" CornerRadius="2.5"
+                <Border Width="4" Height="28" CornerRadius="2"
                         Background="{DynamicResource AccentGradientBrush}" Margin="0,0,13,0" />
                 <StackPanel>
                     <TextBlock Text="WORKSPACE" Style="{StaticResource EyebrowText}"
                                Foreground="{DynamicResource SecondaryTextBrush}" />
                     <TextBlock Text="{Binding TitleText}" FontFamily="{StaticResource DisplayFont}"
-                               FontSize="17" FontWeight="Bold"
+                               FontSize="18" FontWeight="SemiBold"
                                Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,1,0,0" />
                 </StackPanel>
             </StackPanel>
@@ -66,7 +77,7 @@
                         Margin="0,0,8,0">
                 <Border Padding="9,5" Margin="0,0,8,0" CornerRadius="7"
                         Background="{DynamicResource CardBrush}"
-                        BorderBrush="{DynamicResource DividerBrush}" BorderThickness="1"
+                        BorderBrush="{DynamicResource CardBorderBrush}" BorderThickness="1"
                         ToolTip="{Binding ElevationTooltip}">
                     <StackPanel Orientation="Horizontal">
                         <Ellipse Width="6" Height="6" VerticalAlignment="Center">

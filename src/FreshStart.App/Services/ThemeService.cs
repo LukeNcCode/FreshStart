@@ -42,8 +42,8 @@ public sealed class ThemeService : IThemeService
     }
 
     private Color DesignAccent => IsDark
-        ? Color.FromRgb(0x5A, 0x5A, 0x5A)
-        : Color.FromRgb(0x11, 0x11, 0x11);
+        ? Color.FromRgb(0x38, 0xBD, 0xF8)
+        : Color.FromRgb(0x25, 0x63, 0xEB);
 
     private void ApplyAccent(Color color)
     {
@@ -55,8 +55,8 @@ public sealed class ThemeService : IThemeService
         var tint = new SolidColorBrush(Color.FromArgb(0x22, color.R, color.G, color.B));
         tint.Freeze();
         var gradientEnd = IsDark
-            ? Color.FromRgb(0x70, 0x70, 0x70)
-            : Color.FromRgb(0x4A, 0x4A, 0x4A);
+            ? Color.FromRgb(0x25, 0x63, 0xEB)
+            : Color.FromRgb(0x22, 0xD3, 0xEE);
         var gradient = new LinearGradientBrush(color, gradientEnd, new Point(0, 0), new Point(1, 1));
         gradient.Freeze();
         var glow = new RadialGradientBrush

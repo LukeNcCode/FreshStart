@@ -20,9 +20,9 @@
 
     <Style x:Key="PageTitle" TargetType="{x:Type TextBlock}">
         <Setter Property="FontFamily" Value="{StaticResource DisplayFont}" />
-        <Setter Property="FontSize" Value="28" />
-        <Setter Property="FontWeight" Value="Bold" />
-        <Setter Property="LineHeight" Value="34" />
+        <Setter Property="FontSize" Value="30" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="LineHeight" Value="36" />
         <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
     </Style>
 
@@ -34,8 +34,8 @@
 
     <Style x:Key="SectionTitle" TargetType="{x:Type TextBlock}">
         <Setter Property="FontFamily" Value="{StaticResource DisplayFont}" />
-        <Setter Property="FontSize" Value="16" />
-        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="FontSize" Value="17" />
+        <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
     </Style>
 
@@ -47,13 +47,36 @@
     </Style>
 
     <LinearGradientBrush x:Key="HeroSurfaceBrush" StartPoint="0,0" EndPoint="1,1">
-        <GradientStop Color="#050505" Offset="0" />
-        <GradientStop Color="#111111" Offset="0.55" />
-        <GradientStop Color="#050505" Offset="1" />
+        <GradientStop Color="#090D14" Offset="0" />
+        <GradientStop Color="#101827" Offset="0.55" />
+        <GradientStop Color="#090D14" Offset="1" />
     </LinearGradientBrush>
     <SolidColorBrush x:Key="HeroTextBrush" Color="#FFFFFF" />
-    <SolidColorBrush x:Key="HeroMutedTextBrush" Color="#A3A3A3" />
-    <SolidColorBrush x:Key="HeroBorderBrush" Color="#2B2B2B" />
+    <SolidColorBrush x:Key="HeroMutedTextBrush" Color="#A9B8CC" />
+    <SolidColorBrush x:Key="HeroBorderBrush" Color="#24FFFFFF" />
+    <SolidColorBrush x:Key="HeroAccentBrush" Color="#00E5FF" />
+
+    <RadialGradientBrush x:Key="AuroraBlueBrush" Center="0.5,0.5"
+                         GradientOrigin="0.5,0.5" RadiusX="0.5" RadiusY="0.5">
+        <GradientStop Color="#5260A5FA" Offset="0" />
+        <GradientStop Color="#1460A5FA" Offset="0.55" />
+        <GradientStop Color="#0060A5FA" Offset="1" />
+    </RadialGradientBrush>
+    <RadialGradientBrush x:Key="AuroraCyanBrush" Center="0.5,0.5"
+                         GradientOrigin="0.5,0.5" RadiusX="0.5" RadiusY="0.5">
+        <GradientStop Color="#3D22D3EE" Offset="0" />
+        <GradientStop Color="#1022D3EE" Offset="0.58" />
+        <GradientStop Color="#0022D3EE" Offset="1" />
+    </RadialGradientBrush>
+    <RadialGradientBrush x:Key="HeroBlueGlowBrush" Center="0.5,0.5"
+                         GradientOrigin="0.5,0.5" RadiusX="0.5" RadiusY="0.5">
+        <GradientStop Color="#661D4ED8" Offset="0" />
+        <GradientStop Color="#1A1D4ED8" Offset="0.56" />
+        <GradientStop Color="#001D4ED8" Offset="1" />
+    </RadialGradientBrush>
+    <DropShadowEffect x:Key="CardShadowEffect" Color="#1C2F4A" Opacity="0.11"
+                      BlurRadius="28" ShadowDepth="8" Direction="270"
+                      RenderingBias="Performance" />
 
     <Style x:Key="BodyText" TargetType="{x:Type TextBlock}">
         <Setter Property="FontSize" Value="13" />
@@ -92,8 +115,9 @@
         <Setter Property="Background" Value="{DynamicResource CardBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource CardBorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CornerRadius" Value="18" />
+        <Setter Property="CornerRadius" Value="20" />
         <Setter Property="Padding" Value="22" />
+        <Setter Property="Effect" Value="{StaticResource CardShadowEffect}" />
     </Style>
 
     <!-- ================= 按钮 ================= -->
@@ -284,17 +308,19 @@
     <Style x:Key="QuickActionCard" TargetType="{x:Type Button}">
         <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
         <Setter Property="Background" Value="{DynamicResource CardBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource CardBorderBrush}" />
+        <Setter Property="Effect" Value="{StaticResource CardShadowEffect}" />
         <Setter Property="Margin" Value="0,0,12,12" />
-        <Setter Property="Padding" Value="18" />
+        <Setter Property="Padding" Value="20" />
         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
         <Setter Property="Cursor" Value="Hand" />
         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Button}">
-                    <Border x:Name="Root" Background="{TemplateBinding Background}" CornerRadius="16"
+                    <Border x:Name="Root" Background="{TemplateBinding Background}" CornerRadius="20"
                             Padding="{TemplateBinding Padding}"
-                            BorderBrush="{DynamicResource CardBorderBrush}" BorderThickness="1">
+                            BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1">
                         <ContentPresenter>
                             <ContentPresenter.Resources>
                                 <Style TargetType="{x:Type TextBlock}"
@@ -363,7 +389,7 @@
                 <ControlTemplate TargetType="{x:Type controls:ToggleSwitch}">
                     <Grid Width="42" Height="24" Background="Transparent">
                         <Border x:Name="PART_Track" CornerRadius="12" Background="{DynamicResource ToggleOffBrush}" />
-                        <Border x:Name="PART_Accent" CornerRadius="12" Background="{DynamicResource AccentBrush}" Opacity="0" />
+                        <Border x:Name="PART_Accent" CornerRadius="12" Background="{DynamicResource ToggleOnBrush}" Opacity="0" />
                         <Border x:Name="PART_Thumb" Width="20" Height="20" CornerRadius="10"
                                 Background="{DynamicResource ToggleThumbBrush}"
                                 HorizontalAlignment="Left" VerticalAlignment="Center" Margin="2,0,0,0">
