@@ -10,14 +10,62 @@
   const compositionContext = compositionCanvas.getContext("2d");
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const minimumDuration = reduceMotion ? 180 : 2050;
+  const preloadImages = [
+    "site-assets/home-light.webp",
+    "site-assets/home-dark.webp",
+    "site-assets/system-light.webp",
+    "site-assets/software-light.webp",
+    "site-assets/settings-light.webp",
+    "site-assets/execution-dark.webp",
+    "site-assets/environment-migration.webp"
+  ];
+  const preloadFiles = [
+    "download.html",
+    "site-assets/bgm.mp3",
+    "site-assets/MiSans-Light.woff2",
+    "site-assets/MiSans-Regular.woff2",
+    "site-assets/MiSans-Medium.woff2",
+    "site-assets/MiSans-Semibold.woff2"
+  ];
   let startedAt = null;
   let documentReady = document.readyState === "complete";
+  let resourcesReady = false;
+  let resourcesLoaded = 0;
+  const resourceTotal = preloadImages.length + preloadFiles.length;
   let finished = false;
+  let fAppeared = false;
 
   document.documentElement.classList.add("is-preloading");
   window.addEventListener("load", () => {
     documentReady = true;
   }, { once: true });
+
+  const preloadImage = (src) => new Promise((resolve) => {
+    const image = new Image();
+    image.decoding = "async";
+    image.onload = () => {
+      resourcesLoaded++;
+      resolve();
+    };
+    image.onerror = () => {
+      resourcesLoaded++;
+      resolve();
+    };
+    image.src = src;
+  });
+
+  const preloadFile = (src) => fetch(src, { cache: "force-cache" })
+    .catch(() => null)
+    .finally(() => {
+      resourcesLoaded++;
+    });
+
+  Promise.allSettled([
+    ...preloadImages.map(preloadImage),
+    ...preloadFiles.map(preloadFile)
+  ]).then(() => {
+    resourcesReady = true;
+  });
 
   const setProgress = (value) => {
     const progress = Math.max(0, Math.min(100, Math.round(value)));
@@ -31,6 +79,7 @@
     finished = true;
     setProgress(100);
     preloader.classList.add("is-folding");
+    announceFAppeared();
 
     if (reduceMotion || !context) {
       window.setTimeout(cleanup, reduceMotion ? 200 : 2240);
@@ -38,6 +87,19 @@
     }
 
     window.setTimeout(startMaskTransition, 1180);
+  };
+
+  const announceFAppeared = () => {
+    if (fAppeared) return;
+    const notify = () => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          fAppeared = true;
+          window.dispatchEvent(new CustomEvent("freshstart:f-appeared"));
+        });
+      });
+    };
+    window.setTimeout(notify, reduceMotion ? 0 : 640);
   };
 
   const resizeCanvas = () => {
@@ -162,8 +224,9 @@
     const elapsed = now - startedAt;
     const timeProgress = Math.min(1, elapsed / minimumDuration);
     const eased = 1 - (1 - timeProgress) ** 3;
-    const cap = documentReady ? 100 : 96;
-    const progress = setProgress(Math.min(cap, eased * 100));
+    const resourceProgress = (resourcesLoaded / resourceTotal) * 100;
+    const cap = documentReady && resourcesReady ? 100 : 96;
+    const progress = setProgress(Math.min(cap, eased * 100, resourceProgress));
 
     if (progress >= 100) {
       finish();

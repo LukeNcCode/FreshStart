@@ -24,6 +24,9 @@ Direct visits to `download.html` still render it as a standalone page.
 MiSans is used only for Chinese glyphs through a small WOFF2 subset and a
 `unicode-range`; Latin text continues to use the original typefaces.
 
+Product screenshots are stored as 1600px WebP assets for faster loading while
+retaining enough resolution for the large desktop presentation.
+
 Background music uses `site-assets/bgm.mp3`. As soon as the loading rail reaches
 100% and the `F` begins to form, the track starts at a low volume with a soft
 fade-in. A header control remembers the visitor's sound preference; when browser

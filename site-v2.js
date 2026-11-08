@@ -28,6 +28,7 @@
   let musicFadeFrame = 0;
   let musicAutoplayBlocked = false;
   let musicStartPromise = null;
+  let letterHasAppeared = false;
 
   try {
     musicPreference = window.localStorage.getItem(musicStorageKey);
@@ -87,6 +88,7 @@
 
   const startMusic = async ({ fadeIn = false } = {}) => {
     if (!backgroundMusic || !musicEnabled) return;
+    if (!letterHasAppeared && document.documentElement.classList.contains("is-preloading")) return;
     if (musicStartPromise) return musicStartPromise;
 
     musicStartPromise = (async () => {
@@ -184,7 +186,7 @@
     ) {
       return;
     }
-    if (musicEnabled && !isMusicPlaying()) startMusic();
+    if (letterHasAppeared && musicEnabled && !isMusicPlaying()) startMusic();
   };
 
   ["pointerdown", "keydown", "touchstart", "wheel"].forEach((eventName) => {
@@ -197,19 +199,16 @@
 
   const preloader = document.querySelector("[data-preloader]");
   const startMusicWhenLetterAppears = () => {
-    if (preloader?.classList.contains("is-folding")) {
-      startMusic({ fadeIn: true });
-      musicObserver?.disconnect();
-    }
+    letterHasAppeared = true;
+    startMusic({ fadeIn: true });
   };
-  const musicObserver = preloader
-    ? new MutationObserver(startMusicWhenLetterAppears)
-    : null;
-  musicObserver?.observe(preloader, { attributes: true, attributeFilter: ["class"] });
-  startMusicWhenLetterAppears();
+  window.addEventListener("freshstart:f-appeared", startMusicWhenLetterAppears, { once: true });
 
   if (!preloader && document.documentElement.classList.contains("has-preloaded")) {
-    window.setTimeout(() => startMusic({ fadeIn: true }), 180);
+    window.setTimeout(() => {
+      letterHasAppeared = true;
+      startMusic({ fadeIn: true });
+    }, 180);
   }
 
   window.addEventListener("freshstart:loaded", () => {
@@ -230,35 +229,35 @@
 
   const suiteData = {
     overview: {
-      src: "site-assets/home-dark.png",
+      src: "site-assets/home-dark.webp",
       number: "01 / OVERVIEW",
       title: "开荒工作台",
       copy: "把系统状态、常用操作和下一步推荐集中在一个清晰界面里。所有功能都从同一个本地工作台出发。",
       tags: ["系统评分", "快捷入口", "本地运行"]
     },
     system: {
-      src: "site-assets/system-light.png",
+      src: "site-assets/system-light.webp",
       number: "02 / SYSTEM",
       title: "先看清机器，再决定改变",
       copy: "CPU、内存、主板、显卡与网络集中呈现，系统基线清晰可查。",
       tags: ["硬件基线", "激活状态", "只读扫描"]
     },
     software: {
-      src: "site-assets/software-light.png",
+      src: "site-assets/software-light.webp",
       number: "03 / SOFTWARE",
       title: "安装软件，也安装秩序",
       copy: "常用软件安装、升级、卸载和残留清理共用同一条可追踪链路，winget 不可用时仍保留官方安装方案。",
       tags: ["winget", "官方回退", "安装记录"]
     },
     settings: {
-      src: "site-assets/settings-light.png",
+      src: "site-assets/settings-light.webp",
       number: "04 / SETTINGS",
       title: "把细节调到自己的习惯",
       copy: "界面、动效、备份策略、启动行为与权限偏好集中管理，不把关键开关埋在系统深处。",
       tags: ["主题", "备份策略", "动效"]
     },
     automation: {
-      src: "site-assets/execution-dark.png",
+      src: "site-assets/execution-dark.webp",
       number: "05 / AUTOMATION",
       title: "每一步执行都有清楚后果",
       copy: "把多个系统动作编排成工作流，执行前检查风险与依赖，执行后保留输出、退出码和可回顾的报告。",
