@@ -238,7 +238,7 @@
       src: "site-assets/system-light.png",
       number: "02 / SYSTEM",
       title: "先看清机器，再决定改变",
-      copy: "CPU、内存、主板、显卡、磁盘、网络和系统版本建立完整基线，不需要在多个系统面板之间来回查找。",
+      copy: "CPU、内存、主板、显卡与网络集中呈现，系统基线清晰可查。",
       tags: ["硬件基线", "激活状态", "只读扫描"]
     },
     software: {

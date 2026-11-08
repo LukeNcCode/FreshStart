@@ -1026,6 +1026,9 @@ body.n-site::before {
 .n-suite-browser {
   --suite-tilt: 0deg;
   --suite-lift: 0px;
+  display: grid;
+  grid-template-rows: 45px minmax(0, 1fr) 112px;
+  height: clamp(500px, 58svh, 660px);
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.7);
   border-radius: 24px;
@@ -1055,7 +1058,7 @@ body.n-site::before {
 
 .n-suite-image-wrap {
   position: relative;
-  height: min(40svh, 430px);
+  min-height: 0;
   overflow: hidden;
   background: #cad8ef;
 }
@@ -1078,7 +1081,9 @@ body.n-site::before {
   display: grid;
   grid-template-columns: minmax(0, 1.35fr) minmax(220px, 0.65fr);
   gap: 40px;
+  align-content: start;
   padding: 18px 24px 22px;
+  overflow: hidden;
 }
 
 .n-suite-caption h3 {
@@ -1089,9 +1094,15 @@ body.n-site::before {
 }
 
 .n-suite-caption p {
+  display: -webkit-box;
+  overflow: hidden;
   margin: 0;
   color: var(--n-muted);
   font-size: 14px;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-height: 1.5;
+  text-wrap: pretty;
 }
 
 .n-suite-tags {
@@ -2179,11 +2190,13 @@ body.n-site::before {
   }
 
   .n-suite-browser {
+    grid-template-rows: 45px auto auto;
+    height: auto;
     border-radius: 14px;
   }
 
   .n-suite-image-wrap {
-    height: auto;
+    min-height: 0;
     aspect-ratio: 2560 / 1528;
   }
 
