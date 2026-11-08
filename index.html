@@ -21,12 +21,12 @@
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter+Tight:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
   </noscript>
-  <link rel="stylesheet" href="styles.css?v=20261107-6">
-  <link rel="stylesheet" href="neo.css?v=20261107-6">
-  <link rel="stylesheet" href="noomo.css?v=20261107-6">
+  <link rel="stylesheet" href="styles.css?v=20261107-7">
+  <link rel="stylesheet" href="neo.css?v=20261107-7">
+  <link rel="stylesheet" href="noomo.css?v=20261107-7">
   <script>document.documentElement.classList.add("js");</script>
-  <script src="preloader.js?v=20261107-6" defer></script>
-  <script src="site-v2.js?v=20261107-6" defer></script>
+  <script src="preloader.js?v=20261107-7" defer></script>
+  <script src="site-v2.js?v=20261107-7" defer></script>
 </head>
 <body class="neo-site n-site">
   <div class="fs-preloader" data-preloader aria-label="正在载入 FreshStart">
@@ -49,7 +49,7 @@
     </div>
   </div>
 
-  <audio class="n-background-audio" src="site-assets/bgm.mp3?v=20261107-6" loop preload="metadata" data-background-music></audio>
+  <audio class="n-background-audio" src="site-assets/bgm.mp3?v=20261107-7" loop preload="metadata" data-background-music></audio>
   <aside class="n-audio-prompt" data-audio-prompt hidden>
     <div class="n-audio-prompt-icon" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
     <div>
@@ -62,6 +62,10 @@
       <button type="button" class="n-audio-prompt-dismiss" data-audio-dismiss>保持静音</button>
     </div>
   </aside>
+  <div class="n-download-route" data-download-route aria-hidden="true" hidden>
+    <button class="n-download-close" type="button" aria-label="关闭下载页" data-download-close>×</button>
+    <iframe class="n-download-frame" src="about:blank" title="FreshStart 下载页" data-download-frame></iframe>
+  </div>
   <div class="n-scroll-progress" aria-hidden="true"><span data-scroll-progress></span></div>
   <a class="n-skip" href="#main">跳到主要内容</a>
 
@@ -80,7 +84,7 @@
         <a href="#system">系统</a>
         <a href="#safety">原则</a>
         <a href="#handoff">迁移</a>
-        <a href="#download">下载</a>
+        <a href="download.html">下载</a>
       </nav>
 
       <div class="n-header-actions">
@@ -103,7 +107,7 @@
       <a href="#system"><small>02</small> 系统能力</a>
       <a href="#safety"><small>03</small> 执行原则</a>
       <a href="#handoff"><small>04</small> 环境迁移</a>
-      <a href="#download"><small>05</small> 获取应用</a>
+      <a href="download.html"><small>05</small> 获取应用</a>
       <a href="https://github.com/LukeNcCode/FreshStart" target="_blank" rel="noreferrer"><small>↗</small> GitHub</a>
     </nav>
   </aside>
@@ -148,7 +152,7 @@
           </div>
           <div class="n-actions">
             <a class="n-button n-button-solid" href="#software">查看软件界面 <span>↓</span></a>
-            <a class="n-button" href="#download">获取 0.2.7 <span>↗</span></a>
+            <a class="n-button" href="download.html">获取 0.2.7 <span>↗</span></a>
           </div>
         </div>
 
@@ -366,7 +370,7 @@
         <h2>YOUR WINDOWS.<br><span>YOUR RULES.</span></h2>
         <p>从一台刚装好的 Windows 开始。选择轻量安装器，或在无法联网安装 winget 的环境使用完整离线版。</p>
         <div class="n-download-actions">
-          <a class="n-button n-button-solid" href="https://github.com/LukeNcCode/FreshStart/releases" target="_blank" rel="noreferrer">
+          <a class="n-button n-button-solid" href="download.html">
             下载 FreshStart 0.2.7 <span>↗</span>
           </a>
           <a class="n-button n-button-line" href="https://github.com/LukeNcCode/FreshStart" target="_blank" rel="noreferrer">

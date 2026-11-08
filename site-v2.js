@@ -4,7 +4,9 @@
   const menuToggle = document.querySelector("[data-menu-toggle]");
   const mobileMenu = document.querySelector("[data-mobile-menu]");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if (!reducedMotion) document.documentElement.classList.add("n-snap");
+  if (!reducedMotion && document.querySelector(".n-hero")) {
+    document.documentElement.classList.add("n-snap");
+  }
   const suiteStage = document.querySelector("[data-suite-stage]");
   const suiteImage = document.querySelector("[data-suite-image]");
   const suiteTitle = document.querySelector("[data-suite-title]");
@@ -323,8 +325,83 @@
     link.addEventListener("click", closeMenu);
   });
 
+  const downloadRoute = document.querySelector("[data-download-route]");
+  const downloadFrame = document.querySelector("[data-download-frame]");
+  const downloadClose = document.querySelector("[data-download-close]");
+  const homeTitle = document.title;
+  let downloadRouteOpen = false;
+  let downloadHideTimer = 0;
+  let downloadEnterTimer = 0;
+
+  const closeDownloadRoute = (fromHistory = false) => {
+    if (!downloadRoute || !downloadRouteOpen) return;
+    downloadRouteOpen = false;
+    clearTimeout(downloadHideTimer);
+    clearTimeout(downloadEnterTimer);
+    downloadRoute.classList.remove("is-entering");
+    downloadRoute.classList.remove("is-open");
+    downloadRoute.classList.add("is-closing");
+    downloadRoute.setAttribute("aria-hidden", "true");
+    document.title = homeTitle;
+    downloadHideTimer = window.setTimeout(() => {
+      if (!downloadRouteOpen && downloadRoute) {
+        downloadRoute.hidden = true;
+        downloadRoute.classList.remove("is-closing");
+        body.classList.remove("n-download-route-open");
+      }
+    }, reducedMotion ? 0 : 760);
+    if (!fromHistory && history.state?.freshstartView === "download") {
+      history.back();
+    }
+  };
+
+  const openDownloadRoute = (pushHistory = true) => {
+    if (!downloadRoute || !downloadFrame || downloadRouteOpen) return;
+    downloadRouteOpen = true;
+    clearTimeout(downloadHideTimer);
+    clearTimeout(downloadEnterTimer);
+    downloadRoute.hidden = false;
+    downloadRoute.classList.remove("is-closing");
+    downloadRoute.setAttribute("aria-hidden", "false");
+    downloadRoute.classList.remove("is-open");
+    downloadRoute.classList.add("is-entering");
+    body.classList.add("n-download-route-open");
+    if (!downloadFrame.getAttribute("src")?.includes("download.html")) {
+      downloadFrame.src = "download.html?embedded=1";
+    }
+    document.title = "下载 FreshStart 0.2.7";
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => downloadRoute.classList.add("is-open"));
+    });
+    downloadEnterTimer = window.setTimeout(() => {
+      downloadRoute.classList.remove("is-entering");
+    }, reducedMotion ? 0 : 760);
+    if (pushHistory) {
+      history.pushState({ freshstartView: "download" }, "", "download.html");
+    }
+  };
+
+  document.addEventListener("click", (event) => {
+    const link = event.target instanceof Element
+      ? event.target.closest('a[href$="download.html"]')
+      : null;
+    if (!link || !downloadRoute || link.target === "_blank") return;
+    event.preventDefault();
+    closeMenu();
+    openDownloadRoute();
+  });
+  downloadClose?.addEventListener("click", () => closeDownloadRoute());
+  window.addEventListener("popstate", () => {
+    if (!downloadRoute) return;
+    if (history.state?.freshstartView === "download") openDownloadRoute(false);
+    else closeDownloadRoute(true);
+  });
+
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") closeMenu();
+    if (event.key === "Escape") {
+      closeMenu();
+      closeDownloadRoute();
+    }
   });
 
   let lastScroll = window.scrollY;
@@ -508,6 +585,8 @@
 
   const supportsPagedWheel =
     !reducedMotion
+    && pageSections.length > 1
+    && Boolean(document.querySelector(".n-hero"))
     && window.innerWidth > 1024
     && window.matchMedia("(hover: hover) and (pointer: fine)").matches;
 

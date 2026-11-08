@@ -13,6 +13,17 @@ through all five software surfaces before continuing to the next section.
 Scroll-linked hero motion, drifting feature cards, and image parallax remain.
 Mobile and reduced-motion visitors use gentle native scroll snapping.
 
+Download actions open the dedicated `download.html` page, where the lightweight
+and offline installers link directly to their GitHub Release assets without
+requiring a detour through the repository page.
+
+On the main site, the download page opens in a same-document overlay and updates
+the address bar with History API, so background music continues uninterrupted.
+Direct visits to `download.html` still render it as a standalone page.
+
+MiSans is used only for Chinese glyphs through a small WOFF2 subset and a
+`unicode-range`; Latin text continues to use the original typefaces.
+
 Background music uses `site-assets/bgm.mp3`. As soon as the loading rail reaches
 100% and the `F` begins to form, the track starts at a low volume with a soft
 fade-in. A header control remembers the visitor's sound preference; when browser
