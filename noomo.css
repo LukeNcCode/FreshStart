@@ -1862,14 +1862,14 @@ body.n-site::before {
     visibility 0s linear 720ms;
 }
 
-.n-download-frame {
+.n-download-view {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
-  border: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
   background: var(--n-bg);
   opacity: 0;
+  overscroll-behavior: contain;
   transform: translateY(18px) scale(0.995);
   transform-origin: 50% 100%;
   transition:
@@ -1878,12 +1878,16 @@ body.n-site::before {
   will-change: opacity, transform;
 }
 
-.n-download-route.is-open .n-download-frame {
+.n-download-route .d-hero {
+  padding-top: 72px;
+}
+
+.n-download-route.is-open .n-download-view {
   opacity: 1;
   transform: none;
 }
 
-.n-download-route.is-closing .n-download-frame {
+.n-download-route.is-closing .n-download-view {
   opacity: 0;
   transform: translateY(18px) scale(0.995);
   transition:
@@ -1941,17 +1945,6 @@ body.n-site::before {
 
 .n-download-route-open {
   overflow: hidden !important;
-}
-
-.is-embedded .n-header,
-.is-embedded .n-mobile-menu,
-.is-embedded .d-back-link,
-.is-embedded .d-footer {
-  display: none;
-}
-
-.is-embedded .d-hero {
-  padding-top: 72px;
 }
 
 .d-hero {

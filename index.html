@@ -21,12 +21,12 @@
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter+Tight:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
   </noscript>
-  <link rel="stylesheet" href="styles.css?v=20261107-7">
-  <link rel="stylesheet" href="neo.css?v=20261107-7">
-  <link rel="stylesheet" href="noomo.css?v=20261107-7">
+  <link rel="stylesheet" href="styles.css?v=20261108-1">
+  <link rel="stylesheet" href="neo.css?v=20261108-1">
+  <link rel="stylesheet" href="noomo.css?v=20261108-1">
   <script>document.documentElement.classList.add("js");</script>
-  <script src="preloader.js?v=20261107-7" defer></script>
-  <script src="site-v2.js?v=20261107-7" defer></script>
+  <script src="preloader.js?v=20261108-1" defer></script>
+  <script src="site-v2.js?v=20261108-1" defer></script>
 </head>
 <body class="neo-site n-site">
   <div class="fs-preloader" data-preloader aria-label="正在载入 FreshStart">
@@ -49,7 +49,7 @@
     </div>
   </div>
 
-  <audio class="n-background-audio" src="site-assets/bgm.mp3?v=20261107-7" loop preload="metadata" data-background-music></audio>
+  <audio class="n-background-audio" src="site-assets/bgm.mp3?v=20261108-1" loop preload="metadata" data-background-music></audio>
   <aside class="n-audio-prompt" data-audio-prompt hidden>
     <div class="n-audio-prompt-icon" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
     <div>
@@ -64,7 +64,95 @@
   </aside>
   <div class="n-download-route" data-download-route aria-hidden="true" hidden>
     <button class="n-download-close" type="button" aria-label="关闭下载页" data-download-close>×</button>
-    <iframe class="n-download-frame" src="about:blank" title="FreshStart 下载页" data-download-frame></iframe>
+    <div class="n-download-view" data-download-view>
+      <section class="d-hero">
+        <div class="n-shell d-hero-inner">
+          <div class="n-mono">FRESHSTART / RELEASE 0.2.7</div>
+          <div class="d-hero-layout">
+            <div>
+              <div class="n-mono">DOWNLOAD / WINDOWS 11</div>
+              <h1 class="d-title">CHOOSE YOUR<br><span>INSTALLER.</span></h1>
+            </div>
+            <div class="d-hero-copy">
+              <p>两个版本安装同一套 FreshStart。根据当前网络环境和是否需要预置 winget 离线组件进行选择。</p>
+              <div class="d-version">
+                <div><span>Version</span><strong>0.2.7</strong></div>
+                <div><span>Platform</span><strong>Windows 11 x64</strong></div>
+                <div><span>License</span><strong>MIT</strong></div>
+                <div><span>Privacy</span><strong>Local-first</strong></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="d-installers">
+            <article class="d-installer">
+              <div class="d-installer-top">
+                <span class="n-mono">INSTALLER / ONLINE</span>
+                <span class="d-installer-badge">推荐</span>
+              </div>
+              <h2>轻量安装器</h2>
+              <p>适合已有网络和可用 winget 的系统。文件更小，安装期间可能需要联网获取 App Installer 或软件包。</p>
+              <div class="d-installer-bottom">
+                <span class="d-installer-size">53.35 MB · EXE</span>
+                <a class="n-button n-button-solid" href="https://github.com/LukeNcCode/FreshStart/releases/download/v0.2.7/FreshStart-v0.2.7-setup.exe" download rel="noreferrer">
+                  直接下载 <span>↓</span>
+                </a>
+              </div>
+            </article>
+
+            <article class="d-installer is-offline">
+              <div class="d-installer-top">
+                <span class="n-mono">INSTALLER / OFFLINE</span>
+                <span class="d-installer-badge">离线完整包</span>
+              </div>
+              <h2>完整离线安装器</h2>
+              <p>适合新机、无稳定网络或需要预置 winget 组件的环境。文件较大，但主要安装资源无需临时下载。</p>
+              <div class="d-installer-bottom">
+                <span class="d-installer-size">324.49 MB · EXE</span>
+                <a class="n-button" href="https://github.com/LukeNcCode/FreshStart/releases/download/v0.2.7/FreshStart-v0.2.7-offline-setup.exe" download rel="noreferrer">
+                  直接下载 <span>↓</span>
+                </a>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="d-details">
+        <div class="n-shell">
+          <div class="d-details-head">
+            <div>
+              <div class="n-mono">BEFORE INSTALLING</div>
+              <h2>THREE THINGS<br>TO KNOW.</h2>
+            </div>
+            <p>安装过程需要管理员权限。FreshStart 不会上传系统信息，也不会在后台静默修改系统。</p>
+          </div>
+
+          <div class="d-steps">
+            <article class="d-step">
+              <span>01</span>
+              <h3>WINDOWS 11 22H2+</h3>
+              <p>当前版本面向 Windows 11 x64。Windows 10 不在正式支持范围内。</p>
+            </article>
+            <article class="d-step">
+              <span>02</span>
+              <h3>ADMINISTRATOR</h3>
+              <p>首次启动会请求一次管理员权限，后续重复打开不会再次弹窗。</p>
+            </article>
+            <article class="d-step">
+              <span>03</span>
+              <h3>LOCAL BY DEFAULT</h3>
+              <p>配置、日志和备份保存在本机；涉及系统写入的操作会先确认并创建快照。</p>
+            </article>
+          </div>
+
+          <div class="d-note">
+            <span>下载内容直接来自 GitHub Release，不在仓库页面中转。</span>
+            <a href="https://github.com/LukeNcCode/FreshStart/releases/tag/v0.2.7" target="_blank" rel="noreferrer">查看 Release 校验信息 ↗</a>
+          </div>
+        </div>
+      </section>
+    </div>
   </div>
   <div class="n-scroll-progress" aria-hidden="true"><span data-scroll-progress></span></div>
   <a class="n-skip" href="#main">跳到主要内容</a>

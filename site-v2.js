@@ -326,7 +326,6 @@
   });
 
   const downloadRoute = document.querySelector("[data-download-route]");
-  const downloadFrame = document.querySelector("[data-download-frame]");
   const downloadClose = document.querySelector("[data-download-close]");
   const homeTitle = document.title;
   let downloadRouteOpen = false;
@@ -356,7 +355,7 @@
   };
 
   const openDownloadRoute = (pushHistory = true) => {
-    if (!downloadRoute || !downloadFrame || downloadRouteOpen) return;
+    if (!downloadRoute || downloadRouteOpen) return;
     downloadRouteOpen = true;
     clearTimeout(downloadHideTimer);
     clearTimeout(downloadEnterTimer);
@@ -366,9 +365,6 @@
     downloadRoute.classList.remove("is-open");
     downloadRoute.classList.add("is-entering");
     body.classList.add("n-download-route-open");
-    if (!downloadFrame.getAttribute("src")?.includes("download.html")) {
-      downloadFrame.src = "download.html?embedded=1";
-    }
     document.title = "下载 FreshStart 0.2.7";
     requestAnimationFrame(() => {
       requestAnimationFrame(() => downloadRoute.classList.add("is-open"));
